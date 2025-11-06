@@ -1,0 +1,49 @@
+# Rust/Cargo
+/target/
+**/*.rs.bk
+*.pdb
+
+# WASM/wasm-pack
+/pkg/
+wasm-pack.log
+
+# Build artifacts
+*.wasm
+*.wasm.map
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Cargo
+Cargo.lock
+
+# Test coverage
+*.profraw
+*.profdata
+/coverage/
+tarpaulin-report.html
+cobertura.xml
+
+# Benchmarks
+/criterion/
+/target/criterion/
+
+# Node.js (for testing WASM)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Documentation
+/target/doc/
+
+# Environment
+.env
+.env.local
+
+# CI/CD
+.github/workflows/*.log
