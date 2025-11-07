@@ -1,0 +1,22 @@
+Issue,Title,Quarter,Priority,Story Points,Epic,Sprint
+#1,Epic: CLI Tool Development,Q1 2026,🔴 Critical,21,CLI Tool,
+#2,Feature: Global CLI Installation,Q1 2026,🔴 Critical,5,CLI Tool,Sprint 1
+#3,Feature: Interactive Scanning,Q1 2026,🔴 Critical,8,CLI Tool,Sprint 1
+#4,Feature: Watch Mode,Q1 2026,🟠 High,8,CLI Tool,Sprint 2
+#5,Feature: CLI Configuration,Q1 2026,🟡 Medium,5,CLI Tool,Sprint 2
+#6,Epic: VS Code Extension,Q2 2026,🔴 Critical,21,IDE Extensions,
+#7,Feature: VS Code Publishing,Q2 2026,🔴 Critical,5,IDE Extensions,Sprint 5
+#8,Feature: Real-Time Highlighting,Q2 2026,🔴 Critical,13,IDE Extensions,Sprint 5-6
+#9,Feature: Quick Fixes,Q2 2026,🔴 Critical,8,IDE Extensions,Sprint 6
+#10,Feature: Scanner Panel,Q2 2026,🟠 High,8,IDE Extensions,Sprint 7
+#11,Feature: JetBrains Plugin,Q2 2026,🟠 High,13,IDE Extensions,Sprint 8-9
+#12,Epic: Multi-Language Detection,Q3 2026,🟠 High,21,Enhanced Detection,
+#13,Feature: Kotlin Support,Q3 2026,🟠 High,8,Enhanced Detection,Sprint 10
+#14,Feature: Swift Support,Q3 2026,🟠 High,8,Enhanced Detection,Sprint 11
+#15,Feature: NIST PQC Detection,Q3 2026,🔴 Critical,13,Enhanced Detection,Sprint 12
+#16,Feature: Framework Patterns,Q3 2026,🟡 Medium,13,Enhanced Detection,Sprint 13-14
+#17,Epic: Compliance Automation,Q4 2026,🔴 Critical,21,Compliance,
+#18,Feature: FedRAMP Reporting,Q4 2026,🔴 Critical,13,Compliance,Sprint 15-16
+#19,Feature: ISO 27001 Controls,Q4 2026,🟠 High,13,Compliance,Sprint 16-17
+#20,Feature: PCI DSS Security,Q4 2026,🔴 Critical,13,Compliance,Sprint 17-18
+#21,Feature: HIPAA Compliance,Q4 2026,🟠 High,13,Compliance,Sprint 19
