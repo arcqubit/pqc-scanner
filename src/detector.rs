@@ -3,10 +3,10 @@
 //! Detects cryptographic algorithms, key sizes, and security issues across multiple languages.
 //! Provides severity classifications and actionable quantum-readiness recommendations.
 
+use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::fmt;
-use once_cell::sync::Lazy;
 
 /// Severity level for detected cryptographic patterns
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -152,8 +152,15 @@ fn calculate_position(content: &str, offset: usize) -> (usize, usize) {
     let mut line = 0;
     let mut column = 0;
     for (idx, ch) in content.char_indices() {
-        if idx >= offset { break; }
-        if ch == '\n' { line += 1; column = 0; } else { column += 1; }
+        if idx >= offset {
+            break;
+        }
+        if ch == '\n' {
+            line += 1;
+            column = 0;
+        } else {
+            column += 1;
+        }
     }
     (line, column)
 }
@@ -171,22 +178,31 @@ pub fn filter_by_severity(detections: &[Detection], min_severity: Severity) -> V
         Severity::Medium => 2,
         Severity::Low => 3,
     };
-    detections.iter().filter(|d| {
-        let detection_level = match d.severity {
-            Severity::Critical => 0,
-            Severity::High => 1,
-            Severity::Medium => 2,
-            Severity::Low => 3,
-        };
-        detection_level <= severity_threshold
-    }).cloned().collect()
+    detections
+        .iter()
+        .filter(|d| {
+            let detection_level = match d.severity {
+                Severity::Critical => 0,
+                Severity::High => 1,
+                Severity::Medium => 2,
+                Severity::Low => 3,
+            };
+            detection_level <= severity_threshold
+        })
+        .cloned()
+        .collect()
 }
 
-pub fn group_by_category(detections: &[Detection]) -> std::collections::HashMap<CryptoCategory, Vec<Detection>> {
+pub fn group_by_category(
+    detections: &[Detection],
+) -> std::collections::HashMap<CryptoCategory, Vec<Detection>> {
     use std::collections::HashMap;
     let mut grouped: HashMap<CryptoCategory, Vec<Detection>> = HashMap::new();
     for detection in detections {
-        grouped.entry(detection.category.clone()).or_insert_with(Vec::new).push(detection.clone());
+        grouped
+            .entry(detection.category.clone())
+            .or_default()
+            .push(detection.clone());
     }
     grouped
 }

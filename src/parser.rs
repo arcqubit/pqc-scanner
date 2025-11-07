@@ -283,7 +283,10 @@ mod tests {
         let source = "use std::collections::HashMap;\nlet x = HashMap::new();";
         let result = parse_file(source, "rust").unwrap();
         assert_eq!(result.imports.len(), 1);
-        assert!(result.function_calls.iter().any(|f| f.name.contains("HashMap")));
+        assert!(result
+            .function_calls
+            .iter()
+            .any(|f| f.name.contains("HashMap")));
     }
 
     #[test]
@@ -291,7 +294,10 @@ mod tests {
         let source = "import crypto from 'crypto';\ncrypto.createCipher('aes', key);";
         let result = parse_file(source, "javascript").unwrap();
         assert!(!result.imports.is_empty());
-        assert!(result.function_calls.iter().any(|f| f.name.contains("crypto")));
+        assert!(result
+            .function_calls
+            .iter()
+            .any(|f| f.name.contains("crypto")));
     }
 
     #[test]

@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId, Throughput};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use rust_wasm_app::audit;
 use std::time::Duration;
 
@@ -13,9 +13,7 @@ fn benchmark_file_parsing(c: &mut Criterion) {
         BenchmarkId::from_parameter(format!("{}_LOC", lines)),
         &source,
         |b, source| {
-            b.iter(|| {
-                audit::analyze(black_box(source), black_box("rust"))
-            });
+            b.iter(|| audit::analyze(black_box(source), black_box("rust")));
         },
     );
 
@@ -32,15 +30,9 @@ fn benchmark_pattern_detection(c: &mut Criterion) {
     let mut group = c.benchmark_group("pattern_detection");
 
     for (name, code) in test_cases {
-        group.bench_with_input(
-            BenchmarkId::from_parameter(name),
-            &code,
-            |b, code| {
-                b.iter(|| {
-                    audit::analyze(black_box(code), black_box("rust"))
-                });
-            },
-        );
+        group.bench_with_input(BenchmarkId::from_parameter(name), &code, |b, code| {
+            b.iter(|| audit::analyze(black_box(code), black_box("rust")));
+        });
     }
 
     group.finish();
@@ -78,9 +70,7 @@ fn benchmark_scaling(c: &mut Criterion) {
             BenchmarkId::from_parameter(format!("{}_lines", size)),
             &code,
             |b, code| {
-                b.iter(|| {
-                    audit::analyze(black_box(code), black_box("rust"))
-                });
+                b.iter(|| audit::analyze(black_box(code), black_box("rust")));
             },
         );
     }

@@ -16,8 +16,14 @@ fn test_end_to_end_rust_audit() {
     assert!(result.vulnerabilities.len() > 0);
     assert!(result.risk_score > 0);
 
-    let has_rsa = result.vulnerabilities.iter().any(|v| v.crypto_type == CryptoType::Rsa);
-    let has_ecdsa = result.vulnerabilities.iter().any(|v| v.crypto_type == CryptoType::Ecdsa);
+    let has_rsa = result
+        .vulnerabilities
+        .iter()
+        .any(|v| v.crypto_type == CryptoType::Rsa);
+    let has_ecdsa = result
+        .vulnerabilities
+        .iter()
+        .any(|v| v.crypto_type == CryptoType::Ecdsa);
 
     assert!(has_rsa || has_ecdsa);
 }
@@ -49,8 +55,14 @@ fn test_python_crypto_detection() {
     let result = analyze(source, "python").unwrap();
     assert!(result.vulnerabilities.len() > 0);
 
-    let has_md5 = result.vulnerabilities.iter().any(|v| v.crypto_type == CryptoType::Md5);
-    let has_rsa = result.vulnerabilities.iter().any(|v| v.crypto_type == CryptoType::Rsa);
+    let has_md5 = result
+        .vulnerabilities
+        .iter()
+        .any(|v| v.crypto_type == CryptoType::Md5);
+    let has_rsa = result
+        .vulnerabilities
+        .iter()
+        .any(|v| v.crypto_type == CryptoType::Rsa);
 
     assert!(has_md5 || has_rsa);
 }
@@ -103,7 +115,9 @@ fn test_severity_levels() {
 
     let result = analyze(source, "python").unwrap();
 
-    let has_critical = result.vulnerabilities.iter()
+    let has_critical = result
+        .vulnerabilities
+        .iter()
         .any(|v| matches!(v.severity, Severity::Critical));
 
     assert!(has_critical);

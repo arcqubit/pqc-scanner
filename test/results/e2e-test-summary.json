@@ -1,0 +1,49 @@
+{
+  "timestamp": "2025-11-07T00:22:11.018Z",
+  "tests": [
+    {
+      "name": "JavaScript App Scan",
+      "passed": true,
+      "vulnerabilities": 48
+    },
+    {
+      "name": "JS SC-13 Report",
+      "passed": true
+    },
+    {
+      "name": "JS OSCAL Report",
+      "passed": false
+    },
+    {
+      "name": "Python App Scan",
+      "passed": true,
+      "vulnerabilities": 68
+    },
+    {
+      "name": "Python SC-13 Report",
+      "passed": true
+    },
+    {
+      "name": "Python OSCAL Report",
+      "passed": false
+    }
+  ],
+  "reports": [
+    {
+      "type": "SC-13",
+      "language": "JavaScript",
+      "path": "/mnt/c/Users/bowma/Projects/_aq_/pqc-scanner/test/results/js-sc13-report.json"
+    },
+    {
+      "type": "SC-13",
+      "language": "Python",
+      "path": "/mnt/c/Users/bowma/Projects/_aq_/pqc-scanner/test/results/py-sc13-report.json"
+    }
+  ],
+  "statistics": {
+    "totalVulnerabilities": 116,
+    "criticalCount": 62,
+    "highCount": 54,
+    "mediumCount": 0
+  }
+}

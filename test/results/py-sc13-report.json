@@ -1,0 +1,1098 @@
+{
+  "metadata": {
+    "report_id": "30cf1c97-1ab9-4723-a454-eaf9aa78445e",
+    "title": "NIST 800-53 SC-13 Cryptographic Protection Assessment",
+    "published": "2025-11-07T00:22:10.999+00:00",
+    "last_modified": "2025-11-07T00:22:10.999+00:00",
+    "version": "1.0.0",
+    "oscal_version": "1.1.2"
+  },
+  "control_assessment": {
+    "control_id": "sc-13",
+    "control_name": "Cryptographic Protection",
+    "control_family": "System and Communications Protection",
+    "control_description": "The information system implements [Assignment: organization-defined cryptographic uses and type of cryptography required for each use] in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards.",
+    "implementation_status": "partiallyimplemented",
+    "assessment_status": "notsatisfied",
+    "assessment_method": [
+      "TEST",
+      "EXAMINE",
+      "INTERVIEW"
+    ]
+  },
+  "summary": {
+    "files_scanned": 1,
+    "lines_scanned": 199,
+    "total_vulnerabilities": 68,
+    "quantum_vulnerable_algorithms": [
+      "RSA",
+      "DSA",
+      "ECDSA"
+    ],
+    "deprecated_algorithms": [
+      "MD5",
+      "SHA-1",
+      "3DES",
+      "DES"
+    ],
+    "weak_key_sizes": [
+      "RSA 1024-bit"
+    ],
+    "compliance_score": 8,
+    "risk_score": 92
+  },
+  "findings": [
+    {
+      "finding_id": "002384ab-e939-4ced-8ec3-aeff78e349a1",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 8 instance(s) of DSA cryptographic algorithm usage. This algorithm is quantum-vulnerable and poses a high risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "vulnerable-app.py:8:59",
+        "vulnerable-app.py:51:10",
+        "vulnerable-app.py:52:15",
+        "vulnerable-app.py:53:18",
+        "vulnerable-app.py:89:10",
+        "vulnerable-app.py:90:13",
+        "vulnerable-app.py:91:16",
+        "vulnerable-app.py:92:18"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "002384ab-e939-4ced-8ec3-aeff78e349a1-0",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 8 column 59: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 8,
+            "column": 59,
+            "snippet": "from cryptography.hazmat.primitives.asymmetric import rsa, dsa, ec"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "002384ab-e939-4ced-8ec3-aeff78e349a1-1",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 51 column 10: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 51,
+            "column": 10,
+            "snippet": "# HIGH: ECDSA - Quantum Vulnerable"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "002384ab-e939-4ced-8ec3-aeff78e349a1-2",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 52 column 15: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 52,
+            "column": 15,
+            "snippet": "def generate_ecdsa_keypair():"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "002384ab-e939-4ced-8ec3-aeff78e349a1-3",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 53 column 18: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 53,
+            "column": 18,
+            "snippet": "\"\"\"Generate ECDSA key pair (VULNERABLE to quantum)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "002384ab-e939-4ced-8ec3-aeff78e349a1-4",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 89 column 10: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 89,
+            "column": 10,
+            "snippet": "# MEDIUM: DSA - Quantum Vulnerable"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "002384ab-e939-4ced-8ec3-aeff78e349a1-5",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 90 column 13: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 90,
+            "column": 13,
+            "snippet": "def generate_dsa_keypair():"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "002384ab-e939-4ced-8ec3-aeff78e349a1-6",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 91 column 16: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 91,
+            "column": 16,
+            "snippet": "\"\"\"Generate DSA key pair (VULNERABLE to quantum)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "002384ab-e939-4ced-8ec3-aeff78e349a1-7",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 92 column 18: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 92,
+            "column": 18,
+            "snippet": "private_key = dsa.generate_private_key("
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        }
+      ],
+      "remediation": "Replace with CRYSTALS-Dilithium for post-quantum digital signatures",
+      "risk_level": "high"
+    },
+    {
+      "finding_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 9 instance(s) of 3DES cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a high risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "vulnerable-app.py:62:10",
+        "vulnerable-app.py:63:0",
+        "vulnerable-app.py:64:21",
+        "vulnerable-app.py:67:19",
+        "vulnerable-app.py:171:14",
+        "vulnerable-app.py:173:33",
+        "vulnerable-app.py:174:48",
+        "vulnerable-app.py:175:0",
+        "vulnerable-app.py:197:19"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f-0",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 62 column 10: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 62,
+            "column": 10,
+            "snippet": "# MEDIUM: 3DES - Deprecated"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f-1",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 63 column 0: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 63,
+            "column": 0,
+            "snippet": "def encrypt_3des(plaintext, key):"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f-2",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 64 column 21: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 64,
+            "column": 21,
+            "snippet": "\"\"\"Encrypt using 3DES (DEPRECATED!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f-3",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 67 column 19: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 67,
+            "column": 19,
+            "snippet": "algorithms.TripleDES(key),"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f-4",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 171 column 14: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 171,
+            "column": 14,
+            "snippet": "# MEDIUM: 3DES encryption"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f-5",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 173 column 33: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 173,
+            "column": 33,
+            "snippet": "\"\"\"Encrypt message using 3DES (DEPRECATED!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f-6",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 174 column 48: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 174,
+            "column": 48,
+            "snippet": "key = os.urandom(24)  # 192-bit key for 3DES"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f-7",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 175 column 0: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 175,
+            "column": 0,
+            "snippet": "encrypted = encrypt_3des(message.encode(), key)"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "cfc7240b-b2a1-4429-8ef3-da50f791f04f-8",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 197 column 19: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 197,
+            "column": 19,
+            "snippet": "# Encrypt with 3DES"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        }
+      ],
+      "remediation": "Replace with AES-256 or ChaCha20-Poly1305",
+      "risk_level": "high"
+    },
+    {
+      "finding_id": "5fab066f-1903-45ef-8d83-5380006031b0",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 3 instance(s) of ECDSA cryptographic algorithm usage. This algorithm is quantum-vulnerable and poses a high risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "vulnerable-app.py:51:8",
+        "vulnerable-app.py:52:0",
+        "vulnerable-app.py:53:8"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "5fab066f-1903-45ef-8d83-5380006031b0-0",
+          "evidence_type": "static-scan",
+          "description": "Detected ECDSA at line 51 column 8: ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 51,
+            "column": 8,
+            "snippet": "# HIGH: ECDSA - Quantum Vulnerable"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "5fab066f-1903-45ef-8d83-5380006031b0-1",
+          "evidence_type": "static-scan",
+          "description": "Detected ECDSA at line 52 column 0: ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 52,
+            "column": 0,
+            "snippet": "def generate_ecdsa_keypair():"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "5fab066f-1903-45ef-8d83-5380006031b0-2",
+          "evidence_type": "static-scan",
+          "description": "Detected ECDSA at line 53 column 8: ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 53,
+            "column": 8,
+            "snippet": "\"\"\"Generate ECDSA key pair (VULNERABLE to quantum)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        }
+      ],
+      "remediation": "Replace with CRYSTALS-Dilithium or SPHINCS+ for post-quantum signatures",
+      "risk_level": "high"
+    },
+    {
+      "finding_id": "87715d87-ea99-40ca-b43a-eaea2ab295c8",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 5 instance(s) of DES cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a critical risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "vulnerable-app.py:68:10",
+        "vulnerable-app.py:81:10",
+        "vulnerable-app.py:82:12",
+        "vulnerable-app.py:83:21",
+        "vulnerable-app.py:84:49"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "87715d87-ea99-40ca-b43a-eaea2ab295c8-0",
+          "evidence_type": "static-scan",
+          "description": "Detected DES at line 68 column 10: DES is obsolete and cryptographically weak",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 68,
+            "column": 10,
+            "snippet": "modes.CBC(iv),"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "87715d87-ea99-40ca-b43a-eaea2ab295c8-1",
+          "evidence_type": "static-scan",
+          "description": "Detected DES at line 81 column 10: DES is obsolete and cryptographically weak",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 81,
+            "column": 10,
+            "snippet": "# MEDIUM: DES - Deprecated and Weak"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "87715d87-ea99-40ca-b43a-eaea2ab295c8-2",
+          "evidence_type": "static-scan",
+          "description": "Detected DES at line 82 column 12: DES is obsolete and cryptographically weak",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 82,
+            "column": 12,
+            "snippet": "def encrypt_des(plaintext, key):"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "87715d87-ea99-40ca-b43a-eaea2ab295c8-3",
+          "evidence_type": "static-scan",
+          "description": "Detected DES at line 83 column 21: DES is obsolete and cryptographically weak",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 83,
+            "column": 21,
+            "snippet": "\"\"\"Encrypt using DES (DEPRECATED and WEAK!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "87715d87-ea99-40ca-b43a-eaea2ab295c8-4",
+          "evidence_type": "static-scan",
+          "description": "Detected DES at line 84 column 49: DES is obsolete and cryptographically weak",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 84,
+            "column": 49,
+            "snippet": "# Note: cryptography library doesn't support DES directly"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        }
+      ],
+      "remediation": "Replace with AES-256 or ChaCha20",
+      "risk_level": "critical"
+    },
+    {
+      "finding_id": "4870ca9e-815b-416a-ae10-760b7874256e",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 16 instance(s) of RSA cryptographic algorithm usage. This algorithm is quantum-vulnerable and poses a critical risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "vulnerable-app.py:8:1",
+        "vulnerable-app.py:27:8",
+        "vulnerable-app.py:28:8",
+        "vulnerable-app.py:29:11",
+        "vulnerable-app.py:30:5",
+        "vulnerable-app.py:39:8",
+        "vulnerable-app.py:40:8",
+        "vulnerable-app.py:41:11",
+        "vulnerable-app.py:42:5",
+        "vulnerable-app.py:134:18",
+        "vulnerable-app.py:136:14",
+        "vulnerable-app.py:137:9",
+        "vulnerable-app.py:160:12",
+        "vulnerable-app.py:162:30",
+        "vulnerable-app.py:163:9",
+        "vulnerable-app.py:193:24"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-0",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 8 column 1: RSA detected - vulnerable to quantum attacks via Shor's algorithm",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 8,
+            "column": 1,
+            "snippet": "from cryptography.hazmat.primitives.asymmetric import rsa, dsa, ec"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-1",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 27 column 8: RSA with 1024-bit key is critically vulnerable to quantum attacks",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 27,
+            "column": 8,
+            "snippet": "# HIGH: RSA 1024-bit - Quantum Vulnerable"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-2",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 28 column 8: RSA with 1024-bit key is critically vulnerable to quantum attacks",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 28,
+            "column": 8,
+            "snippet": "def generate_rsa_1024_keypair():"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-3",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 29 column 11: RSA with 1024-bit key is critically vulnerable to quantum attacks",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 29,
+            "column": 11,
+            "snippet": "\"\"\"Generate RSA 1024-bit key pair (VULNERABLE!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-4",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 30 column 5: RSA detected - vulnerable to quantum attacks via Shor's algorithm",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 30,
+            "column": 5,
+            "snippet": "private_key = rsa.generate_private_key("
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-5",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 39 column 8: RSA with 2048-bit key will be vulnerable to quantum computers",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 39,
+            "column": 8,
+            "snippet": "# HIGH: RSA 2048-bit - Quantum Vulnerable"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-6",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 40 column 8: RSA with 2048-bit key will be vulnerable to quantum computers",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 40,
+            "column": 8,
+            "snippet": "def generate_rsa_2048_keypair():"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-7",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 41 column 11: RSA with 2048-bit key will be vulnerable to quantum computers",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 41,
+            "column": 11,
+            "snippet": "\"\"\"Generate RSA 2048-bit key pair (VULNERABLE to quantum)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-8",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 42 column 5: RSA detected - vulnerable to quantum attacks via Shor's algorithm",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 42,
+            "column": 5,
+            "snippet": "private_key = rsa.generate_private_key("
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-9",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 134 column 18: RSA with 1024-bit key is critically vulnerable to quantum attacks",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 134,
+            "column": 18,
+            "snippet": "# HIGH: Using RSA 1024 for encryption"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-10",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 136 column 14: RSA with 1024-bit key is critically vulnerable to quantum attacks",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 136,
+            "column": 14,
+            "snippet": "\"\"\"Encrypt data using RSA 1024 (VULNERABLE!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-11",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 137 column 9: RSA with 1024-bit key is critically vulnerable to quantum attacks",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 137,
+            "column": 9,
+            "snippet": "private_key, public_key = generate_rsa_1024_keypair()"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-12",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 160 column 12: RSA with 2048-bit key will be vulnerable to quantum computers",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 160,
+            "column": 12,
+            "snippet": "# HIGH: RSA 2048 for key exchange"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-13",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 162 column 30: RSA with 2048-bit key will be vulnerable to quantum computers",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 162,
+            "column": 30,
+            "snippet": "\"\"\"Key exchange using RSA 2048 (VULNERABLE to quantum)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-14",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 163 column 9: RSA with 2048-bit key will be vulnerable to quantum computers",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 163,
+            "column": 9,
+            "snippet": "private_key, public_key = generate_rsa_2048_keypair()"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "4870ca9e-815b-416a-ae10-760b7874256e-15",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 193 column 24: RSA with 2048-bit key will be vulnerable to quantum computers",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 193,
+            "column": 24,
+            "snippet": "# Key exchange with RSA 2048"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        }
+      ],
+      "remediation": "Replace with CRYSTALS-Dilithium (signatures) or CRYSTALS-Kyber (encryption)",
+      "risk_level": "critical"
+    },
+    {
+      "finding_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 16 instance(s) of MD5 cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a critical risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "vulnerable-app.py:15:12",
+        "vulnerable-app.py:16:18",
+        "vulnerable-app.py:17:27",
+        "vulnerable-app.py:18:19",
+        "vulnerable-app.py:100:22",
+        "vulnerable-app.py:101:9",
+        "vulnerable-app.py:102:27",
+        "vulnerable-app.py:103:60",
+        "vulnerable-app.py:118:45",
+        "vulnerable-app.py:120:30",
+        "vulnerable-app.py:121:38",
+        "vulnerable-app.py:123:48",
+        "vulnerable-app.py:154:16",
+        "vulnerable-app.py:156:28",
+        "vulnerable-app.py:157:27",
+        "vulnerable-app.py:189:23"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-0",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 15 column 12: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 15,
+            "column": 12,
+            "snippet": "# CRITICAL: MD5 Hash - Cryptographically Broken"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-1",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 16 column 18: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 16,
+            "column": 18,
+            "snippet": "def hash_password_md5(password):"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-2",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 17 column 27: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 17,
+            "column": 27,
+            "snippet": "\"\"\"Hash password using MD5 (VULNERABLE!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-3",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 18 column 19: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 18,
+            "column": 19,
+            "snippet": "return hashlib.md5(password.encode()).hexdigest()"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-4",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 100 column 22: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 100,
+            "column": 22,
+            "snippet": "# CRITICAL: HMAC with MD5"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-5",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 101 column 9: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 101,
+            "column": 9,
+            "snippet": "def hmac_md5(key, message):"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-6",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 102 column 27: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 102,
+            "column": 27,
+            "snippet": "\"\"\"Generate HMAC using MD5 (VULNERABLE!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-7",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 103 column 60: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 103,
+            "column": 60,
+            "snippet": "return hmac.new(key.encode(), message.encode(), hashlib.md5).hexdigest()"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-8",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 118 column 45: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 118,
+            "column": 45,
+            "snippet": "# CRITICAL: Storing password hashes with MD5"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-9",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 120 column 30: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 120,
+            "column": 30,
+            "snippet": "\"\"\"Register user with MD5 password hash (VULNERABLE!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-10",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 121 column 38: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 121,
+            "column": 38,
+            "snippet": "password_hash = hash_password_md5(password)"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-11",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 123 column 48: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 123,
+            "column": 48,
+            "snippet": "print(f\"User {username} registered with MD5 hash\")"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-12",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 154 column 16: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 154,
+            "column": 16,
+            "snippet": "# CRITICAL: MD5 for file integrity"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-13",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 156 column 28: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 156,
+            "column": 28,
+            "snippet": "\"\"\"Upload file with MD5 checksum (VULNERABLE!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-14",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 157 column 27: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 157,
+            "column": 27,
+            "snippet": "checksum = hashlib.md5(file_content).hexdigest()"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "faa9759c-551b-4eb1-a017-aa8fe2ae7e03-15",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 189 column 23: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 189,
+            "column": 23,
+            "snippet": "# File upload with MD5"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        }
+      ],
+      "remediation": "Replace with SHA-256 or SHA-3",
+      "risk_level": "critical"
+    },
+    {
+      "finding_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 11 instance(s) of SHA-1 cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a critical risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "vulnerable-app.py:21:0",
+        "vulnerable-app.py:22:19",
+        "vulnerable-app.py:23:0",
+        "vulnerable-app.py:24:19",
+        "vulnerable-app.py:107:9",
+        "vulnerable-app.py:108:0",
+        "vulnerable-app.py:109:60",
+        "vulnerable-app.py:125:0",
+        "vulnerable-app.py:127:0",
+        "vulnerable-app.py:130:39",
+        "vulnerable-app.py:131:0"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-0",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 21 column 0: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 21,
+            "column": 0,
+            "snippet": "# CRITICAL: SHA-1 Hash - Cryptographically Broken"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-1",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 22 column 19: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 22,
+            "column": 19,
+            "snippet": "def generate_token_sha1(data):"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-2",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 23 column 0: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 23,
+            "column": 0,
+            "snippet": "\"\"\"Generate token using SHA-1 (VULNERABLE!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-3",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 24 column 19: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 24,
+            "column": 19,
+            "snippet": "return hashlib.sha1(data.encode()).hexdigest()"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-4",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 107 column 9: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 107,
+            "column": 9,
+            "snippet": "def hmac_sha1(key, message):"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-5",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 108 column 0: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 108,
+            "column": 0,
+            "snippet": "\"\"\"Generate HMAC using SHA-1 (VULNERABLE!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-6",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 109 column 60: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 109,
+            "column": 60,
+            "snippet": "return hmac.new(key.encode(), message.encode(), hashlib.sha1).hexdigest()"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-7",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 125 column 0: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 125,
+            "column": 0,
+            "snippet": "# CRITICAL: Using SHA-1 for session tokens"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-8",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 127 column 0: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 127,
+            "column": 0,
+            "snippet": "\"\"\"Create session token using SHA-1 (VULNERABLE!)\"\"\""
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-9",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 130 column 39: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 130,
+            "column": 39,
+            "snippet": "session_token = generate_token_sha1(username + timestamp)"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        },
+        {
+          "evidence_id": "f929cc30-f016-45fc-b143-3b9bb6831b5d-10",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 131 column 0: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "vulnerable-app.py",
+            "line": 131,
+            "column": 0,
+            "snippet": "print(f\"Session token created with SHA-1\")"
+          },
+          "collected_at": "2025-11-07T00:22:10.999+00:00",
+          "data": {}
+        }
+      ],
+      "remediation": "Replace with SHA-256, SHA-384, or SHA-512",
+      "risk_level": "critical"
+    }
+  ],
+  "recommendations": [
+    "SC-13 Control Objective: Implement FIPS 140-2/140-3 validated cryptographic modules for cryptographic protection.",
+    "CRITICAL: Immediate action required. The use of cryptographically broken algorithms (MD5, SHA-1, DES, RC4) violates SC-13 requirements and poses significant security risks.",
+    "HIGH PRIORITY: Transition to post-quantum cryptography (PQC) algorithms to comply with NIST SP 800-208 and prepare for quantum computing threats.",
+    "Recommended PQC Algorithms: CRYSTALS-Kyber (key encapsulation), CRYSTALS-Dilithium (digital signatures), SPHINCS+ (stateless signatures).",
+    "Implement crypto-agility: Design systems to easily swap cryptographic algorithms as new standards emerge.",
+    "Maintain a cryptographic inventory: Document all cryptographic implementations and their compliance status.",
+    "Reference: NIST SP 800-53 Rev. 5 SC-13, NIST SP 800-175B (Cryptographic Algorithm Validation Program), NIST Post-Quantum Cryptography Standardization."
+  ]
+}

@@ -150,8 +150,7 @@ pub fn analyze(source: &str, language: &str) -> Result<AuditResult, AuditError> 
 
 /// Parse language string to enum
 fn parse_language(lang: &str) -> Result<Language, AuditError> {
-    Language::from_string(lang)
-        .ok_or_else(|| AuditError::UnsupportedLanguage(lang.to_string()))
+    Language::from_string(lang).ok_or_else(|| AuditError::UnsupportedLanguage(lang.to_string()))
 }
 
 /// Detect RSA usage and determine risk
@@ -170,17 +169,26 @@ fn detect_rsa(line: &str, line_num: usize) -> Option<Vulnerability> {
         Some(size) if size < 2048 => (
             Severity::Critical,
             100,
-            format!("RSA with {}-bit key is critically vulnerable to quantum attacks", size),
+            format!(
+                "RSA with {}-bit key is critically vulnerable to quantum attacks",
+                size
+            ),
         ),
         Some(size) if size < 4096 => (
             Severity::High,
             85,
-            format!("RSA with {}-bit key will be vulnerable to quantum computers", size),
+            format!(
+                "RSA with {}-bit key will be vulnerable to quantum computers",
+                size
+            ),
         ),
         Some(size) => (
             Severity::High,
             80,
-            format!("RSA with {}-bit key is quantum-vulnerable (Shor's algorithm)", size),
+            format!(
+                "RSA with {}-bit key is quantum-vulnerable (Shor's algorithm)",
+                size
+            ),
         ),
         None => (
             Severity::High,
@@ -189,7 +197,9 @@ fn detect_rsa(line: &str, line_num: usize) -> Option<Vulnerability> {
         ),
     };
 
-    let column = line.find(|c: char| c.to_lowercase().any(|c| c == 'r')).unwrap_or(0);
+    let column = line
+        .find(|c: char| c.to_lowercase().any(|c| c == 'r'))
+        .unwrap_or(0);
 
     Some(Vulnerability {
         crypto_type: CryptoType::Rsa,
@@ -199,7 +209,9 @@ fn detect_rsa(line: &str, line_num: usize) -> Option<Vulnerability> {
         column,
         context: line.trim().to_string(),
         message,
-        recommendation: "Replace with CRYSTALS-Dilithium (signatures) or CRYSTALS-Kyber (encryption)".to_string(),
+        recommendation:
+            "Replace with CRYSTALS-Dilithium (signatures) or CRYSTALS-Kyber (encryption)"
+                .to_string(),
         key_size,
     })
 }
@@ -210,7 +222,9 @@ fn detect_ecdsa(line: &str, line_num: usize) -> Option<Vulnerability> {
         return None;
     }
 
-    let column = line.find(|c: char| c.to_uppercase().any(|c| "ECDSA".contains(c))).unwrap_or(0);
+    let column = line
+        .find(|c: char| c.to_uppercase().any(|c| "ECDSA".contains(c)))
+        .unwrap_or(0);
 
     Some(Vulnerability {
         crypto_type: CryptoType::Ecdsa,
@@ -219,8 +233,10 @@ fn detect_ecdsa(line: &str, line_num: usize) -> Option<Vulnerability> {
         line: line_num,
         column,
         context: line.trim().to_string(),
-        message: "ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable".to_string(),
-        recommendation: "Replace with CRYSTALS-Dilithium or SPHINCS+ for post-quantum signatures".to_string(),
+        message: "ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable"
+            .to_string(),
+        recommendation: "Replace with CRYSTALS-Dilithium or SPHINCS+ for post-quantum signatures"
+            .to_string(),
         key_size: None,
     })
 }
@@ -231,7 +247,9 @@ fn detect_ecdh(line: &str, line_num: usize) -> Option<Vulnerability> {
         return None;
     }
 
-    let column = line.find(|c: char| c.to_uppercase().any(|c| "ECDH".contains(c))).unwrap_or(0);
+    let column = line
+        .find(|c: char| c.to_uppercase().any(|c| "ECDH".contains(c)))
+        .unwrap_or(0);
 
     Some(Vulnerability {
         crypto_type: CryptoType::Ecdh,
@@ -241,7 +259,8 @@ fn detect_ecdh(line: &str, line_num: usize) -> Option<Vulnerability> {
         column,
         context: line.trim().to_string(),
         message: "ECDH (Elliptic Curve Diffie-Hellman) is quantum-vulnerable".to_string(),
-        recommendation: "Replace with CRYSTALS-Kyber or NTRU for quantum-safe key exchange".to_string(),
+        recommendation: "Replace with CRYSTALS-Kyber or NTRU for quantum-safe key exchange"
+            .to_string(),
         key_size: None,
     })
 }
@@ -262,7 +281,8 @@ fn detect_dsa(line: &str, line_num: usize) -> Option<Vulnerability> {
         column,
         context: line.trim().to_string(),
         message: "DSA (Digital Signature Algorithm) is quantum-vulnerable".to_string(),
-        recommendation: "Replace with CRYSTALS-Dilithium for post-quantum digital signatures".to_string(),
+        recommendation: "Replace with CRYSTALS-Dilithium for post-quantum digital signatures"
+            .to_string(),
         key_size: None,
     })
 }
@@ -283,7 +303,8 @@ fn detect_diffie_hellman(line: &str, line_num: usize) -> Option<Vulnerability> {
         column,
         context: line.trim().to_string(),
         message: "Diffie-Hellman key exchange is quantum-vulnerable".to_string(),
-        recommendation: "Replace with CRYSTALS-Kyber or FrodoKEM for quantum-safe key encapsulation".to_string(),
+        recommendation:
+            "Replace with CRYSTALS-Kyber or FrodoKEM for quantum-safe key encapsulation".to_string(),
         key_size: None,
     })
 }
@@ -357,7 +378,10 @@ fn detect_triple_des(line: &str, line_num: usize) -> Option<Vulnerability> {
         return None;
     }
 
-    let column = line.find("3DES").or_else(|| line.find("TripleDES")).unwrap_or(0);
+    let column = line
+        .find("3DES")
+        .or_else(|| line.find("TripleDES"))
+        .unwrap_or(0);
 
     Some(Vulnerability {
         crypto_type: CryptoType::TripleDes,
@@ -397,19 +421,19 @@ fn detect_rc4(line: &str, line_num: usize) -> Option<Vulnerability> {
 pub fn score_vulnerability(crypto_type: &CryptoType, key_size: Option<u32>) -> u32 {
     match crypto_type {
         CryptoType::Rsa => match key_size {
-            Some(size) if size < 1024 => 100,  // Critical
-            Some(size) if size < 2048 => 100,  // Critical
-            Some(size) if size < 4096 => 85,   // High
-            _ => 80,                            // High (any RSA is quantum-vulnerable)
+            Some(size) if size < 1024 => 100, // Critical
+            Some(size) if size < 2048 => 100, // Critical
+            Some(size) if size < 4096 => 85,  // High
+            _ => 80,                          // High (any RSA is quantum-vulnerable)
         },
-        CryptoType::Ecdsa | CryptoType::Ecdh => 85,           // High
-        CryptoType::Dsa => 90,                                 // High
-        CryptoType::DiffieHellman => 85,                       // High
-        CryptoType::Sha1 => 95,                                // Critical (broken)
-        CryptoType::Md5 => 100,                                // Critical (broken)
-        CryptoType::Des => 95,                                 // Critical (weak)
-        CryptoType::TripleDes => 80,                           // High (deprecated)
-        CryptoType::Rc4 => 95,                                 // Critical (broken)
+        CryptoType::Ecdsa | CryptoType::Ecdh => 85, // High
+        CryptoType::Dsa => 90,                      // High
+        CryptoType::DiffieHellman => 85,            // High
+        CryptoType::Sha1 => 95,                     // Critical (broken)
+        CryptoType::Md5 => 100,                     // Critical (broken)
+        CryptoType::Des => 95,                      // Critical (weak)
+        CryptoType::TripleDes => 80,                // High (deprecated)
+        CryptoType::Rc4 => 95,                      // Critical (broken)
     }
 }
 

@@ -2,10 +2,10 @@
 name = "rust-wasm-app"
 version = "0.1.0"
 edition = "2021"
-authors = ["PhotonIQ Team"]
+authors = ["ArcQubit Team"]
 description = "Quantum-safe cryptography auditor for detecting vulnerable algorithms"
 license = "MIT"
-repository = "https://github.com/photoniq/quantum-audit"
+repository = "https://github.com/arcqubit/pqc-scanner"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -19,6 +19,23 @@ regex = "1.10"
 lazy_static = "1.4"
 thiserror = "1.0"
 once_cell = "1.19"
+uuid = { version = "1.6", features = ["v4", "serde", "js"] }
+chrono = { version = "0.4", features = ["serde", "wasmbind"] }
+
+# Agent-Booster Integration (Auto-remediation capabilities)
+# Note: agent-booster is not available as a standalone Rust crate on crates.io.
+# It's embedded in the agentic-flow npm package as Rust/WASM binaries.
+# The WASM functionality is accessed via the npm package in development workflows.
+# For direct Rust integration, consider using the booster crate or implementing
+# custom auto-remediation logic that interfaces with the npm package via FFI/CLI.
+#
+# Integration options:
+# 1. Use via npm package: agentic-flow (recommended for development)
+# 2. Git dependency: [dependencies.agent-booster] (if available in agentic-flow repo)
+# 3. Path dependency: agent-booster = { path = "../agent-booster" } (local development)
+#
+# Performance benefits: 352x faster code transformations, $0 cost
+# See: https://github.com/ruvnet/agentic-flow
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1"
@@ -30,6 +47,10 @@ criterion = "0.5"
 [[bench]]
 name = "benchmarks"
 harness = false
+
+[[example]]
+name = "generate_compliance_report"
+path = "examples/generate_compliance_report.rs"
 
 [profile.release]
 opt-level = "z"
