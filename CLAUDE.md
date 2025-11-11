@@ -1,4 +1,16 @@
-# Claude Code Configuration - SPARC Development Environment
+# PQC Scanner - Claude Code Configuration
+
+## 🔐 Project Overview
+
+**PQC Scanner** is a quantum-safe cryptography auditor that detects vulnerable cryptographic algorithms and generates NIST compliance reports. Built in Rust with WASM support for cross-platform deployment.
+
+**Key Capabilities:**
+- Detect quantum-vulnerable algorithms (RSA, ECDSA, DSA, DH)
+- Identify deprecated/weak crypto (MD5, SHA-1, DES, RC4, 3DES)
+- Multi-language support (JavaScript, TypeScript, Python, Rust, Java, Go, C++, C#)
+- Generate NIST 800-53 SC-13 compliance reports
+- Export OSCAL 1.1.2 assessment results
+- CLI tool for directory and remote repository scanning
 
 ## 🚨 CRITICAL: CONCURRENT EXECUTION & FILE MANAGEMENT
 
@@ -6,347 +18,342 @@
 1. ALL operations MUST be concurrent/parallel in a single message
 2. **NEVER save working files, text/mds and tests to the root folder**
 3. ALWAYS organize files in appropriate subdirectories
-4. **USE CLAUDE CODE'S TASK TOOL** for spawning agents concurrently, not just MCP
+4. **USE CLAUDE CODE'S TASK TOOL** for spawning agents concurrently
 
 ### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
 
 **MANDATORY PATTERNS:**
 - **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
-- **Task tool (Claude Code)**: ALWAYS spawn ALL agents in ONE message with full instructions
+- **Task tool**: ALWAYS spawn ALL agents in ONE message with full instructions
 - **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
 - **Bash commands**: ALWAYS batch ALL terminal operations in ONE message
-- **Memory operations**: ALWAYS batch ALL memory store/retrieve in ONE message
 
-### 🎯 CRITICAL: Claude Code Task Tool for Agent Execution
-
-**Claude Code's Task tool is the PRIMARY way to spawn agents:**
-```javascript
-// ✅ CORRECT: Use Claude Code's Task tool for parallel agent execution
-[Single Message]:
-  Task("Research agent", "Analyze requirements and patterns...", "researcher")
-  Task("Coder agent", "Implement core features...", "coder")
-  Task("Tester agent", "Create comprehensive tests...", "tester")
-  Task("Reviewer agent", "Review code quality...", "reviewer")
-  Task("Architect agent", "Design system architecture...", "system-architect")
-```
-
-**MCP tools are ONLY for coordination setup:**
-- `mcp__claude-flow__swarm_init` - Initialize coordination topology
-- `mcp__claude-flow__agent_spawn` - Define agent types for coordination
-- `mcp__claude-flow__task_orchestrate` - Orchestrate high-level workflows
-
-### 📁 File Organization Rules
+### 📁 Project File Organization
 
 **NEVER save to root folder. Use these directories:**
-- `/src` - Source code files
-- `/tests` - Test files
-- `/docs` - Documentation and markdown files
-- `/config` - Configuration files
-- `/scripts` - Utility scripts
-- `/examples` - Example code
+- `/src` - Rust source code (lib.rs, modules)
+- `/src/bin` - CLI binary implementations
+- `/tests` - Integration and unit tests
+- `/examples` - Example usage code
+- `/docs` - Project documentation (when explicitly needed)
+- `/reports` - Generated compliance reports (gitignored)
+- `/samples` - Test samples for vulnerability detection
+- `/benches` - Performance benchmarks
 
-## Project Overview
+## 🛠️ Development Commands
 
-This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology with Claude-Flow orchestration for systematic Test-Driven Development.
-
-## SPARC Commands
-
-### Core Commands
-- `npx claude-flow sparc modes` - List available modes
-- `npx claude-flow sparc run <mode> "<task>"` - Execute specific mode
-- `npx claude-flow sparc tdd "<feature>"` - Run complete TDD workflow
-- `npx claude-flow sparc info <mode>` - Get mode details
-
-### Batchtools Commands
-- `npx claude-flow sparc batch <modes> "<task>"` - Parallel execution
-- `npx claude-flow sparc pipeline "<task>"` - Full pipeline processing
-- `npx claude-flow sparc concurrent <mode> "<tasks-file>"` - Multi-task processing
-
-### Build Commands
-- `npm run build` - Build project
-- `npm run test` - Run tests
-- `npm run lint` - Linting
-- `npm run typecheck` - Type checking
-
-## SPARC Workflow Phases
-
-1. **Specification** - Requirements analysis (`sparc run spec-pseudocode`)
-2. **Pseudocode** - Algorithm design (`sparc run spec-pseudocode`)
-3. **Architecture** - System design (`sparc run architect`)
-4. **Refinement** - TDD implementation (`sparc tdd`)
-5. **Completion** - Integration (`sparc run integration`)
-
-## Code Style & Best Practices
-
-- **Modular Design**: Files under 500 lines
-- **Environment Safety**: Never hardcode secrets
-- **Test-First**: Write tests before implementation
-- **Clean Architecture**: Separate concerns
-- **Documentation**: Keep updated
-
-## 🚀 Available Agents (54 Total)
-
-### Core Development
-`coder`, `reviewer`, `tester`, `planner`, `researcher`
-
-### Swarm Coordination
-`hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`, `collective-intelligence-coordinator`, `swarm-memory-manager`
-
-### Consensus & Distributed
-`byzantine-coordinator`, `raft-manager`, `gossip-coordinator`, `consensus-builder`, `crdt-synchronizer`, `quorum-manager`, `security-manager`
-
-### Performance & Optimization
-`perf-analyzer`, `performance-benchmarker`, `task-orchestrator`, `memory-coordinator`, `smart-agent`
-
-### GitHub & Repository
-`github-modes`, `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`, `workflow-automation`, `project-board-sync`, `repo-architect`, `multi-repo-swarm`
-
-### SPARC Methodology
-`sparc-coord`, `sparc-coder`, `specification`, `pseudocode`, `architecture`, `refinement`
-
-### Specialized Development
-`backend-dev`, `mobile-dev`, `ml-developer`, `cicd-engineer`, `api-docs`, `system-architect`, `code-analyzer`, `base-template-generator`
-
-### Testing & Validation
-`tdd-london-swarm`, `production-validator`
-
-### Migration & Planning
-`migration-planner`, `swarm-init`
-
-## 🎯 Claude Code vs MCP Tools
-
-### Claude Code Handles ALL EXECUTION:
-- **Task tool**: Spawn and run agents concurrently for actual work
-- File operations (Read, Write, Edit, MultiEdit, Glob, Grep)
-- Code generation and programming
-- Bash commands and system operations
-- Implementation work
-- Project navigation and analysis
-- TodoWrite and task management
-- Git operations
-- Package management
-- Testing and debugging
-
-### MCP Tools ONLY COORDINATE:
-- Swarm initialization (topology setup)
-- Agent type definitions (coordination patterns)
-- Task orchestration (high-level planning)
-- Memory management
-- Neural features
-- Performance tracking
-- GitHub integration
-
-**KEY**: MCP coordinates the strategy, Claude Code's Task tool executes with real agents.
-
-## 🚀 Quick Setup
-
+### Rust Build Commands
 ```bash
-# Add MCP servers (Claude Flow required, others optional)
-claude mcp add claude-flow npx claude-flow@alpha mcp start
-claude mcp add ruv-swarm npx ruv-swarm mcp start  # Optional: Enhanced coordination
-claude mcp add flow-nexus npx flow-nexus@latest mcp start  # Optional: Cloud features
+# Development
+make build              # Debug build
+cargo build             # Direct cargo build
+
+# Release (optimized)
+make build-release      # Production build
+cargo build --release   # Binary at: ./target/release/pqc-scanner
+
+# Testing
+make test              # Run all tests
+make test-integration  # Integration tests only
+cargo test --verbose   # Detailed test output
+
+# Quality
+make lint              # Run clippy linter
+make format            # Auto-format code
+make format-check      # Check formatting without changes
+make bench             # Run benchmarks
+
+# WASM
+make wasm              # Build WASM (debug)
+make wasm-release      # Build WASM (optimized)
+make wasm-size         # Check WASM bundle sizes
+
+# Cleanup
+make clean             # Remove build artifacts
+
+# Full workflow
+make dev               # format + lint + test
+make ci                # lint + format-check + test + bench
+make release           # build-release + wasm-release
 ```
 
-## MCP Tool Categories
+### CLI Usage
+```bash
+# Scan local directory
+./target/release/pqc-scanner scan <directory> [OPTIONS]
 
-### Coordination
-`swarm_init`, `agent_spawn`, `task_orchestrate`
+# Scan remote repository
+./target/release/pqc-scanner scan <repo-url> [OPTIONS]
 
-### Monitoring
-`swarm_status`, `agent_list`, `agent_metrics`, `task_status`, `task_results`
+# Options
+--report-dir <dir>     # Output directory (default: reports)
+--report-name <name>   # Base name for reports (default: dir/repo name)
+--keep-clone           # Keep cloned repo after scan
 
-### Memory & Neural
-`memory_usage`, `neural_status`, `neural_train`, `neural_patterns`
+# Examples
+./target/release/pqc-scanner scan samples/vulnerable-app-1
+./target/release/pqc-scanner scan https://github.com/user/repo.git
+./target/release/pqc-scanner scan myapp --report-name security-audit
+```
 
-### GitHub Integration
-`github_swarm`, `repo_analyze`, `pr_enhance`, `issue_triage`, `code_review`
+## 🔍 Cryptographic Scanning Domain Knowledge
 
-### System
-`benchmark_run`, `features_detect`, `swarm_monitor`
+### Vulnerability Detection Patterns
 
-### Flow-Nexus MCP Tools (Optional Advanced Features)
-Flow-Nexus extends MCP capabilities with 70+ cloud-based orchestration tools:
+**Quantum-Vulnerable Algorithms:**
+- RSA (all key sizes vulnerable to Shor's algorithm)
+- ECDSA/ECDH (elliptic curve crypto)
+- DSA (discrete logarithm problem)
+- Diffie-Hellman key exchange
 
-**Key MCP Tool Categories:**
-- **Swarm & Agents**: `swarm_init`, `swarm_scale`, `agent_spawn`, `task_orchestrate`
-- **Sandboxes**: `sandbox_create`, `sandbox_execute`, `sandbox_upload` (cloud execution)
-- **Templates**: `template_list`, `template_deploy` (pre-built project templates)
-- **Neural AI**: `neural_train`, `neural_patterns`, `seraphina_chat` (AI assistant)
-- **GitHub**: `github_repo_analyze`, `github_pr_manage` (repository management)
-- **Real-time**: `execution_stream_subscribe`, `realtime_subscribe` (live monitoring)
-- **Storage**: `storage_upload`, `storage_list` (cloud file management)
+**Deprecated/Weak Algorithms:**
+- MD5 (cryptographically broken, collision attacks)
+- SHA-1 (deprecated, collision attacks demonstrated)
+- DES (56-bit keys, too weak)
+- 3DES (deprecated, 112-bit effective security)
+- RC4 (broken stream cipher)
 
-**Authentication Required:**
-- Register: `mcp__flow-nexus__user_register` or `npx flow-nexus@latest register`
-- Login: `mcp__flow-nexus__user_login` or `npx flow-nexus@latest login`
-- Access 70+ specialized MCP tools for advanced orchestration
+**Weak Key Sizes:**
+- RSA < 2048 bits (CRITICAL)
+- RSA < 4096 bits (HIGH)
+- ECDSA curves < 256 bits
 
-## 🚀 Agent Execution Flow with Claude Code
+**Post-Quantum Safe Alternatives:**
+- CRYSTALS-Kyber (key encapsulation)
+- CRYSTALS-Dilithium (digital signatures)
+- FALCON (compact signatures)
+- NTRU (lattice-based)
 
-### The Correct Pattern:
+### NIST Compliance Standards
 
-1. **Optional**: Use MCP tools to set up coordination topology
-2. **REQUIRED**: Use Claude Code's Task tool to spawn agents that do actual work
-3. **REQUIRED**: Each agent runs hooks for coordination
-4. **REQUIRED**: Batch all operations in single messages
+**NIST 800-53 SC-13: Cryptographic Protection**
+- Ensures FIPS-validated cryptography
+- Prohibits deprecated algorithms
+- Requires adequate key sizes
+- Mandates proper key management
 
-### Example Full-Stack Development:
+**OSCAL 1.1.2 Format:**
+- Machine-readable security assessments
+- Standardized compliance reporting
+- Interoperable with GRC tools
 
+## 🏗️ Rust/WASM Architecture
+
+### Module Structure
+```rust
+src/
+├── lib.rs              # Public API, WASM exports
+├── audit.rs            # Core vulnerability scanning
+├── detector.rs         # Pattern detection engine
+├── parser.rs           # Multi-language AST parsing
+├── types.rs            # Type definitions
+├── compliance.rs       # NIST SC-13, OSCAL generation
+├── remediation.rs      # Fix recommendations
+└── bin/
+    └── pqc-scanner.rs  # CLI implementation
+```
+
+### Code Style Guidelines
+
+**Rust Best Practices:**
+```rust
+// ✅ GOOD: Clear error types, descriptive names
+pub fn analyze(source: &str, language: &str) -> Result<AuditResult, AuditError> {
+    let parsed = parse_source(source, language)?;
+    let vulnerabilities = detect_vulnerabilities(&parsed)?;
+    Ok(AuditResult::new(vulnerabilities))
+}
+
+// ✅ GOOD: Use proper Result propagation
+fn detect_rsa_usage(node: &AstNode) -> Result<Option<Vulnerability>, DetectorError> {
+    // Detection logic
+}
+
+// ❌ BAD: Unwrap in library code
+let result = analyze(source, lang).unwrap(); // Never do this!
+
+// ❌ BAD: Hardcoded values
+const API_KEY = "sk-1234567890"; // Use environment variables!
+```
+
+**WASM Compatibility:**
+```rust
+// ✅ GOOD: Guard WASM-specific code
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn audit_code(source: &str, language: &str) -> Result<JsValue, JsValue> {
+    // WASM-specific implementation
+}
+
+// ✅ GOOD: Share core logic
+pub fn analyze(source: &str, language: &str) -> Result<AuditResult, AuditError> {
+    // Shared logic works in both Rust and WASM
+}
+```
+
+**Security Considerations:**
+```rust
+// ✅ GOOD: Validate inputs
+pub fn scan_file(path: &Path) -> Result<AuditResult, ScanError> {
+    if !path.exists() {
+        return Err(ScanError::FileNotFound(path.to_owned()));
+    }
+    // Proceed with scan
+}
+
+// ✅ GOOD: Never log sensitive data
+eprintln!("Scanning file: {}", path.display()); // OK
+eprintln!("API key: {}", api_key); // ❌ NEVER!
+
+// ✅ GOOD: Sanitize paths
+let safe_path = path.canonicalize()?; // Prevent path traversal
+```
+
+## 🧪 Testing Guidelines
+
+### Test Organization
+```rust
+// Unit tests in same file
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_detect_md5_usage() {
+        let source = "crypto.createHash('md5')";
+        let result = analyze(source, "javascript").unwrap();
+        assert!(!result.vulnerabilities.is_empty());
+        assert_eq!(result.vulnerabilities[0].crypto_type, CryptoType::Md5);
+    }
+}
+
+// Integration tests in /tests directory
+// tests/integration_tests.rs
+#[test]
+fn test_scan_vulnerable_app() {
+    let result = scan_directory("samples/vulnerable-app-1").unwrap();
+    assert!(result.stats.critical_count > 0);
+}
+```
+
+### Benchmark Tests
+```rust
+// benches/benchmarks.rs
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+fn benchmark_scan(c: &mut Criterion) {
+    c.bench_function("scan javascript", |b| {
+        b.iter(|| {
+            analyze(black_box(SAMPLE_CODE), "javascript")
+        });
+    });
+}
+```
+
+## 🚀 Development Workflow
+
+### Adding New Language Support
+
+1. Update `Language` enum in `src/types.rs`
+2. Add parser patterns in `src/parser.rs`
+3. Add detector rules in `src/detector.rs`
+4. Add file extension mapping in `src/bin/pqc-scanner.rs`
+5. Add tests in `tests/` directory
+6. Update documentation
+
+### Adding New Vulnerability Detection
+
+1. Add `CryptoType` variant in `src/types.rs`
+2. Add detection regex in `src/detector.rs`
+3. Define severity and risk score
+4. Add recommendation text
+5. Add test cases
+6. Update expected counts in samples
+
+### Generating Compliance Reports
+
+```rust
+// 1. Scan code
+let audit_result = analyze(source, "javascript")?;
+
+// 2. Generate SC-13 report
+let sc13_report = generate_sc13_report(&audit_result, Some("path/to/file"));
+
+// 3. Generate OSCAL
+let oscal = generate_oscal_json(&sc13_report, Some("path/to/file"));
+
+// 4. Export as JSON
+let sc13_json = export_sc13_json(&sc13_report)?;
+let oscal_json = export_oscal_json(&oscal)?;
+
+// 5. Save reports
+fs::write("reports/sc13-compliance.json", sc13_json)?;
+fs::write("reports/oscal-assessment.json", oscal_json)?;
+```
+
+## 🎯 Agent Task Suggestions
+
+### Security Audit Tasks
 ```javascript
-// Single message with all agent spawning via Claude Code's Task tool
-[Parallel Agent Execution]:
-  Task("Backend Developer", "Build REST API with Express. Use hooks for coordination.", "backend-dev")
-  Task("Frontend Developer", "Create React UI. Coordinate with backend via memory.", "coder")
-  Task("Database Architect", "Design PostgreSQL schema. Store schema in memory.", "code-analyzer")
-  Task("Test Engineer", "Write Jest tests. Check memory for API contracts.", "tester")
-  Task("DevOps Engineer", "Setup Docker and CI/CD. Document in memory.", "cicd-engineer")
-  Task("Security Auditor", "Review authentication. Report findings via hooks.", "reviewer")
-  
-  // All todos batched together
-  TodoWrite { todos: [...8-10 todos...] }
-  
-  // All file operations together
-  Write "backend/server.js"
-  Write "frontend/App.jsx"
-  Write "database/schema.sql"
+// Research quantum-safe migration
+Task("Crypto Researcher", "Research latest NIST PQC standards and implementation recommendations", "researcher")
+
+// Code analysis
+Task("Security Analyzer", "Analyze src/detector.rs for completeness of vulnerability patterns", "code-analyzer")
+
+// Testing
+Task("Security Tester", "Create comprehensive test suite for all crypto types and severities", "tester")
+
+// Performance
+Task("Performance Analyst", "Benchmark scanning speed on large codebases, optimize hot paths", "perf-analyzer")
 ```
 
-## 📋 Agent Coordination Protocol
-
-### Every Agent Spawned via Task Tool MUST:
-
-**1️⃣ BEFORE Work:**
-```bash
-npx claude-flow@alpha hooks pre-task --description "[task]"
-npx claude-flow@alpha hooks session-restore --session-id "swarm-[id]"
-```
-
-**2️⃣ DURING Work:**
-```bash
-npx claude-flow@alpha hooks post-edit --file "[file]" --memory-key "swarm/[agent]/[step]"
-npx claude-flow@alpha hooks notify --message "[what was done]"
-```
-
-**3️⃣ AFTER Work:**
-```bash
-npx claude-flow@alpha hooks post-task --task-id "[task]"
-npx claude-flow@alpha hooks session-end --export-metrics true
-```
-
-## 🎯 Concurrent Execution Examples
-
-### ✅ CORRECT WORKFLOW: MCP Coordinates, Claude Code Executes
-
+### Feature Development
 ```javascript
-// Step 1: MCP tools set up coordination (optional, for complex tasks)
-[Single Message - Coordination Setup]:
-  mcp__claude-flow__swarm_init { topology: "mesh", maxAgents: 6 }
-  mcp__claude-flow__agent_spawn { type: "researcher" }
-  mcp__claude-flow__agent_spawn { type: "coder" }
-  mcp__claude-flow__agent_spawn { type: "tester" }
+// Add new language support
+Task("Language Parser Dev", "Implement PHP parser with regex patterns for crypto API detection", "coder")
+Task("Integration Tester", "Test PHP scanning against WordPress and Laravel codebases", "tester")
 
-// Step 2: Claude Code Task tool spawns ACTUAL agents that do the work
-[Single Message - Parallel Agent Execution]:
-  // Claude Code's Task tool spawns real agents concurrently
-  Task("Research agent", "Analyze API requirements and best practices. Check memory for prior decisions.", "researcher")
-  Task("Coder agent", "Implement REST endpoints with authentication. Coordinate via hooks.", "coder")
-  Task("Database agent", "Design and implement database schema. Store decisions in memory.", "code-analyzer")
-  Task("Tester agent", "Create comprehensive test suite with 90% coverage.", "tester")
-  Task("Reviewer agent", "Review code quality and security. Document findings.", "reviewer")
-  
-  // Batch ALL todos in ONE call
-  TodoWrite { todos: [
-    {id: "1", content: "Research API patterns", status: "in_progress", priority: "high"},
-    {id: "2", content: "Design database schema", status: "in_progress", priority: "high"},
-    {id: "3", content: "Implement authentication", status: "pending", priority: "high"},
-    {id: "4", content: "Build REST endpoints", status: "pending", priority: "high"},
-    {id: "5", content: "Write unit tests", status: "pending", priority: "medium"},
-    {id: "6", content: "Integration tests", status: "pending", priority: "medium"},
-    {id: "7", content: "API documentation", status: "pending", priority: "low"},
-    {id: "8", content: "Performance optimization", status: "pending", priority: "low"}
-  ]}
-  
-  // Parallel file operations
-  Bash "mkdir -p app/{src,tests,docs,config}"
-  Write "app/package.json"
-  Write "app/src/server.js"
-  Write "app/tests/server.test.js"
-  Write "app/docs/API.md"
+// Enhance reporting
+Task("Report Developer", "Add HTML report generation with charts and recommendations", "coder")
+Task("API Documentation", "Generate OpenAPI spec for WASM/REST API endpoints", "api-docs")
 ```
 
-### ❌ WRONG (Multiple Messages):
-```javascript
-Message 1: mcp__claude-flow__swarm_init
-Message 2: Task("agent 1")
-Message 3: TodoWrite { todos: [single todo] }
-Message 4: Write "file.js"
-// This breaks parallel coordination!
-```
+## 📊 Performance Targets
 
-## Performance Benefits
+**Scanning Speed:**
+- Small project (< 100 files): < 1 second
+- Medium project (< 1000 files): < 10 seconds
+- Large project (> 10000 files): < 2 minutes
 
-- **84.8% SWE-Bench solve rate**
-- **32.3% token reduction**
-- **2.8-4.4x speed improvement**
-- **27+ neural models**
+**Memory Usage:**
+- CLI tool: < 50 MB
+- WASM bundle: < 500 KB (gzipped)
 
-## Hooks Integration
+**Accuracy:**
+- False positives: < 5%
+- False negatives: < 1% (critical vulnerabilities)
+- Detection coverage: > 95% (OWASP Crypto Risks)
 
-### Pre-Operation
-- Auto-assign agents by file type
-- Validate commands for safety
-- Prepare resources automatically
-- Optimize topology by complexity
-- Cache searches
+## 🔗 Related Resources
 
-### Post-Operation
-- Auto-format code
-- Train neural patterns
-- Update memory
-- Analyze performance
-- Track token usage
+- **NIST PQC**: https://csrc.nist.gov/projects/post-quantum-cryptography
+- **NIST 800-53**: https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final
+- **OSCAL**: https://pages.nist.gov/OSCAL/
+- **Rust Security**: https://rustsec.org/
+- **WASM Security**: https://webassembly.org/docs/security/
 
-### Session Management
-- Generate summaries
-- Persist state
-- Track metrics
-- Restore context
-- Export workflows
+## 📋 important-instruction-reminders
 
-## Advanced Features (v2.0.0)
-
-- 🚀 Automatic Topology Selection
-- ⚡ Parallel Execution (2.8-4.4x speed)
-- 🧠 Neural Training
-- 📊 Bottleneck Analysis
-- 🤖 Smart Auto-Spawning
-- 🛡️ Self-Healing Workflows
-- 💾 Cross-Session Memory
-- 🔗 GitHub Integration
-
-## Integration Tips
-
-1. Start with basic swarm init
-2. Scale agents gradually
-3. Use memory for context
-4. Monitor progress regularly
-5. Train patterns from success
-6. Enable hooks automation
-7. Use GitHub tools first
-
-## Support
-
-- Documentation: https://github.com/ruvnet/claude-flow
-- Issues: https://github.com/ruvnet/claude-flow/issues
-- Flow-Nexus Platform: https://flow-nexus.ruv.io (registration required for cloud features)
-
----
-
-Remember: **Claude Flow coordinates, Claude Code creates!**
-
-# important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
 Never save working files, text/mds and tests to the root folder.
+
+---
+
+**Remember:** Focus on security, accuracy, and NIST compliance in all development work.

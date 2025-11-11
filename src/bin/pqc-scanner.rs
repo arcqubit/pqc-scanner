@@ -1,7 +1,10 @@
 // PQC Scanner - CLI Entry Point
 // Command-line interface for scanning directories for cryptographic vulnerabilities
 
-use pqc_scanner::{analyze, export_oscal_json, export_sc13_json, generate_oscal_json, generate_sc13_report, Language};
+use pqc_scanner::{
+    analyze, export_oscal_json, export_sc13_json, generate_oscal_json, generate_sc13_report,
+    Language,
+};
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -134,7 +137,10 @@ fn print_usage(program: &str) {
     eprintln!("Examples:");
     eprintln!("  {} scan samples/vulnerable-app-1", program);
     eprintln!("  {} scan https://github.com/digininja/DVWA.git", program);
-    eprintln!("  {} scan https://github.com/org/repo.git --report-name my-audit --keep-clone", program);
+    eprintln!(
+        "  {} scan https://github.com/org/repo.git --report-name my-audit --keep-clone",
+        program
+    );
 }
 
 fn scan_directory(mut options: ScanOptions) -> Result<(), String> {
@@ -184,9 +190,19 @@ fn scan_directory(mut options: ScanOptions) -> Result<(), String> {
 
     // Scan all supported files in directory
     if target.is_dir() {
-        scan_dir_recursive(&target, &mut total_files, &mut total_vulnerabilities, &mut critical_count, &mut high_count, &mut all_results)?;
+        scan_dir_recursive(
+            &target,
+            &mut total_files,
+            &mut total_vulnerabilities,
+            &mut critical_count,
+            &mut high_count,
+            &mut all_results,
+        )?;
     } else {
-        return Err(format!("Expected directory, got file: {}", options.target_path));
+        return Err(format!(
+            "Expected directory, got file: {}",
+            options.target_path
+        ));
     }
 
     println!("\n=== Scan Summary ===");
@@ -201,7 +217,8 @@ fn scan_directory(mut options: ScanOptions) -> Result<(), String> {
 
         // Create reports directory if it doesn't exist
         let reports_dir = PathBuf::from(&options.report_dir);
-        fs::create_dir_all(&reports_dir).map_err(|e| format!("Failed to create reports directory: {}", e))?;
+        fs::create_dir_all(&reports_dir)
+            .map_err(|e| format!("Failed to create reports directory: {}", e))?;
 
         // Determine base name for reports
         let base_name = if let Some(name) = options.report_name {
@@ -285,7 +302,7 @@ fn clone_repository(url: &str) -> Result<PathBuf, String> {
 
     // Execute git clone command
     let output = process::Command::new("git")
-        .args(&["clone", "--depth", "1", url, clone_path.to_str().unwrap()])
+        .args(["clone", "--depth", "1", url, clone_path.to_str().unwrap()])
         .output()
         .map_err(|e| format!("Failed to execute git clone: {}. Is git installed?", e))?;
 
@@ -304,9 +321,7 @@ fn extract_repo_name(url: &str) -> Option<String> {
     // git@github.com:user/repo.git -> repo
     // /path/to/repo -> repo
 
-    let path_str = url
-        .trim_end_matches('/')
-        .trim_end_matches(".git");
+    let path_str = url.trim_end_matches('/').trim_end_matches(".git");
 
     let name = path_str
         .rsplit('/')
@@ -349,11 +364,15 @@ fn scan_dir_recursive(
                 if result.stats.total_vulnerabilities > 0 {
                     println!("\n{}", path.display());
                     println!("  Vulnerabilities: {}", result.stats.total_vulnerabilities);
-                    println!("  Critical: {}, High: {}", result.stats.critical_count, result.stats.high_count);
+                    println!(
+                        "  Critical: {}, High: {}",
+                        result.stats.critical_count, result.stats.high_count
+                    );
 
                     // Show first few vulnerabilities
                     for (i, vuln) in result.vulnerabilities.iter().take(3).enumerate() {
-                        println!("    {}. [{:?}] {} (line {})",
+                        println!(
+                            "    {}. [{:?}] {} (line {})",
                             i + 1,
                             vuln.severity,
                             vuln.crypto_type,
@@ -390,9 +409,8 @@ fn scan_file(path: &Path) -> Result<Option<pqc_scanner::AuditResult>, String> {
 
     if let Some(lang) = language {
         // Read file content
-        let content = fs::read_to_string(path).map_err(|e| {
-            format!("Failed to read {}: {}", path.display(), e)
-        })?;
+        let content = fs::read_to_string(path)
+            .map_err(|e| format!("Failed to read {}: {}", path.display(), e))?;
 
         // Analyze content
         let lang_str = match lang {

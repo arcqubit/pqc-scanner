@@ -35,18 +35,13 @@ jobs:
           node-version: '20'
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: wasm32-unknown-unknown
-          override: true
+          targets: wasm32-unknown-unknown
           components: rustfmt, clippy
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-      - name: Install dependencies
-        run: npm install
 
       - name: Run full test suite
         run: |
@@ -56,7 +51,10 @@ jobs:
 
       - name: Build release binaries
         run: |
-          npm run build:release
+          cargo build --release
+          wasm-pack build --target bundler --out-dir pkg --release
+          wasm-pack build --target nodejs --out-dir pkg-nodejs --release
+          wasm-pack build --target web --out-dir pkg-web --release
 
       - name: Run benchmarks
         run: cargo bench --no-run
@@ -81,13 +79,18 @@ jobs:
         run: |
           VERSION="${{ steps.changelog.outputs.VERSION }}"
 
-          # Create archives for each target
-          tar -czf pqc-scanner-bundler-${VERSION}.tar.gz pkg/
-          tar -czf pqc-scanner-nodejs-${VERSION}.tar.gz pkg-nodejs/
-          tar -czf pqc-scanner-web-${VERSION}.tar.gz pkg-web/
+          # Create binary archive
+          mkdir -p release-artifacts
+          cp target/release/pqc-scanner release-artifacts/ || echo "Binary not found"
+          tar -czf pqc-scanner-cli-${VERSION}-linux-x86_64.tar.gz -C release-artifacts pqc-scanner || true
 
-          # Create combined archive
-          tar -czf pqc-scanner-all-${VERSION}.tar.gz pkg/ pkg-nodejs/ pkg-web/
+          # Create archives for each WASM target
+          tar -czf pqc-scanner-wasm-bundler-${VERSION}.tar.gz pkg/
+          tar -czf pqc-scanner-wasm-nodejs-${VERSION}.tar.gz pkg-nodejs/
+          tar -czf pqc-scanner-wasm-web-${VERSION}.tar.gz pkg-web/
+
+          # Create combined WASM archive
+          tar -czf pqc-scanner-wasm-all-${VERSION}.tar.gz pkg/ pkg-nodejs/ pkg-web/
 
           # Generate checksums
           sha256sum pqc-scanner-*.tar.gz > checksums.txt
@@ -135,7 +138,7 @@ jobs:
           echo "VERSION=${VERSION#v}" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
@@ -157,7 +160,7 @@ jobs:
             -o spdx-json=/out/sbom.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sbom
           path: sbom.json
