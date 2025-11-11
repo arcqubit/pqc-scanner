@@ -28,11 +28,9 @@ RUN wasm-pack build --target bundler --out-dir pkg --release
 RUN wasm-pack build --target nodejs --out-dir pkg-nodejs --release
 RUN wasm-pack build --target web --out-dir pkg-web --release
 
-# Optimize WASM binaries
-RUN npm install -g wasm-opt
-RUN wasm-opt -Oz -o pkg/pqc_scanner_bg.wasm pkg/pqc_scanner_bg.wasm
-RUN wasm-opt -Oz -o pkg-nodejs/pqc_scanner_bg.wasm pkg-nodejs/pqc_scanner_bg.wasm
-RUN wasm-opt -Oz -o pkg-web/pqc_scanner_bg.wasm pkg-web/pqc_scanner_bg.wasm
+# WASM binaries are already optimized by wasm-pack --release
+# wasm-pack applies wasm-opt optimizations automatically
+# No additional optimization step needed
 
 # Stage 2: Runtime image with distroless Node.js
 FROM gcr.io/distroless/nodejs20-debian12:nonroot
