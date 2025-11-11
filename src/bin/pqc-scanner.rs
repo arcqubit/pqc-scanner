@@ -11,6 +11,8 @@ struct ScanOptions {
     target_path: String,
     report_dir: String,
     report_name: Option<String>,
+    is_repo_url: bool,
+    cleanup_after_scan: bool,
 }
 
 fn main() {
@@ -49,12 +51,13 @@ fn main() {
 
 fn parse_scan_args(args: &[String]) -> Result<ScanOptions, String> {
     if args.is_empty() {
-        return Err("Missing target path".to_string());
+        return Err("Missing target path or repository URL".to_string());
     }
 
     let mut target_path = None;
     let mut report_dir = "reports".to_string();
     let mut report_name = None;
+    let mut cleanup_after_scan = true;
     let mut i = 0;
 
     while i < args.len() {
@@ -73,6 +76,10 @@ fn parse_scan_args(args: &[String]) -> Result<ScanOptions, String> {
                 report_name = Some(args[i + 1].clone());
                 i += 2;
             }
+            "--keep-clone" => {
+                cleanup_after_scan = false;
+                i += 1;
+            }
             arg => {
                 if arg.starts_with("--") {
                     return Err(format!("Unknown option: {}", arg));
@@ -88,33 +95,78 @@ fn parse_scan_args(args: &[String]) -> Result<ScanOptions, String> {
     }
 
     match target_path {
-        Some(path) => Ok(ScanOptions {
-            target_path: path,
-            report_dir,
-            report_name,
-        }),
-        None => Err("Missing target path".to_string()),
+        Some(path) => {
+            let is_repo_url = is_git_url(&path);
+            Ok(ScanOptions {
+                target_path: path,
+                report_dir,
+                report_name,
+                is_repo_url,
+                cleanup_after_scan,
+            })
+        }
+        None => Err("Missing target path or repository URL".to_string()),
     }
+}
+
+fn is_git_url(path: &str) -> bool {
+    path.starts_with("http://")
+        || path.starts_with("https://")
+        || path.starts_with("git@")
+        || path.starts_with("ssh://")
+        || path.ends_with(".git")
 }
 
 fn print_usage(program: &str) {
     eprintln!("PQC Scanner - Quantum-Safe Cryptography Auditor");
     eprintln!();
-    eprintln!("Usage: {} scan <directory> [OPTIONS]", program);
+    eprintln!("Usage: {} scan <directory|repo-url> [OPTIONS]", program);
     eprintln!();
     eprintln!("Commands:");
-    eprintln!("  scan <directory>    Scan directory for cryptographic vulnerabilities");
+    eprintln!("  scan <path>         Scan local directory for cryptographic vulnerabilities");
+    eprintln!("  scan <repo-url>     Clone and scan remote Git repository");
     eprintln!();
     eprintln!("Options:");
     eprintln!("  --report-dir <dir>     Output directory for reports (default: reports)");
-    eprintln!("  --report-name <name>   Base name for report files (default: directory name)");
+    eprintln!("  --report-name <name>   Base name for report files (default: directory/repo name)");
+    eprintln!("  --keep-clone           Keep cloned repository after scanning (default: cleanup)");
     eprintln!();
     eprintln!("Examples:");
     eprintln!("  {} scan samples/vulnerable-app-1", program);
-    eprintln!("  {} scan myapp --report-dir output --report-name my-audit", program);
+    eprintln!("  {} scan https://github.com/digininja/DVWA.git", program);
+    eprintln!("  {} scan https://github.com/org/repo.git --report-name my-audit --keep-clone", program);
 }
 
-fn scan_directory(options: ScanOptions) -> Result<(), String> {
+fn scan_directory(mut options: ScanOptions) -> Result<(), String> {
+    // If it's a repository URL, clone it first
+    let cloned_path = if options.is_repo_url {
+        println!("=== Cloning Repository ===");
+        println!("URL: {}\n", options.target_path);
+
+        match clone_repository(&options.target_path) {
+            Ok(path) => {
+                println!("✓ Cloned to: {}\n", path.display());
+
+                // Update target_path to the cloned directory
+                options.target_path = path.to_string_lossy().to_string();
+
+                // Extract repo name for default report naming if not specified
+                if options.report_name.is_none() {
+                    if let Some(name) = extract_repo_name(&options.target_path) {
+                        options.report_name = Some(name);
+                    }
+                }
+
+                Some(path)
+            }
+            Err(e) => {
+                return Err(format!("Failed to clone repository: {}", e));
+            }
+        }
+    } else {
+        None
+    };
+
     let target = PathBuf::from(&options.target_path);
 
     if !target.exists() {
@@ -192,6 +244,20 @@ fn scan_directory(options: ScanOptions) -> Result<(), String> {
         }
     }
 
+    // Cleanup cloned repository if requested
+    if let Some(cloned) = cloned_path {
+        if options.cleanup_after_scan {
+            println!("\nCleaning up cloned repository...");
+            if let Err(e) = fs::remove_dir_all(&cloned) {
+                eprintln!("  ⚠ Warning: Failed to remove cloned directory: {}", e);
+            } else {
+                println!("  ✓ Removed: {}", cloned.display());
+            }
+        } else {
+            println!("\nCloned repository kept at: {}", cloned.display());
+        }
+    }
+
     if critical_count > 0 || high_count > 0 {
         println!("\n⚠️  WARNING: Critical vulnerabilities found!");
         println!("Review the generated reports for detailed remediation steps.");
@@ -199,6 +265,55 @@ fn scan_directory(options: ScanOptions) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+fn clone_repository(url: &str) -> Result<PathBuf, String> {
+    // Create a temporary directory for cloning
+    let temp_dir = env::temp_dir().join(format!(
+        "pqc-scanner-{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs()
+    ));
+
+    fs::create_dir_all(&temp_dir).map_err(|e| format!("Failed to create temp directory: {}", e))?;
+
+    // Extract repository name from URL
+    let repo_name = extract_repo_name(url).unwrap_or_else(|| "repository".to_string());
+    let clone_path = temp_dir.join(&repo_name);
+
+    // Execute git clone command
+    let output = process::Command::new("git")
+        .args(&["clone", "--depth", "1", url, clone_path.to_str().unwrap()])
+        .output()
+        .map_err(|e| format!("Failed to execute git clone: {}. Is git installed?", e))?;
+
+    if !output.status.success() {
+        let error_msg = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("Git clone failed: {}", error_msg));
+    }
+
+    Ok(clone_path)
+}
+
+fn extract_repo_name(url: &str) -> Option<String> {
+    // Extract repository name from various URL formats
+    // https://github.com/user/repo.git -> repo
+    // https://github.com/user/repo -> repo
+    // git@github.com:user/repo.git -> repo
+    // /path/to/repo -> repo
+
+    let path_str = url
+        .trim_end_matches('/')
+        .trim_end_matches(".git");
+
+    let name = path_str
+        .rsplit('/')
+        .next()
+        .or_else(|| path_str.rsplit(':').next())?;
+
+    Some(name.to_string())
 }
 
 fn scan_dir_recursive(
