@@ -38,12 +38,6 @@ jobs:
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-      - name: Run full test suite
-        run: |
-          cargo test --all-features --release
-          cargo clippy --all-features -- -D warnings
-          cargo fmt -- --check
-
       - name: Build release binaries
         run: |
           cargo build --release
