@@ -78,3 +78,7 @@ hive-mind-prompt-*.txt
 # Phase 2 WASM build artifacts
 /pkg-nodejs/
 /pkg-web/
+
+# Generated reports
+/reports/*.json
+/output/

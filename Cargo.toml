@@ -1,5 +1,5 @@
 [package]
-name = "rust-wasm-app"
+name = "pqc-scanner"
 version = "0.1.0"
 edition = "2021"
 authors = ["ArcQubit Team"]
@@ -51,6 +51,10 @@ harness = false
 [[example]]
 name = "generate_compliance_report"
 path = "examples/generate_compliance_report.rs"
+
+[[bin]]
+name = "pqc-scanner"
+path = "src/bin/pqc-scanner.rs"
 
 [profile.release]
 opt-level = "z"

@@ -6,7 +6,7 @@
 // 3. Export the report as JSON
 // 4. Generate OSCAL-compliant assessment results
 
-use rust_wasm_app::{
+use pqc_scanner::{
     analyze, export_oscal_json, export_sc13_json, generate_oscal_json, generate_sc13_report,
 };
 
