@@ -1,6 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use rust_wasm_app::audit;
-use std::time::Duration;
+use pqc_scanner::analyze;
 
 fn benchmark_file_parsing(c: &mut Criterion) {
     let source = generate_code_sample(1000);
@@ -13,7 +12,7 @@ fn benchmark_file_parsing(c: &mut Criterion) {
         BenchmarkId::from_parameter(format!("{}_LOC", lines)),
         &source,
         |b, source| {
-            b.iter(|| audit::analyze(black_box(source), black_box("rust")));
+            b.iter(|| analyze(black_box(source), black_box("rust")));
         },
     );
 
@@ -31,7 +30,7 @@ fn benchmark_pattern_detection(c: &mut Criterion) {
 
     for (name, code) in test_cases {
         group.bench_with_input(BenchmarkId::from_parameter(name), &code, |b, code| {
-            b.iter(|| audit::analyze(black_box(code), black_box("rust")));
+            b.iter(|| analyze(black_box(code), black_box("rust")));
         });
     }
 
@@ -49,7 +48,7 @@ fn benchmark_throughput(c: &mut Criterion) {
     group.bench_function("process_multiple_files", |b| {
         b.iter(|| {
             for sample in &samples {
-                let _ = audit::analyze(black_box(sample), black_box("rust"));
+                let _ = analyze(black_box(sample), black_box("rust"));
             }
         });
     });
@@ -70,7 +69,7 @@ fn benchmark_scaling(c: &mut Criterion) {
             BenchmarkId::from_parameter(format!("{}_lines", size)),
             &code,
             |b, code| {
-                b.iter(|| audit::analyze(black_box(code), black_box("rust")));
+                b.iter(|| analyze(black_box(code), black_box("rust")));
             },
         );
     }
