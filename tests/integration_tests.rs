@@ -1,5 +1,5 @@
 // Integration Tests for Quantum-Safe Crypto Auditor
-use rust_wasm_app::{analyze, CryptoType, Severity};
+use pqc_scanner::{analyze, CryptoType, Severity};
 
 #[test]
 fn test_end_to_end_rust_audit() {

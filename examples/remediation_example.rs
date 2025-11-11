@@ -1,6 +1,6 @@
 // Example demonstrating the auto-remediation feature
 
-use rust_wasm_app::{analyze, generate_remediations};
+use pqc_scanner::{analyze, generate_remediations};
 
 fn main() {
     println!("=== Cryptographic Auto-Remediation Example ===\n");
@@ -59,10 +59,19 @@ def process_data(data, key):
 
     println!("Vulnerabilities found: {}", audit.vulnerabilities.len());
     println!("\nRemediation Summary:");
-    println!("  Total vulnerabilities: {}", remediation.summary.total_vulnerabilities);
+    println!(
+        "  Total vulnerabilities: {}",
+        remediation.summary.total_vulnerabilities
+    );
     println!("  Auto-fixable: {}", remediation.summary.auto_fixable);
-    println!("  Manual review required: {}", remediation.summary.manual_review_required);
-    println!("  Average confidence: {:.1}%", remediation.summary.average_confidence * 100.0);
+    println!(
+        "  Manual review required: {}",
+        remediation.summary.manual_review_required
+    );
+    println!(
+        "  Average confidence: {:.1}%",
+        remediation.summary.average_confidence * 100.0
+    );
 
     println!("\nDetailed Fixes:");
     for (i, fix) in remediation.fixes.iter().enumerate() {

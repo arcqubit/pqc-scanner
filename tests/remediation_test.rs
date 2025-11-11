@@ -1,6 +1,6 @@
 // Integration tests for the remediation module
 
-use rust_wasm_app::{analyze, generate_remediations};
+use pqc_scanner::{analyze, generate_remediations};
 
 #[test]
 fn test_md5_remediation_python() {
@@ -121,7 +121,10 @@ def process_data(data):
 
     // Should have fixes for all detected vulnerabilities
     assert!(!remediation.fixes.is_empty());
-    assert_eq!(remediation.summary.total_vulnerabilities, audit_result.vulnerabilities.len());
+    assert_eq!(
+        remediation.summary.total_vulnerabilities,
+        audit_result.vulnerabilities.len()
+    );
 
     // At least MD5 and SHA1 should be auto-fixable
     assert!(remediation.summary.auto_fixable >= 2);
@@ -162,7 +165,9 @@ sha1_hash = hashlib.sha1()
     assert_eq!(remediation.fixes.len(), 2);
 
     // SHA1 should have higher confidence than MD5
-    let sha1_fix = remediation.fixes.iter()
+    let sha1_fix = remediation
+        .fixes
+        .iter()
         .find(|f| f.algorithm.contains("SHA-1"))
         .unwrap();
 
@@ -197,8 +202,7 @@ hash = hashlib.md5()
 
     // Test JSON serialization
     let json = serde_json::to_string(&remediation).unwrap();
-    let deserialized: rust_wasm_app::RemediationResult =
-        serde_json::from_str(&json).unwrap();
+    let deserialized: pqc_scanner::RemediationResult = serde_json::from_str(&json).unwrap();
 
     assert_eq!(remediation.fixes.len(), deserialized.fixes.len());
     assert_eq!(

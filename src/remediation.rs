@@ -65,10 +65,7 @@ pub struct RemediationSummary {
 }
 
 /// Generate remediation suggestions from audit results
-pub fn generate_remediations(
-    audit_result: &AuditResult,
-    file_path: &str,
-) -> RemediationResult {
+pub fn generate_remediations(audit_result: &AuditResult, file_path: &str) -> RemediationResult {
     let mut fixes = Vec::new();
     let mut warnings = Vec::new();
 
@@ -179,7 +176,9 @@ fn remediate_sha1(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
         new_code,
         confidence: 0.9,
         algorithm: "SHA-1 → SHA-256".to_string(),
-        explanation: "Replaced deprecated SHA-1 hash with SHA-256. SHA-1 is vulnerable to collision attacks.".to_string(),
+        explanation:
+            "Replaced deprecated SHA-1 hash with SHA-256. SHA-1 is vulnerable to collision attacks."
+                .to_string(),
         auto_applicable: true,
     })
 }
@@ -322,11 +321,7 @@ mod tests {
 
     #[test]
     fn test_remediate_sha1() {
-        let vuln = create_test_vulnerability(
-            CryptoType::Sha1,
-            "hash = hashlib.sha1(data)",
-            None,
-        );
+        let vuln = create_test_vulnerability(CryptoType::Sha1, "hash = hashlib.sha1(data)", None);
 
         let fix = remediate_sha1(&vuln, "test.py").unwrap();
 
@@ -338,11 +333,8 @@ mod tests {
 
     #[test]
     fn test_remediate_rsa_weak_key() {
-        let vuln = create_test_vulnerability(
-            CryptoType::Rsa,
-            "key = RSA.generate(1024)",
-            Some(1024),
-        );
+        let vuln =
+            create_test_vulnerability(CryptoType::Rsa, "key = RSA.generate(1024)", Some(1024));
 
         let fix = remediate_rsa(&vuln, "test.py").unwrap();
 
@@ -354,11 +346,8 @@ mod tests {
 
     #[test]
     fn test_remediate_rsa_strong_key() {
-        let vuln = create_test_vulnerability(
-            CryptoType::Rsa,
-            "key = RSA.generate(4096)",
-            Some(4096),
-        );
+        let vuln =
+            create_test_vulnerability(CryptoType::Rsa, "key = RSA.generate(4096)", Some(4096));
 
         let fix = remediate_rsa(&vuln, "test.py").unwrap();
 
@@ -370,11 +359,8 @@ mod tests {
 
     #[test]
     fn test_remediate_des() {
-        let vuln = create_test_vulnerability(
-            CryptoType::Des,
-            "cipher = DES.new(key, DES.MODE_ECB)",
-            None,
-        );
+        let vuln =
+            create_test_vulnerability(CryptoType::Des, "cipher = DES.new(key, DES.MODE_ECB)", None);
 
         let fix = remediate_des_3des(&vuln, "test.py").unwrap();
 
@@ -387,11 +373,8 @@ mod tests {
 
     #[test]
     fn test_remediate_3des() {
-        let vuln = create_test_vulnerability(
-            CryptoType::TripleDes,
-            "cipher = TripleDES.new(key)",
-            None,
-        );
+        let vuln =
+            create_test_vulnerability(CryptoType::TripleDes, "cipher = TripleDES.new(key)", None);
 
         let fix = remediate_des_3des(&vuln, "test.py").unwrap();
 

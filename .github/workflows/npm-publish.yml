@@ -28,17 +28,12 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: wasm32-unknown-unknown
-          override: true
+          targets: wasm32-unknown-unknown
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-      - name: Install dependencies
-        run: npm install
 
       - name: Run tests
         run: |
@@ -47,25 +42,35 @@ jobs:
 
       - name: Build WASM (all targets)
         run: |
-          npm run build:release
+          wasm-pack build --target bundler --out-dir pkg --release
+          wasm-pack build --target nodejs --out-dir pkg-nodejs --release
+          wasm-pack build --target web --out-dir pkg-web --release
 
       - name: Optimize WASM binaries
         run: |
           # Install wasm-opt if not available
-          which wasm-opt || npm install -g wasm-opt
+          which wasm-opt || cargo install wasm-opt
 
           # Optimize each target
-          wasm-opt -Oz -o pkg/rust_wasm_app_bg.wasm pkg/rust_wasm_app_bg.wasm
-          wasm-opt -Oz -o pkg-nodejs/rust_wasm_app_bg.wasm pkg-nodejs/rust_wasm_app_bg.wasm
-          wasm-opt -Oz -o pkg-web/rust_wasm_app_bg.wasm pkg-web/rust_wasm_app_bg.wasm
+          wasm-opt -Oz -o pkg/pqc_scanner_bg.wasm pkg/pqc_scanner_bg.wasm || true
+          wasm-opt -Oz -o pkg-nodejs/pqc_scanner_bg.wasm pkg-nodejs/pqc_scanner_bg.wasm || true
+          wasm-opt -Oz -o pkg-web/pqc_scanner_bg.wasm pkg-web/pqc_scanner_bg.wasm || true
 
       - name: Verify package contents
         run: |
-          npm pack --dry-run
           ls -lh pkg/*.wasm pkg-nodejs/*.wasm pkg-web/*.wasm
 
+      - name: Create NPM packages
+        run: |
+          # Package each WASM target for NPM
+          cd pkg && npm pack
+          cd ../pkg-nodejs && npm pack
+          cd ../pkg-web && npm pack
+          cd ..
+
       - name: Publish to NPM (with provenance)
-        run: npm publish --provenance --access public
+        run: |
+          cd pkg && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
