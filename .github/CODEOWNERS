@@ -1,0 +1,45 @@
+# Code Owners for PQC Scanner
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @arcqubit
+
+# Core scanning logic
+/src/scanner.rs @arcqubit
+/src/detector.rs @arcqubit
+/src/analyzer.rs @arcqubit
+
+# Remediation module
+/src/remediation.rs @arcqubit
+
+# WASM bindings
+/src/lib.rs @arcqubit
+
+# Tests
+/tests/ @arcqubit
+/benches/ @arcqubit
+
+# GitHub workflows and CI/CD
+/.github/ @arcqubit
+/.github/workflows/ @arcqubit
+
+# Security-critical files
+/SECURITY.md @arcqubit
+/.github/dependabot.yml @arcqubit
+/Cargo.lock @arcqubit
+
+# Documentation
+/docs/ @arcqubit
+/README.md @arcqubit
+/CONTRIBUTING.md @arcqubit
+/GOVERNANCE.md @arcqubit
+
+# Build and deployment
+/Dockerfile @arcqubit
+/Cargo.toml @arcqubit
+/.dockerignore @arcqubit
+
+# Configuration
+/.gitignore @arcqubit
+/rustfmt.toml @arcqubit
+/.editorconfig @arcqubit
