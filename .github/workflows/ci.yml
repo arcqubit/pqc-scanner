@@ -71,6 +71,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@7b1c307e0dcbda6122208f10795a713336a9b35a  # stable
         with:
+          toolchain: stable
           targets: wasm32-unknown-unknown
 
       - name: Install wasm-pack
@@ -109,6 +110,8 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@7b1c307e0dcbda6122208f10795a713336a9b35a  # stable
+        with:
+          toolchain: stable
 
       - name: Run benchmarks
         run: cargo bench --no-fail-fast || echo "Benchmarks skipped"
@@ -123,6 +126,8 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@7b1c307e0dcbda6122208f10795a713336a9b35a  # stable
+        with:
+          toolchain: stable
 
       - name: Install tarpaulin
         run: cargo install cargo-tarpaulin || echo "Tarpaulin installation skipped"
@@ -146,6 +151,8 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@7b1c307e0dcbda6122208f10795a713336a9b35a  # stable
+        with:
+          toolchain: stable
 
       - name: Install cargo-geiger
         run: cargo install cargo-geiger

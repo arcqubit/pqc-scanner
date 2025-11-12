@@ -9,14 +9,7 @@ repository = "https://github.com/arcqubit/pqc-scanner"
 
 [lib]
 name = "pqc_scanner"
-
-# Note: conditional crate-type to avoid filename collision warning
-# See: https://github.com/rust-lang/cargo/issues/6313
-[target.'cfg(target_arch = "wasm32")'.lib]
-crate-type = ["cdylib"]
-
-[target.'cfg(not(target_arch = "wasm32"))'.lib]
-crate-type = ["rlib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 wasm-bindgen = "0.2"
