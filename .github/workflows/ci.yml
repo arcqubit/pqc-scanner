@@ -137,8 +137,8 @@ jobs:
           files: ./coverage/cobertura.xml
           fail_ci_if_error: false
 
-  static/geiger:
-    name: Unsafe Code Detection
+  static-geiger:
+    name: Static Analysis - Unsafe Code Detection
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -153,8 +153,8 @@ jobs:
       - name: Geiger scan (deny any unsafe)
         run: cargo geiger --all-features --all-targets --exclude-tests --deny=warn
 
-  deps/udeps:
-    name: Unused Dependencies Detection
+  deps-udeps:
+    name: Dependency Analysis - Unused Dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
