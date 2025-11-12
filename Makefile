@@ -1,4 +1,4 @@
-.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example
+.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps
 
 # Default target - show help
 .DEFAULT_GOAL := help
@@ -48,6 +48,14 @@ format-check:
 # Run benchmarks
 bench:
 	cargo bench
+
+# Unsafe code detection
+geiger:
+	cargo geiger --all-features --all-targets --exclude-tests --deny=warn
+
+# Unused dependencies detection
+udeps:
+	cargo +nightly udeps --all-targets --all-features
 
 # Build WASM (all targets)
 wasm: install
@@ -103,6 +111,8 @@ help:
 	@echo "  make format         - Format code"
 	@echo "  make format-check   - Check formatting"
 	@echo "  make bench          - Run benchmarks"
+	@echo "  make geiger         - Detect unsafe code usage"
+	@echo "  make udeps          - Detect unused dependencies"
 	@echo ""
 	@echo "WASM:"
 	@echo "  make wasm           - Build WASM (debug)"
