@@ -1,4 +1,4 @@
-# Rust WASM Quantum-Safe Crypto Auditor
+# PQC Scanner - Quantum-Safe Crypto Auditor
 
 [![CI](https://github.com/arcqubit/pdq-scanner/actions/workflows/ci.yml/badge.svg)](https://github.com/arcqubit/pdq-scanner/actions/workflows/ci.yml)
 [![Security Audit](https://github.com/arcqubit/pdq-scanner/actions/workflows/cargo-audit.yml/badge.svg)](https://github.com/arcqubit/pdq-scanner/actions/workflows/cargo-audit.yml)
@@ -177,7 +177,7 @@ console.log('OSCAL Version:', oscalReport.oscal_version);
 ## Project Structure
 
 ```
-rust-wasm-app/
+pqc-scanner/
 ├── src/
 │   ├── lib.rs          # WASM entry point & public API
 │   ├── types.rs        # Shared types, OSCAL schemas, and errors
@@ -207,7 +207,7 @@ rust-wasm-app/
 
 ## Auto-Remediation
 
-The scanner includes **intelligent auto-remediation** with template-based code fixes:
+The scanner may include in the future **intelligent auto-remediation** with template-based code fixes:
 
 ```rust
 use rust_wasm_app::{analyze, generate_remediations};
