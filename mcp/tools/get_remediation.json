@@ -1,0 +1,68 @@
+{
+  "tool_id": "get_remediation",
+  "name": "Get Remediation Recommendations",
+  "description": "Generates detailed remediation recommendations for detected cryptographic vulnerabilities with code examples.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "vulnerability_type": {
+        "type": "string",
+        "enum": ["RSA", "ECDSA", "ECDH", "DSA", "MD5", "SHA1", "DES", "3DES", "RC4"],
+        "description": "Type of cryptographic vulnerability"
+      },
+      "language": {
+        "type": "string",
+        "enum": ["javascript", "python", "java", "cpp", "go", "rust", "csharp"],
+        "description": "Target programming language for remediation examples"
+      },
+      "context": {
+        "type": "string",
+        "description": "Optional code context for tailored recommendations"
+      }
+    },
+    "required": ["vulnerability_type", "language"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "vulnerability": {"type": "string"},
+      "severity": {"type": "string"},
+      "recommendation": {"type": "string"},
+      "pqc_alternative": {
+        "type": "object",
+        "properties": {
+          "algorithm": {"type": "string"},
+          "nist_status": {"type": "string"},
+          "code_example": {"type": "string"}
+        }
+      },
+      "interim_solution": {
+        "type": "object",
+        "properties": {
+          "algorithm": {"type": "string"},
+          "code_example": {"type": "string"}
+        }
+      },
+      "migration_steps": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "resources": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": {"type": "string"},
+            "url": {"type": "string"}
+          }
+        }
+      }
+    }
+  },
+  "metadata": {
+    "cost_estimate": 0.0001,
+    "latency": "5-50ms",
+    "category": "remediation",
+    "tags": ["remediation", "post-quantum", "migration"]
+  }
+}

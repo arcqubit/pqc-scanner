@@ -299,6 +299,35 @@ make scan-samples
 
 See [docs/SAMPLE_REPOSITORIES.md](docs/SAMPLE_REPOSITORIES.md) for details.
 
+## Model Context Protocol (MCP) Integration
+
+The PQC Scanner includes an MCP server for AI assistant integration:
+
+```bash
+# Setup MCP server
+cd mcp
+npm install
+
+# Configure Claude Desktop
+# Add to ~/Library/Application Support/Claude/claude_desktop_config.json:
+{
+  "mcpServers": {
+    "pqc-scanner": {
+      "command": "node",
+      "args": ["/path/to/pqc-scanner/mcp/src/index.js"]
+    }
+  }
+}
+```
+
+**Available Tools:**
+- `scan_code` - Scan directories for crypto vulnerabilities
+- `analyze_file` - Analyze single source files
+- `get_remediation` - Get migration recommendations
+- `validate_compliance` - Validate NIST 800-53 SC-13 compliance
+
+See [mcp/README.md](mcp/README.md) for complete documentation.
+
 ## Phase 1 Status: ✅ COMPLETE
 
 - ✅ Rust core implementation

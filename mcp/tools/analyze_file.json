@@ -1,0 +1,65 @@
+{
+  "tool_id": "analyze_file",
+  "name": "Analyze Single File",
+  "description": "Analyzes a single source code file for cryptographic vulnerabilities with detailed per-line findings.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "source_code": {
+        "type": "string",
+        "description": "Source code content to analyze"
+      },
+      "language": {
+        "type": "string",
+        "enum": ["javascript", "python", "java", "cpp", "go", "rust", "csharp", "typescript"],
+        "description": "Programming language of the source code"
+      },
+      "filename": {
+        "type": "string",
+        "description": "Optional filename for context in report"
+      }
+    },
+    "required": ["source_code", "language"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "vulnerabilities": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "crypto_type": {"type": "string"},
+            "severity": {"type": "string"},
+            "risk_score": {"type": "integer"},
+            "line": {"type": "integer"},
+            "column": {"type": "integer"},
+            "context": {"type": "string"},
+            "message": {"type": "string"},
+            "recommendation": {"type": "string"},
+            "key_size": {"type": "integer", "nullable": true}
+          }
+        }
+      },
+      "stats": {
+        "type": "object",
+        "properties": {
+          "lines_scanned": {"type": "integer"},
+          "total_vulnerabilities": {"type": "integer"},
+          "critical_count": {"type": "integer"},
+          "high_count": {"type": "integer"},
+          "medium_count": {"type": "integer"},
+          "low_count": {"type": "integer"}
+        }
+      },
+      "risk_score": {"type": "integer", "minimum": 0, "maximum": 100},
+      "recommendations": {"type": "array", "items": {"type": "string"}}
+    }
+  },
+  "metadata": {
+    "cost_estimate": 0.0001,
+    "latency": "10-100ms",
+    "category": "security",
+    "tags": ["cryptography", "analysis", "single-file"]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "tool_id": "validate_compliance",
+  "name": "Validate NIST Compliance",
+  "description": "Validates code against NIST 800-53 SC-13 cryptographic protection requirements and returns compliance status.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Path to source code to validate"
+      },
+      "target_score": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 80,
+        "description": "Minimum acceptable compliance score"
+      },
+      "strict_mode": {
+        "type": "boolean",
+        "default": false,
+        "description": "Fail on any quantum-vulnerable algorithms"
+      }
+    },
+    "required": ["path"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "compliant": {"type": "boolean"},
+      "compliance_score": {"type": "integer"},
+      "target_score": {"type": "integer"},
+      "control_status": {
+        "type": "string",
+        "enum": ["satisfied", "partiallysatisfied", "notsatisfied"]
+      },
+      "blocking_issues": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "issue": {"type": "string"},
+            "severity": {"type": "string"},
+            "file": {"type": "string"},
+            "line": {"type": "integer"}
+          }
+        }
+      },
+      "recommendations": {"type": "array", "items": {"type": "string"}},
+      "validation_timestamp": {"type": "string", "format": "date-time"}
+    }
+  },
+  "metadata": {
+    "cost_estimate": 0.001,
+    "latency": "100-2000ms",
+    "category": "compliance",
+    "tags": ["nist", "validation", "sc-13", "compliance"]
+  }
+}
