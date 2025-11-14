@@ -1,4 +1,4 @@
-.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps
+.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps scan-samples
 
 # Default target - show help
 .DEFAULT_GOAL := help
@@ -78,6 +78,11 @@ wasm-size: wasm-release
 example:
 	cargo run --example generate_compliance_report
 
+# Scan all sample repositories
+scan-samples:
+	@echo "Scanning all sample repositories..."
+	@./scripts/scan-all-samples.sh
+
 # CI pipeline
 ci: lint format-check test bench
 
@@ -118,6 +123,9 @@ help:
 	@echo "  make wasm           - Build WASM (debug)"
 	@echo "  make wasm-release   - Build WASM (optimized)"
 	@echo "  make wasm-size      - Show WASM bundle sizes"
+	@echo ""
+	@echo "Sample Repositories:"
+	@echo "  make scan-samples   - Scan all sample vulnerable repositories"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  make clean          - Remove build artifacts"
