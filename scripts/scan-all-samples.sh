@@ -116,11 +116,13 @@ for sample in "${SAMPLES[@]}"; do
     print_info "  Source: $SRC_DIR"
     print_info "  Report: $REPORT_FILE"
 
-    # Run scanner
-    if cargo run --example scan_directory -- \
+    # Run scanner (may exit with code 1 if critical vulns found, which is expected)
+    cargo run --example scan_directory -- \
         --path "$SRC_DIR" \
-        --output "$REPORT_FILE" > /dev/null 2>&1; then
+        --output "$REPORT_FILE" > /dev/null 2>&1
 
+    # Check if report was created (regardless of exit code)
+    if [ -f "$REPORT_FILE" ]; then
         print_success "  Scan completed"
 
         # Extract results (simplified - in real implementation would parse JSON)
