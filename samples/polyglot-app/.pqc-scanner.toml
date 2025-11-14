@@ -1,0 +1,39 @@
+# PQC Scanner Configuration for Polyglot App Sample
+
+[scanner]
+# Scan configuration for multi-language repository
+languages = ["javascript", "python", "go", "rust", "java"]
+fail_on_critical = true
+fail_on_high = false
+
+[compliance]
+# NIST 800-53 SC-13 compliance settings
+target_score = 80
+strict_mode = false
+
+[reporting]
+# Report output settings
+format = "json"
+include_remediation = true
+verbose = true
+per_language_breakdown = true
+
+[thresholds]
+# Vulnerability severity thresholds
+critical_max = 0
+high_max = 15
+medium_max = 20
+
+[expected_results]
+# Expected scanner output for validation
+vulnerabilities = 35
+compliance_score = 31
+risk_score = 76
+
+# Per-language breakdown
+[expected_results.by_language]
+javascript = 8
+python = 10
+go = 7
+rust = 5
+java = 8

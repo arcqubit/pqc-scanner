@@ -1,0 +1,33 @@
+# PQC Scanner Configuration for Old Web Framework Sample
+
+[scanner]
+# Scan configuration
+languages = ["java"]
+fail_on_critical = true
+fail_on_high = false
+
+[compliance]
+# NIST 800-53 SC-13 compliance settings
+target_score = 80
+strict_mode = false
+
+[reporting]
+# Report output settings
+format = "json"
+include_remediation = true
+verbose = true
+
+[thresholds]
+# Vulnerability severity thresholds
+critical_max = 0
+high_max = 8
+medium_max = 10
+
+[expected_results]
+# Expected scanner output for validation
+vulnerabilities = 18
+compliance_score = 22
+risk_score = 85
+critical_count = 6
+high_count = 8
+medium_count = 4
