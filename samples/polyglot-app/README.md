@@ -80,16 +80,16 @@ This sample repository demonstrates several real-world challenges:
 
 ```bash
 # Scan entire polyglot repository
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/polyglot-app/ \
   --output reports/polyglot-app-report.json
 
 # Scan by language
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/polyglot-app/frontend/ \
   --output reports/frontend-report.json
 
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/polyglot-app/backend/ \
   --output reports/backend-report.json
 ```

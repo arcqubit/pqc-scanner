@@ -117,7 +117,7 @@ for sample in "${SAMPLES[@]}"; do
     print_info "  Report: $REPORT_FILE"
 
     # Run scanner
-    if cargo run --example generate_compliance_report -- \
+    if cargo run --example scan_directory -- \
         --path "$SRC_DIR" \
         --output "$REPORT_FILE" > /dev/null 2>&1; then
 

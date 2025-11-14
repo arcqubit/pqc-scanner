@@ -61,7 +61,7 @@ npm test
 
 ```bash
 # From the pqc-scanner root directory
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/legacy-banking/src/ \
   --output reports/legacy-banking-report.json
 ```
