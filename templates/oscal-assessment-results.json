@@ -1,0 +1,628 @@
+{
+  "oscal-version": "1.1.2",
+  "assessment-results": {
+    "uuid": "658a5704-fd39-4786-b1c9-bd18b918dcf7",
+    "metadata": {
+      "title": "Cryptographic Protection Assessment Results",
+      "published": "2025-11-14T20:18:51.786961066+00:00",
+      "last-modified": "2025-11-14T20:18:51.786961066+00:00",
+      "version": "1.0.0",
+      "oscal-version": "1.1.2",
+      "roles": [
+        {
+          "id": "assessor",
+          "title": "Security Assessor"
+        }
+      ],
+      "parties": [
+        {
+          "uuid": "ffb747b0-bea4-4c69-96c4-f567aba2527e",
+          "type": "organization",
+          "name": "Security Assessment Team"
+        }
+      ]
+    },
+    "import-ssp": {
+      "href": "#system-security-plan"
+    },
+    "results": [
+      {
+        "uuid": "7f35c4a6-0540-450d-9673-18fa04be164d",
+        "title": "Quantum-Safe Cryptography Assessment",
+        "description": "Assessment of cryptographic implementations against NIST 800-53 SC-13 requirements. Detected 12 vulnerabilities across 20 lines of code.",
+        "start": "2025-11-14T20:18:51.796546290+00:00",
+        "end": "2025-11-14T20:18:51.796546290+00:00",
+        "reviewed-controls": {
+          "control-selections": [
+            {
+              "include-controls": [
+                {
+                  "control-id": "sc-13"
+                }
+              ]
+            }
+          ]
+        },
+        "observations": [
+          {
+            "uuid": "f69b2ab8-e5ae-4a08-8d75-b8e35badcb0a",
+            "description": "Detected MD5 at line 5 column 13: MD5 is cryptographically broken and must not be used",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:5",
+                "description": "Code location: example.js:5"
+              }
+            ]
+          },
+          {
+            "uuid": "a2a00d6d-ccec-4495-af83-75af07941024",
+            "description": "Detected MD5 at line 6 column 6: MD5 is cryptographically broken and must not be used",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:6",
+                "description": "Code location: example.js:6"
+              }
+            ]
+          },
+          {
+            "uuid": "96b520df-412c-4068-87d1-263d2f3eda83",
+            "description": "Detected RSA at line 8 column 9: RSA with 1024-bit key is critically vulnerable to quantum attacks",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:8",
+                "description": "Code location: example.js:8"
+              }
+            ]
+          },
+          {
+            "uuid": "fa472c1e-41c4-43b9-8d86-861ed44a3a7a",
+            "description": "Detected RSA at line 9 column 6: RSA detected - vulnerable to quantum attacks via Shor's algorithm",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:9",
+                "description": "Code location: example.js:9"
+              }
+            ]
+          },
+          {
+            "uuid": "a41baff6-7923-43ce-b2ce-dd7e60455605",
+            "description": "Detected DSA at line 13 column 11: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:13",
+                "description": "Code location: example.js:13"
+              }
+            ]
+          },
+          {
+            "uuid": "11ba2230-1f5c-4d6c-96c4-d03988354c18",
+            "description": "Detected DSA at line 14 column 8: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:14",
+                "description": "Code location: example.js:14"
+              }
+            ]
+          },
+          {
+            "uuid": "0c38f063-fc28-4d6e-91d8-3a94e511f025",
+            "description": "Detected SHA-1 at line 16 column 0: SHA-1 is cryptographically broken and should not be used",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:16",
+                "description": "Code location: example.js:16"
+              }
+            ]
+          },
+          {
+            "uuid": "22814e30-cfcf-42a7-80f2-35f388dda43d",
+            "description": "Detected SHA-1 at line 17 column 6: SHA-1 is cryptographically broken and should not be used",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:17",
+                "description": "Code location: example.js:17"
+              }
+            ]
+          },
+          {
+            "uuid": "9dfbef47-b461-429f-bfef-60a9f1448f4f",
+            "description": "Detected ECDSA at line 13 column 9: ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:13",
+                "description": "Code location: example.js:13"
+              }
+            ]
+          },
+          {
+            "uuid": "ff4167d9-5de2-40bf-8312-8d98971ba764",
+            "description": "Detected ECDSA at line 14 column 0: ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:14",
+                "description": "Code location: example.js:14"
+              }
+            ]
+          },
+          {
+            "uuid": "7743c3a4-6c07-4e4c-89f3-8bdc725fbe16",
+            "description": "Detected DES at line 20 column 38: DES is obsolete and cryptographically weak",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:20",
+                "description": "Code location: example.js:20"
+              }
+            ]
+          },
+          {
+            "uuid": "649806c3-d00b-43c4-ac10-8721791a2631",
+            "description": "Detected 3DES at line 19 column 15: 3DES (Triple DES) is deprecated and should be replaced",
+            "methods": [
+              "TEST"
+            ],
+            "types": [
+              "StaticScan"
+            ],
+            "collected": "2025-11-14T20:18:51.786961066+00:00",
+            "relevant_evidence": [
+              {
+                "href": "#example.js:19",
+                "description": "Code location: example.js:19"
+              }
+            ]
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "c94dbd93-7aa7-431e-a8f8-79182a835a3e",
+            "title": "SC-13 Finding: Found 2 instance(s) of MD5 cryptographic algorithm usage",
+            "description": "Found 2 instance(s) of MD5 cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a critical risk to cryptographic protection.",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sc-13",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "implementation-status": {
+              "state": "not-applicable"
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "f69b2ab8-e5ae-4a08-8d75-b8e35badcb0a"
+              },
+              {
+                "observation-uuid": "a2a00d6d-ccec-4495-af83-75af07941024"
+              },
+              {
+                "observation-uuid": "96b520df-412c-4068-87d1-263d2f3eda83"
+              },
+              {
+                "observation-uuid": "fa472c1e-41c4-43b9-8d86-861ed44a3a7a"
+              },
+              {
+                "observation-uuid": "a41baff6-7923-43ce-b2ce-dd7e60455605"
+              },
+              {
+                "observation-uuid": "11ba2230-1f5c-4d6c-96c4-d03988354c18"
+              },
+              {
+                "observation-uuid": "0c38f063-fc28-4d6e-91d8-3a94e511f025"
+              },
+              {
+                "observation-uuid": "22814e30-cfcf-42a7-80f2-35f388dda43d"
+              },
+              {
+                "observation-uuid": "9dfbef47-b461-429f-bfef-60a9f1448f4f"
+              },
+              {
+                "observation-uuid": "ff4167d9-5de2-40bf-8312-8d98971ba764"
+              },
+              {
+                "observation-uuid": "7743c3a4-6c07-4e4c-89f3-8bdc725fbe16"
+              },
+              {
+                "observation-uuid": "649806c3-d00b-43c4-ac10-8721791a2631"
+              }
+            ]
+          },
+          {
+            "uuid": "4842c27f-4641-41d5-b8df-767a145b92b5",
+            "title": "SC-13 Finding: Found 2 instance(s) of RSA cryptographic algorithm usage",
+            "description": "Found 2 instance(s) of RSA cryptographic algorithm usage. This algorithm is quantum-vulnerable and poses a critical risk to cryptographic protection.",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sc-13",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "implementation-status": {
+              "state": "not-applicable"
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "f69b2ab8-e5ae-4a08-8d75-b8e35badcb0a"
+              },
+              {
+                "observation-uuid": "a2a00d6d-ccec-4495-af83-75af07941024"
+              },
+              {
+                "observation-uuid": "96b520df-412c-4068-87d1-263d2f3eda83"
+              },
+              {
+                "observation-uuid": "fa472c1e-41c4-43b9-8d86-861ed44a3a7a"
+              },
+              {
+                "observation-uuid": "a41baff6-7923-43ce-b2ce-dd7e60455605"
+              },
+              {
+                "observation-uuid": "11ba2230-1f5c-4d6c-96c4-d03988354c18"
+              },
+              {
+                "observation-uuid": "0c38f063-fc28-4d6e-91d8-3a94e511f025"
+              },
+              {
+                "observation-uuid": "22814e30-cfcf-42a7-80f2-35f388dda43d"
+              },
+              {
+                "observation-uuid": "9dfbef47-b461-429f-bfef-60a9f1448f4f"
+              },
+              {
+                "observation-uuid": "ff4167d9-5de2-40bf-8312-8d98971ba764"
+              },
+              {
+                "observation-uuid": "7743c3a4-6c07-4e4c-89f3-8bdc725fbe16"
+              },
+              {
+                "observation-uuid": "649806c3-d00b-43c4-ac10-8721791a2631"
+              }
+            ]
+          },
+          {
+            "uuid": "ade87e8b-b276-4714-8de4-9268cb98b0d6",
+            "title": "SC-13 Finding: Found 2 instance(s) of DSA cryptographic algorithm usage",
+            "description": "Found 2 instance(s) of DSA cryptographic algorithm usage. This algorithm is quantum-vulnerable and poses a high risk to cryptographic protection.",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sc-13",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "implementation-status": {
+              "state": "not-applicable"
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "f69b2ab8-e5ae-4a08-8d75-b8e35badcb0a"
+              },
+              {
+                "observation-uuid": "a2a00d6d-ccec-4495-af83-75af07941024"
+              },
+              {
+                "observation-uuid": "96b520df-412c-4068-87d1-263d2f3eda83"
+              },
+              {
+                "observation-uuid": "fa472c1e-41c4-43b9-8d86-861ed44a3a7a"
+              },
+              {
+                "observation-uuid": "a41baff6-7923-43ce-b2ce-dd7e60455605"
+              },
+              {
+                "observation-uuid": "11ba2230-1f5c-4d6c-96c4-d03988354c18"
+              },
+              {
+                "observation-uuid": "0c38f063-fc28-4d6e-91d8-3a94e511f025"
+              },
+              {
+                "observation-uuid": "22814e30-cfcf-42a7-80f2-35f388dda43d"
+              },
+              {
+                "observation-uuid": "9dfbef47-b461-429f-bfef-60a9f1448f4f"
+              },
+              {
+                "observation-uuid": "ff4167d9-5de2-40bf-8312-8d98971ba764"
+              },
+              {
+                "observation-uuid": "7743c3a4-6c07-4e4c-89f3-8bdc725fbe16"
+              },
+              {
+                "observation-uuid": "649806c3-d00b-43c4-ac10-8721791a2631"
+              }
+            ]
+          },
+          {
+            "uuid": "935705ad-00ff-49a3-9c5b-1f09212df045",
+            "title": "SC-13 Finding: Found 2 instance(s) of SHA-1 cryptographic algorithm usage",
+            "description": "Found 2 instance(s) of SHA-1 cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a critical risk to cryptographic protection.",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sc-13",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "implementation-status": {
+              "state": "not-applicable"
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "f69b2ab8-e5ae-4a08-8d75-b8e35badcb0a"
+              },
+              {
+                "observation-uuid": "a2a00d6d-ccec-4495-af83-75af07941024"
+              },
+              {
+                "observation-uuid": "96b520df-412c-4068-87d1-263d2f3eda83"
+              },
+              {
+                "observation-uuid": "fa472c1e-41c4-43b9-8d86-861ed44a3a7a"
+              },
+              {
+                "observation-uuid": "a41baff6-7923-43ce-b2ce-dd7e60455605"
+              },
+              {
+                "observation-uuid": "11ba2230-1f5c-4d6c-96c4-d03988354c18"
+              },
+              {
+                "observation-uuid": "0c38f063-fc28-4d6e-91d8-3a94e511f025"
+              },
+              {
+                "observation-uuid": "22814e30-cfcf-42a7-80f2-35f388dda43d"
+              },
+              {
+                "observation-uuid": "9dfbef47-b461-429f-bfef-60a9f1448f4f"
+              },
+              {
+                "observation-uuid": "ff4167d9-5de2-40bf-8312-8d98971ba764"
+              },
+              {
+                "observation-uuid": "7743c3a4-6c07-4e4c-89f3-8bdc725fbe16"
+              },
+              {
+                "observation-uuid": "649806c3-d00b-43c4-ac10-8721791a2631"
+              }
+            ]
+          },
+          {
+            "uuid": "9b56685c-424c-4eb1-bdfb-70353f794ece",
+            "title": "SC-13 Finding: Found 2 instance(s) of ECDSA cryptographic algorithm usage",
+            "description": "Found 2 instance(s) of ECDSA cryptographic algorithm usage. This algorithm is quantum-vulnerable and poses a high risk to cryptographic protection.",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sc-13",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "implementation-status": {
+              "state": "not-applicable"
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "f69b2ab8-e5ae-4a08-8d75-b8e35badcb0a"
+              },
+              {
+                "observation-uuid": "a2a00d6d-ccec-4495-af83-75af07941024"
+              },
+              {
+                "observation-uuid": "96b520df-412c-4068-87d1-263d2f3eda83"
+              },
+              {
+                "observation-uuid": "fa472c1e-41c4-43b9-8d86-861ed44a3a7a"
+              },
+              {
+                "observation-uuid": "a41baff6-7923-43ce-b2ce-dd7e60455605"
+              },
+              {
+                "observation-uuid": "11ba2230-1f5c-4d6c-96c4-d03988354c18"
+              },
+              {
+                "observation-uuid": "0c38f063-fc28-4d6e-91d8-3a94e511f025"
+              },
+              {
+                "observation-uuid": "22814e30-cfcf-42a7-80f2-35f388dda43d"
+              },
+              {
+                "observation-uuid": "9dfbef47-b461-429f-bfef-60a9f1448f4f"
+              },
+              {
+                "observation-uuid": "ff4167d9-5de2-40bf-8312-8d98971ba764"
+              },
+              {
+                "observation-uuid": "7743c3a4-6c07-4e4c-89f3-8bdc725fbe16"
+              },
+              {
+                "observation-uuid": "649806c3-d00b-43c4-ac10-8721791a2631"
+              }
+            ]
+          },
+          {
+            "uuid": "5eea5a40-8369-455c-aeea-86de750575d7",
+            "title": "SC-13 Finding: Found 1 instance(s) of DES cryptographic algorithm usage",
+            "description": "Found 1 instance(s) of DES cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a critical risk to cryptographic protection.",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sc-13",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "implementation-status": {
+              "state": "not-applicable"
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "f69b2ab8-e5ae-4a08-8d75-b8e35badcb0a"
+              },
+              {
+                "observation-uuid": "a2a00d6d-ccec-4495-af83-75af07941024"
+              },
+              {
+                "observation-uuid": "96b520df-412c-4068-87d1-263d2f3eda83"
+              },
+              {
+                "observation-uuid": "fa472c1e-41c4-43b9-8d86-861ed44a3a7a"
+              },
+              {
+                "observation-uuid": "a41baff6-7923-43ce-b2ce-dd7e60455605"
+              },
+              {
+                "observation-uuid": "11ba2230-1f5c-4d6c-96c4-d03988354c18"
+              },
+              {
+                "observation-uuid": "0c38f063-fc28-4d6e-91d8-3a94e511f025"
+              },
+              {
+                "observation-uuid": "22814e30-cfcf-42a7-80f2-35f388dda43d"
+              },
+              {
+                "observation-uuid": "9dfbef47-b461-429f-bfef-60a9f1448f4f"
+              },
+              {
+                "observation-uuid": "ff4167d9-5de2-40bf-8312-8d98971ba764"
+              },
+              {
+                "observation-uuid": "7743c3a4-6c07-4e4c-89f3-8bdc725fbe16"
+              },
+              {
+                "observation-uuid": "649806c3-d00b-43c4-ac10-8721791a2631"
+              }
+            ]
+          },
+          {
+            "uuid": "52054648-0feb-40b5-964e-799fc90c2c27",
+            "title": "SC-13 Finding: Found 1 instance(s) of 3DES cryptographic algorithm usage",
+            "description": "Found 1 instance(s) of 3DES cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a high risk to cryptographic protection.",
+            "target": {
+              "type": "objective-id",
+              "target-id": "sc-13",
+              "status": {
+                "state": "not-satisfied"
+              }
+            },
+            "implementation-status": {
+              "state": "not-applicable"
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "f69b2ab8-e5ae-4a08-8d75-b8e35badcb0a"
+              },
+              {
+                "observation-uuid": "a2a00d6d-ccec-4495-af83-75af07941024"
+              },
+              {
+                "observation-uuid": "96b520df-412c-4068-87d1-263d2f3eda83"
+              },
+              {
+                "observation-uuid": "fa472c1e-41c4-43b9-8d86-861ed44a3a7a"
+              },
+              {
+                "observation-uuid": "a41baff6-7923-43ce-b2ce-dd7e60455605"
+              },
+              {
+                "observation-uuid": "11ba2230-1f5c-4d6c-96c4-d03988354c18"
+              },
+              {
+                "observation-uuid": "0c38f063-fc28-4d6e-91d8-3a94e511f025"
+              },
+              {
+                "observation-uuid": "22814e30-cfcf-42a7-80f2-35f388dda43d"
+              },
+              {
+                "observation-uuid": "9dfbef47-b461-429f-bfef-60a9f1448f4f"
+              },
+              {
+                "observation-uuid": "ff4167d9-5de2-40bf-8312-8d98971ba764"
+              },
+              {
+                "observation-uuid": "7743c3a4-6c07-4e4c-89f3-8bdc725fbe16"
+              },
+              {
+                "observation-uuid": "649806c3-d00b-43c4-ac10-8721791a2631"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

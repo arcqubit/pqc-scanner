@@ -1,0 +1,386 @@
+{
+  "metadata": {
+    "report_id": "76613857-1035-4cd1-a71a-ae26144abbbb",
+    "title": "NIST 800-53 SC-13 Cryptographic Protection Assessment",
+    "published": "2025-11-14T20:18:51.786961066+00:00",
+    "last_modified": "2025-11-14T20:18:51.786961066+00:00",
+    "version": "1.0.0",
+    "oscal_version": "1.1.2"
+  },
+  "control_assessment": {
+    "control_id": "sc-13",
+    "control_name": "Cryptographic Protection",
+    "control_family": "System and Communications Protection",
+    "control_description": "The information system implements [Assignment: organization-defined cryptographic uses and type of cryptography required for each use] in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards.",
+    "implementation_status": "partiallyimplemented",
+    "assessment_status": "notsatisfied",
+    "assessment_method": [
+      "TEST",
+      "EXAMINE",
+      "INTERVIEW"
+    ]
+  },
+  "summary": {
+    "files_scanned": 1,
+    "lines_scanned": 20,
+    "total_vulnerabilities": 12,
+    "quantum_vulnerable_algorithms": [
+      "RSA",
+      "ECDSA",
+      "DSA"
+    ],
+    "deprecated_algorithms": [
+      "MD5",
+      "SHA-1",
+      "3DES",
+      "DES"
+    ],
+    "weak_key_sizes": [
+      "RSA 1024-bit"
+    ],
+    "compliance_score": 9,
+    "risk_score": 91
+  },
+  "findings": [
+    {
+      "finding_id": "55c62fff-29e4-4406-bbd0-2fadc532b81e",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 2 instance(s) of MD5 cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a critical risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "example.js:5:13",
+        "example.js:6:6"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "55c62fff-29e4-4406-bbd0-2fadc532b81e-0",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 5 column 13: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 5,
+            "column": 13,
+            "snippet": "// CRITICAL: MD5 is cryptographically broken"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "MD5",
+            "key_size": null,
+            "message": "MD5 is cryptographically broken and must not be used",
+            "risk_score": 100,
+            "severity": "Critical"
+          }
+        },
+        {
+          "evidence_id": "55c62fff-29e4-4406-bbd0-2fadc532b81e-1",
+          "evidence_type": "static-scan",
+          "description": "Detected MD5 at line 6 column 6: MD5 is cryptographically broken and must not be used",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 6,
+            "column": 6,
+            "snippet": "const md5Hash = crypto.createHash('md5').update('data').digest('hex');"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "MD5",
+            "key_size": null,
+            "message": "MD5 is cryptographically broken and must not be used",
+            "risk_score": 100,
+            "severity": "Critical"
+          }
+        }
+      ],
+      "remediation": "Replace with SHA-256 or SHA-3",
+      "risk_level": "critical"
+    },
+    {
+      "finding_id": "8b7ad89d-863b-487c-8154-78ccc1552c86",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 2 instance(s) of RSA cryptographic algorithm usage. This algorithm is quantum-vulnerable and poses a critical risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "example.js:8:9",
+        "example.js:9:6"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "8b7ad89d-863b-487c-8154-78ccc1552c86-0",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 8 column 9: RSA with 1024-bit key is critically vulnerable to quantum attacks",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 8,
+            "column": 9,
+            "snippet": "// HIGH: RSA with 1024-bit key is quantum-vulnerable"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "RSA",
+            "key_size": 1024,
+            "message": "RSA with 1024-bit key is critically vulnerable to quantum attacks",
+            "risk_score": 100,
+            "severity": "Critical"
+          }
+        },
+        {
+          "evidence_id": "8b7ad89d-863b-487c-8154-78ccc1552c86-1",
+          "evidence_type": "static-scan",
+          "description": "Detected RSA at line 9 column 6: RSA detected - vulnerable to quantum attacks via Shor's algorithm",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 9,
+            "column": 6,
+            "snippet": "const rsaKey = crypto.generateKeyPairSync('rsa', {"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "RSA",
+            "key_size": null,
+            "message": "RSA detected - vulnerable to quantum attacks via Shor's algorithm",
+            "risk_score": 85,
+            "severity": "High"
+          }
+        }
+      ],
+      "remediation": "Replace with CRYSTALS-Dilithium (signatures) or CRYSTALS-Kyber (encryption)",
+      "risk_level": "critical"
+    },
+    {
+      "finding_id": "08195e3b-12ef-4d1d-8a06-ceb3d14b5cc8",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 2 instance(s) of DSA cryptographic algorithm usage. This algorithm is quantum-vulnerable and poses a high risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "example.js:13:11",
+        "example.js:14:8"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "08195e3b-12ef-4d1d-8a06-ceb3d14b5cc8-0",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 13 column 11: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 13,
+            "column": 11,
+            "snippet": "// HIGH: ECDSA is quantum-vulnerable"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "DSA",
+            "key_size": null,
+            "message": "DSA (Digital Signature Algorithm) is quantum-vulnerable",
+            "risk_score": 90,
+            "severity": "High"
+          }
+        },
+        {
+          "evidence_id": "08195e3b-12ef-4d1d-8a06-ceb3d14b5cc8-1",
+          "evidence_type": "static-scan",
+          "description": "Detected DSA at line 14 column 8: DSA (Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 14,
+            "column": 8,
+            "snippet": "const ecdsaKey = crypto.createSign('ecdsa-with-SHA256');"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "DSA",
+            "key_size": null,
+            "message": "DSA (Digital Signature Algorithm) is quantum-vulnerable",
+            "risk_score": 90,
+            "severity": "High"
+          }
+        }
+      ],
+      "remediation": "Replace with CRYSTALS-Dilithium for post-quantum digital signatures",
+      "risk_level": "high"
+    },
+    {
+      "finding_id": "f9308e1b-e672-4023-a5a8-55bac4a3c34d",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 2 instance(s) of SHA-1 cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a critical risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "example.js:16:0",
+        "example.js:17:6"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "f9308e1b-e672-4023-a5a8-55bac4a3c34d-0",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 16 column 0: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 16,
+            "column": 0,
+            "snippet": "// CRITICAL: SHA-1 is cryptographically broken"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "SHA-1",
+            "key_size": null,
+            "message": "SHA-1 is cryptographically broken and should not be used",
+            "risk_score": 95,
+            "severity": "Critical"
+          }
+        },
+        {
+          "evidence_id": "f9308e1b-e672-4023-a5a8-55bac4a3c34d-1",
+          "evidence_type": "static-scan",
+          "description": "Detected SHA-1 at line 17 column 6: SHA-1 is cryptographically broken and should not be used",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 17,
+            "column": 6,
+            "snippet": "const sha1Hash = crypto.createHash('sha1').update('data').digest('hex');"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "SHA-1",
+            "key_size": null,
+            "message": "SHA-1 is cryptographically broken and should not be used",
+            "risk_score": 95,
+            "severity": "Critical"
+          }
+        }
+      ],
+      "remediation": "Replace with SHA-256, SHA-384, or SHA-512",
+      "risk_level": "critical"
+    },
+    {
+      "finding_id": "fe75d637-b9b2-42dd-a647-eb1f5c9124db",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 2 instance(s) of ECDSA cryptographic algorithm usage. This algorithm is quantum-vulnerable and poses a high risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "example.js:13:9",
+        "example.js:14:0"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "fe75d637-b9b2-42dd-a647-eb1f5c9124db-0",
+          "evidence_type": "static-scan",
+          "description": "Detected ECDSA at line 13 column 9: ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 13,
+            "column": 9,
+            "snippet": "// HIGH: ECDSA is quantum-vulnerable"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "ECDSA",
+            "key_size": null,
+            "message": "ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable",
+            "risk_score": 85,
+            "severity": "High"
+          }
+        },
+        {
+          "evidence_id": "fe75d637-b9b2-42dd-a647-eb1f5c9124db-1",
+          "evidence_type": "static-scan",
+          "description": "Detected ECDSA at line 14 column 0: ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 14,
+            "column": 0,
+            "snippet": "const ecdsaKey = crypto.createSign('ecdsa-with-SHA256');"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "ECDSA",
+            "key_size": null,
+            "message": "ECDSA (Elliptic Curve Digital Signature Algorithm) is quantum-vulnerable",
+            "risk_score": 85,
+            "severity": "High"
+          }
+        }
+      ],
+      "remediation": "Replace with CRYSTALS-Dilithium or SPHINCS+ for post-quantum signatures",
+      "risk_level": "high"
+    },
+    {
+      "finding_id": "7cf60378-85c4-4a40-b0e5-be8402aa3d27",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 1 instance(s) of DES cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a critical risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "example.js:20:38"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "7cf60378-85c4-4a40-b0e5-be8402aa3d27-0",
+          "evidence_type": "static-scan",
+          "description": "Detected DES at line 20 column 38: DES is obsolete and cryptographically weak",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 20,
+            "column": 38,
+            "snippet": "const cipher = crypto.createCipheriv('des-ede3', key, iv);"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "DES",
+            "key_size": null,
+            "message": "DES is obsolete and cryptographically weak",
+            "risk_score": 95,
+            "severity": "Critical"
+          }
+        }
+      ],
+      "remediation": "Replace with AES-256 or ChaCha20",
+      "risk_level": "critical"
+    },
+    {
+      "finding_id": "9072fd3b-8a81-406c-9345-b7f21c6cc4be",
+      "control_id": "sc-13",
+      "implementation_status": "notapplicable",
+      "assessment_status": "notsatisfied",
+      "description": "Found 1 instance(s) of 3DES cryptographic algorithm usage. This algorithm is cryptographically deprecated and poses a high risk to cryptographic protection.",
+      "related_vulnerabilities": [
+        "example.js:19:15"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "9072fd3b-8a81-406c-9345-b7f21c6cc4be-0",
+          "evidence_type": "static-scan",
+          "description": "Detected 3DES at line 19 column 15: 3DES (Triple DES) is deprecated and should be replaced",
+          "source_location": {
+            "file_path": "example.js",
+            "line": 19,
+            "column": 15,
+            "snippet": "// DEPRECATED: 3DES should be replaced"
+          },
+          "collected_at": "2025-11-14T20:18:51.786961066+00:00",
+          "data": {
+            "crypto_type": "3DES",
+            "key_size": null,
+            "message": "3DES (Triple DES) is deprecated and should be replaced",
+            "risk_score": 80,
+            "severity": "High"
+          }
+        }
+      ],
+      "remediation": "Replace with AES-256 or ChaCha20-Poly1305",
+      "risk_level": "high"
+    }
+  ],
+  "recommendations": [
+    "SC-13 Control Objective: Implement FIPS 140-2/140-3 validated cryptographic modules for cryptographic protection.",
+    "CRITICAL: Immediate action required. The use of cryptographically broken algorithms (MD5, SHA-1, DES, RC4) violates SC-13 requirements and poses significant security risks.",
+    "HIGH PRIORITY: Transition to post-quantum cryptography (PQC) algorithms to comply with NIST SP 800-208 and prepare for quantum computing threats.",
+    "Recommended PQC Algorithms: CRYSTALS-Kyber (key encapsulation), CRYSTALS-Dilithium (digital signatures), SPHINCS+ (stateless signatures).",
+    "Implement crypto-agility: Design systems to easily swap cryptographic algorithms as new standards emerge.",
+    "Maintain a cryptographic inventory: Document all cryptographic implementations and their compliance status.",
+    "Reference: NIST SP 800-53 Rev. 5 SC-13, NIST SP 800-175B (Cryptographic Algorithm Validation Program), NIST Post-Quantum Cryptography Standardization."
+  ]
+}

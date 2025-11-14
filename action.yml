@@ -1,0 +1,205 @@
+name: 'PQC Scanner Action'
+description: 'Scan code for quantum-vulnerable cryptography and deprecated algorithms'
+author: 'ArcQubit Team'
+
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  path:
+    description: 'Path to scan (file or directory)'
+    required: false
+    default: '.'
+
+  config:
+    description: 'Path to configuration file (JSON)'
+    required: false
+    default: ''
+
+  fail-on-findings:
+    description: 'Fail the action if vulnerabilities are found'
+    required: false
+    default: 'false'
+
+  severity-threshold:
+    description: 'Minimum severity to report (low, medium, high, critical)'
+    required: false
+    default: 'medium'
+
+  output-format:
+    description: 'Output format (json, oscal, sarif, markdown)'
+    required: false
+    default: 'markdown'
+
+  output-file:
+    description: 'Path to save the report'
+    required: false
+    default: 'pdq-scan-report.md'
+
+  compliance-report:
+    description: 'Generate NIST 800-53 SC-13 compliance report'
+    required: false
+    default: 'true'
+
+  auto-remediation:
+    description: 'Enable auto-remediation suggestions'
+    required: false
+    default: 'true'
+
+  github-token:
+    description: 'GitHub token for creating PR comments'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  findings-count:
+    description: 'Total number of findings'
+    value: ${{ steps.scan.outputs.findings_count }}
+
+  compliance-score:
+    description: 'NIST 800-53 SC-13 compliance score (0-100)'
+    value: ${{ steps.scan.outputs.compliance_score }}
+
+  report-path:
+    description: 'Path to the generated report'
+    value: ${{ steps.scan.outputs.report_path }}
+
+  passed:
+    description: 'Whether the scan passed (no critical findings)'
+    value: ${{ steps.scan.outputs.passed }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install PQC Scanner
+      shell: bash
+      run: |
+        npm install -g @arcqubit/pdq-scanner@latest
+
+    - name: Run PQC scan
+      id: scan
+      shell: bash
+      env:
+        SCAN_PATH: ${{ inputs.path }}
+        CONFIG_FILE: ${{ inputs.config }}
+        SEVERITY: ${{ inputs.severity-threshold }}
+        OUTPUT_FORMAT: ${{ inputs.output-format }}
+        OUTPUT_FILE: ${{ inputs.output-file }}
+        COMPLIANCE: ${{ inputs.compliance-report }}
+        REMEDIATION: ${{ inputs.auto-remediation }}
+      run: |
+        # Create scan command
+        CMD="npx pdq-scanner scan"
+
+        # Add path
+        CMD="$CMD \"$SCAN_PATH\""
+
+        # Add config if provided
+        if [ -n "$CONFIG_FILE" ]; then
+          CMD="$CMD --config \"$CONFIG_FILE\""
+        fi
+
+        # Add severity threshold
+        CMD="$CMD --severity \"$SEVERITY\""
+
+        # Add output format
+        CMD="$CMD --format \"$OUTPUT_FORMAT\""
+
+        # Add output file
+        CMD="$CMD --output \"$OUTPUT_FILE\""
+
+        # Add compliance report flag
+        if [ "$COMPLIANCE" == "true" ]; then
+          CMD="$CMD --compliance"
+        fi
+
+        # Add remediation flag
+        if [ "$REMEDIATION" == "true" ]; then
+          CMD="$CMD --remediate"
+        fi
+
+        # Run scan and capture results
+        echo "Running: $CMD"
+        eval $CMD > scan-output.log 2>&1 || true
+
+        # Parse results
+        FINDINGS=$(jq -r '.summary.total_vulnerabilities // 0' "$OUTPUT_FILE" 2>/dev/null || echo "0")
+        SCORE=$(jq -r '.summary.compliance_score // 0' "$OUTPUT_FILE" 2>/dev/null || echo "0")
+        CRITICAL=$(jq -r '.summary.critical_count // 0' "$OUTPUT_FILE" 2>/dev/null || echo "0")
+
+        # Set outputs
+        echo "findings_count=$FINDINGS" >> $GITHUB_OUTPUT
+        echo "compliance_score=$SCORE" >> $GITHUB_OUTPUT
+        echo "report_path=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+
+        # Determine if passed
+        if [ "$CRITICAL" -eq "0" ]; then
+          echo "passed=true" >> $GITHUB_OUTPUT
+        else
+          echo "passed=false" >> $GITHUB_OUTPUT
+        fi
+
+        # Show summary
+        cat scan-output.log
+
+    - name: Upload scan results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: pdq-scan-results
+        path: |
+          ${{ inputs.output-file }}
+          scan-output.log
+
+    - name: Comment on PR
+      if: github.event_name == 'pull_request' && inputs.github-token != ''
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          const reportPath = '${{ inputs.output-file }}';
+          const report = fs.readFileSync(reportPath, 'utf8');
+
+          const comment = `## 🔒 PQC Scanner Results
+
+          **Findings:** ${{ steps.scan.outputs.findings_count }}
+          **Compliance Score:** ${{ steps.scan.outputs.compliance_score }}/100
+          **Status:** ${{ steps.scan.outputs.passed == 'true' && '✅ Passed' || '⚠️ Failed' }}
+
+          <details>
+          <summary>View Full Report</summary>
+
+          \`\`\`
+          ${report}
+          \`\`\`
+
+          </details>
+          `;
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+    - name: Upload to Code Scanning (SARIF)
+      if: inputs.output-format == 'sarif'
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ inputs.output-file }}
+        category: pdq-scanner
+
+    - name: Fail on findings
+      if: inputs.fail-on-findings == 'true' && steps.scan.outputs.passed == 'false'
+      shell: bash
+      run: |
+        echo "::error::PDQ scan found critical vulnerabilities"
+        exit 1

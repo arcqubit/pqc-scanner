@@ -1,0 +1,91 @@
+name: Publish to NPM
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.2.0)'
+        required: true
+        type: string
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for NPM provenance
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Run tests
+        run: |
+          cargo test --all-features
+          cargo clippy -- -D warnings
+
+      - name: Build WASM (all targets)
+        run: |
+          wasm-pack build --target bundler --out-dir pkg --release
+          wasm-pack build --target nodejs --out-dir pkg-nodejs --release
+          wasm-pack build --target web --out-dir pkg-web --release
+
+      - name: Optimize WASM binaries
+        run: |
+          # Install wasm-opt if not available
+          which wasm-opt || cargo install wasm-opt
+
+          # Optimize each target
+          wasm-opt -Oz -o pkg/pqc_scanner_bg.wasm pkg/pqc_scanner_bg.wasm || true
+          wasm-opt -Oz -o pkg-nodejs/pqc_scanner_bg.wasm pkg-nodejs/pqc_scanner_bg.wasm || true
+          wasm-opt -Oz -o pkg-web/pqc_scanner_bg.wasm pkg-web/pqc_scanner_bg.wasm || true
+
+      - name: Verify package contents
+        run: |
+          ls -lh pkg/*.wasm pkg-nodejs/*.wasm pkg-web/*.wasm
+
+      - name: Create NPM packages
+        run: |
+          # Package each WASM target for NPM
+          cd pkg && npm pack
+          cd ../pkg-nodejs && npm pack
+          cd ../pkg-web && npm pack
+          cd ..
+
+      - name: Publish to NPM (with provenance)
+        run: |
+          cd pkg && npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release assets
+        if: github.event_name == 'release'
+        run: |
+          tar -czf pqc-scanner-${{ github.ref_name }}.tar.gz pkg/ pkg-nodejs/ pkg-web/
+
+      - name: Upload release assets
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./pqc-scanner-${{ github.ref_name }}.tar.gz
+          asset_name: pqc-scanner-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip

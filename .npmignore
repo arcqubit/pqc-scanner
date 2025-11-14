@@ -1,0 +1,39 @@
+# Build artifacts and source files (only publish compiled WASM)
+/src
+/target
+/tests
+/benches
+/.cargo
+
+# Development files
+/.git
+/.github
+/.vscode
+/.claude
+/.claude-flow
+/.swarm
+/Cargo.lock
+/Cargo.toml
+
+# Build scripts
+/scripts
+/Makefile
+
+# Test files
+/test
+/samples
+
+# Documentation (keep README)
+/docs
+/examples
+CLAUDE.md
+CHANGELOG.md
+
+# JSON reports
+*.json
+!package.json
+
+# Other
+.DS_Store
+.env
+*.log

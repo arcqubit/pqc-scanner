@@ -1,0 +1,84 @@
+# Rust/Cargo
+/target/
+**/*.rs.bk
+*.pdb
+
+# WASM/wasm-pack
+/pkg/
+wasm-pack.log
+
+# Build artifacts
+*.wasm
+*.wasm.map
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Cargo
+Cargo.lock
+
+# Test coverage
+*.profraw
+*.profdata
+/coverage/
+tarpaulin-report.html
+cobertura.xml
+
+# Benchmarks
+/criterion/
+/target/criterion/
+
+# Node.js (for testing WASM)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Documentation
+/target/doc/
+
+# Environment
+.env
+.env.local
+
+# CI/CD
+.github/workflows/*.log
+
+# Claude Flow generated files
+.claude/settings.local.json
+.mcp.json
+claude-flow.config.json
+.swarm/
+.hive-mind/
+.claude-flow/
+memory/
+coordination/
+memory/claude-flow-data.json
+memory/sessions/*
+!memory/sessions/README.md
+memory/agents/*
+!memory/agents/README.md
+coordination/memory_bank/*
+coordination/subtasks/*
+coordination/orchestration/*
+*.db
+*.db-journal
+*.db-wal
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+claude-flow
+# Removed Windows wrapper files per user request
+hive-mind-prompt-*.txt
+
+# Phase 2 WASM build artifacts
+/pkg-nodejs/
+/pkg-web/
+
+# Generated reports
+/reports/*.json
+/output/

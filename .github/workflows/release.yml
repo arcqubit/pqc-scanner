@@ -1,0 +1,162 @@
+name: Release Workflow
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.2.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+permissions: read-all
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@7b1c307e0dcbda6122208f10795a713336a9b35a  # stable
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build release binaries
+        run: |
+          cargo build --release
+          wasm-pack build --target bundler --out-dir pkg --release
+          wasm-pack build --target nodejs --out-dir pkg-nodejs --release
+          wasm-pack build --target web --out-dir pkg-web --release
+
+      - name: Run benchmarks
+        run: cargo bench --no-run
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+          # Extract changelog for this version
+          if [ -f CHANGELOG.md ]; then
+            CHANGES=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d')
+            echo "CHANGES<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "CHANGES=Release $VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create release archives
+        run: |
+          VERSION="${{ steps.changelog.outputs.VERSION }}"
+
+          # Create binary archive
+          mkdir -p release-artifacts
+          cp target/release/pdq-scanner release-artifacts/ || echo "Binary not found"
+          tar -czf pdq-scanner-${VERSION}-linux-x86_64.tar.gz -C release-artifacts pdq-scanner || true
+
+          # Create archives for each WASM target
+          tar -czf pdq-scanner-wasm-bundler-${VERSION}.tar.gz pkg/
+          tar -czf pdq-scanner-wasm-nodejs-${VERSION}.tar.gz pkg-nodejs/
+          tar -czf pdq-scanner-wasm-web-${VERSION}.tar.gz pkg-web/
+
+          # Create combined WASM archive
+          tar -czf pdq-scanner-wasm-all-${VERSION}.tar.gz pkg/ pkg-nodejs/ pkg-web/
+
+          # Generate checksums
+          sha256sum pdq-scanner-*.tar.gz > checksums.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191  # v2.0.8
+        with:
+          tag_name: v${{ steps.changelog.outputs.VERSION }}
+          name: Release v${{ steps.changelog.outputs.VERSION }}
+          body: ${{ steps.changelog.outputs.CHANGES }}
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease || false }}
+          files: |
+            pdq-scanner-*.tar.gz
+            checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-container:
+    name: Build and Push Container
+    needs: create-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349  # v3.7.1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567  # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          echo "VERSION=${VERSION#v}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75  # v6.9.0
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: Generate SBOM
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v $(pwd):/out \
+            anchore/syft:latest \
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }} \
+            -o spdx-json=/out/sbom.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        with:
+          name: sbom
+          path: sbom.json
