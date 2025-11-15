@@ -37,7 +37,7 @@ jobs:
           toolchain: stable
 
       - name: Install cargo-audit
-        run: cargo install cargo-audit --locked
+        run: cargo install cargo-audit --version 0.22.0 --locked
 
       - name: Run cargo audit
         id: audit
