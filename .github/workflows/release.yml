@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., 1.2.0)'
+        description: 'Release version in CalVer format (e.g., 2025.11.0 for November 2025)'
         required: true
         type: string
       prerelease:
@@ -156,7 +156,7 @@ jobs:
             -o spdx-json=/out/sbom.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: sbom
           path: sbom.json
