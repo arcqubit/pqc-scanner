@@ -1,8 +1,8 @@
-# PQC Scanner - Claude Code Configuration
+# PDQ Scanner - Claude Code Configuration
 
 ## 🔐 Project Overview
 
-**PQC Scanner** is a quantum-safe cryptography auditor that detects vulnerable cryptographic algorithms and generates NIST compliance reports. Built in Rust with WASM support for cross-platform deployment.
+**PDQ Scanner** is a quantum-safe cryptography auditor that detects vulnerable cryptographic algorithms and generates NIST compliance reports. Built in Rust with WASM support for cross-platform deployment.
 
 **Key Capabilities:**
 - Detect quantum-vulnerable algorithms (RSA, ECDSA, DSA, DH)
@@ -50,7 +50,7 @@ cargo build             # Direct cargo build
 
 # Release (optimized)
 make build-release      # Production build
-cargo build --release   # Binary at: ./target/release/pqc-scanner
+cargo build --release   # Binary at: ./target/release/pdq-scanner
 
 # Testing
 make test              # Run all tests
@@ -80,10 +80,10 @@ make release           # build-release + wasm-release
 ### CLI Usage
 ```bash
 # Scan local directory
-./target/release/pqc-scanner scan <directory> [OPTIONS]
+./target/release/pdq-scanner scan <directory> [OPTIONS]
 
 # Scan remote repository
-./target/release/pqc-scanner scan <repo-url> [OPTIONS]
+./target/release/pdq-scanner scan <repo-url> [OPTIONS]
 
 # Options
 --report-dir <dir>     # Output directory (default: reports)
@@ -91,9 +91,9 @@ make release           # build-release + wasm-release
 --keep-clone           # Keep cloned repo after scan
 
 # Examples
-./target/release/pqc-scanner scan samples/vulnerable-app-1
-./target/release/pqc-scanner scan https://github.com/user/repo.git
-./target/release/pqc-scanner scan myapp --report-name security-audit
+./target/release/pdq-scanner scan samples/vulnerable-app-1
+./target/release/pdq-scanner scan https://github.com/user/repo.git
+./target/release/pdq-scanner scan myapp --report-name security-audit
 ```
 
 ## 🔍 Cryptographic Scanning Domain Knowledge

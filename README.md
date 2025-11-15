@@ -321,9 +321,9 @@ See [docs/SAMPLE_REPOSITORIES.md](docs/SAMPLE_REPOSITORIES.md) for details.
 
 ## Phase 3 Status: ✅ COMPLETE
 
-- ✅ NPM package publishing (`@arcqubit/pqc-scanner`)
+- ✅ NPM package publishing (`@arcqubit/pdq-scanner`)
 - ✅ GitHub release automation workflow
-- ✅ Distroless container image (ghcr.io/arcqubit/pqc-scanner)
+- ✅ Distroless container image (ghcr.io/arcqubit/pdq-scanner)
 - ✅ GitHub Action for CI/CD integration
 - ✅ Complete deployment ecosystem
 
@@ -335,20 +335,20 @@ See [docs/PHASE_3_DEPLOYMENT.md](docs/PHASE_3_DEPLOYMENT.md) for details.
 
 ```bash
 # Install globally
-npm install -g @arcqubit/pqc-scanner
+npm install -g @arcqubit/pdq-scanner
 
 # Or as project dependency
-npm install @arcqubit/pqc-scanner
+npm install @arcqubit/pdq-scanner
 ```
 
 ### Docker Container
 
 ```bash
 # Pull latest image
-docker pull ghcr.io/arcqubit/pqc-scanner:latest
+docker pull ghcr.io/arcqubit/pdq-scanner:latest
 
 # Run scan
-docker run --rm -v $(pwd):/data ghcr.io/arcqubit/pqc-scanner:latest
+docker run --rm -v $(pwd):/data ghcr.io/arcqubit/pdq-scanner:latest
 ```
 
 ### GitHub Action
@@ -357,11 +357,11 @@ docker run --rm -v $(pwd):/data ghcr.io/arcqubit/pqc-scanner:latest
 name: Security Scan
 on: [push, pull_request]
 jobs:
-  pqc-scan:
+  pdq-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: arcqubit/pqc-scanner@v1
+      - uses: arcqubit/pdq-scanner@v1
         with:
           path: 'src/'
           fail-on-findings: true

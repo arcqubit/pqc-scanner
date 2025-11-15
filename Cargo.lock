@@ -372,6 +372,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6790f58c7ff633d8771f42965289203411a5e5c68388703c06e14f24770b41e"
 
 [[package]]
+name = "pdq-scanner"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "console_error_panic_hook",
+ "criterion",
+ "lazy_static",
+ "once_cell",
+ "regex",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "thiserror",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-test",
+]
+
+[[package]]
 name = "plotters"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -397,25 +416,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51bae2ac328883f7acdfea3d66a7c35751187f870bc81f94563733a154d7a670"
 dependencies = [
  "plotters-backend",
-]
-
-[[package]]
-name = "pqc-scanner"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "console_error_panic_hook",
- "criterion",
- "lazy_static",
- "once_cell",
- "regex",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "thiserror",
- "uuid",
- "wasm-bindgen",
- "wasm-bindgen-test",
 ]
 
 [[package]]

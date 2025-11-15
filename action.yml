@@ -1,4 +1,4 @@
-name: 'PQC Scanner Action'
+name: 'PDQ Scanner Action'
 description: 'Scan code for quantum-vulnerable cryptography and deprecated algorithms'
 author: 'ArcQubit Team'
 
@@ -35,7 +35,7 @@ inputs:
   output-file:
     description: 'Path to save the report'
     required: false
-    default: 'pqc-scan-report.md'
+    default: 'pdq-scan-report.md'
 
   compliance-report:
     description: 'Generate NIST 800-53 SC-13 compliance report'
@@ -77,12 +77,12 @@ runs:
       with:
         node-version: '20'
 
-    - name: Install PQC Scanner
+    - name: Install PDQ Scanner
       shell: bash
       run: |
-        npm install -g @arcqubit/pqc-scanner@latest
+        npm install -g @arcqubit/pdq-scanner@latest
 
-    - name: Run PQC scan
+    - name: Run PDQ scan
       id: scan
       shell: bash
       env:
@@ -95,7 +95,7 @@ runs:
         REMEDIATION: ${{ inputs.auto-remediation }}
       run: |
         # Create scan command
-        CMD="npx pqc-scanner scan"
+        CMD="npx pdq-scanner scan"
 
         # Add path
         CMD="$CMD \"$SCAN_PATH\""
@@ -152,7 +152,7 @@ runs:
       uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: pqc-scan-results
+        name: pdq-scan-results
         path: |
           ${{ inputs.output-file }}
           scan-output.log
@@ -167,7 +167,7 @@ runs:
           const reportPath = '${{ inputs.output-file }}';
           const report = fs.readFileSync(reportPath, 'utf8');
 
-          const comment = `## 🔒 PQC Scanner Results
+          const comment = `## 🔒 PDQ Scanner Results
 
           **Findings:** ${{ steps.scan.outputs.findings_count }}
           **Compliance Score:** ${{ steps.scan.outputs.compliance_score }}/100
@@ -195,11 +195,11 @@ runs:
       uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: ${{ inputs.output-file }}
-        category: pqc-scanner
+        category: pdq-scanner
 
     - name: Fail on findings
       if: inputs.fail-on-findings == 'true' && steps.scan.outputs.passed == 'false'
       shell: bash
       run: |
-        echo "::error::PQC scan found critical vulnerabilities"
+        echo "::error::PDQ scan found critical vulnerabilities"
         exit 1

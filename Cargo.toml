@@ -1,5 +1,5 @@
 [package]
-name = "pqc-scanner"
+name = "pdq-scanner"
 version = "0.1.0"
 edition = "2021"
 authors = ["ArcQubit Team"]
@@ -8,7 +8,7 @@ license = "MIT"
 repository = "https://github.com/arcqubit/pqc-scanner"
 
 [lib]
-name = "pqc_scanner"
+name = "pdq_scanner"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
@@ -54,8 +54,8 @@ name = "generate_compliance_report"
 path = "examples/generate_compliance_report.rs"
 
 [[bin]]
-name = "pqc-scanner-cli"
-path = "src/bin/pqc-scanner.rs"
+name = "pdq-scanner"
+path = "src/bin/pdq-scanner.rs"
 
 [profile.release]
 opt-level = "z"

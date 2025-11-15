@@ -93,7 +93,7 @@ dev: format lint test
 
 # Help
 help:
-	@echo "PhotonIQ PQC Scanner - Build Targets"
+	@echo "PhotonIQ PDQ Scanner - Build Targets"
 	@echo "===================================="
 	@echo "Development:"
 	@echo "  make build          - Build debug version"

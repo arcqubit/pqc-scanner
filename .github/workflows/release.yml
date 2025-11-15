@@ -75,19 +75,19 @@ jobs:
 
           # Create binary archive
           mkdir -p release-artifacts
-          cp target/release/pqc-scanner release-artifacts/ || echo "Binary not found"
-          tar -czf pqc-scanner-cli-${VERSION}-linux-x86_64.tar.gz -C release-artifacts pqc-scanner || true
+          cp target/release/pdq-scanner release-artifacts/ || echo "Binary not found"
+          tar -czf pdq-scanner-${VERSION}-linux-x86_64.tar.gz -C release-artifacts pdq-scanner || true
 
           # Create archives for each WASM target
-          tar -czf pqc-scanner-wasm-bundler-${VERSION}.tar.gz pkg/
-          tar -czf pqc-scanner-wasm-nodejs-${VERSION}.tar.gz pkg-nodejs/
-          tar -czf pqc-scanner-wasm-web-${VERSION}.tar.gz pkg-web/
+          tar -czf pdq-scanner-wasm-bundler-${VERSION}.tar.gz pkg/
+          tar -czf pdq-scanner-wasm-nodejs-${VERSION}.tar.gz pkg-nodejs/
+          tar -czf pdq-scanner-wasm-web-${VERSION}.tar.gz pkg-web/
 
           # Create combined WASM archive
-          tar -czf pqc-scanner-wasm-all-${VERSION}.tar.gz pkg/ pkg-nodejs/ pkg-web/
+          tar -czf pdq-scanner-wasm-all-${VERSION}.tar.gz pkg/ pkg-nodejs/ pkg-web/
 
           # Generate checksums
-          sha256sum pqc-scanner-*.tar.gz > checksums.txt
+          sha256sum pdq-scanner-*.tar.gz > checksums.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191  # v2.0.8
@@ -98,7 +98,7 @@ jobs:
           draft: false
           prerelease: ${{ github.event.inputs.prerelease || false }}
           files: |
-            pqc-scanner-*.tar.gz
+            pdq-scanner-*.tar.gz
             checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
