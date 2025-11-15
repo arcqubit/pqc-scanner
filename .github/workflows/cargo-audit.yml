@@ -63,6 +63,6 @@ jobs:
 
       - name: Generate security advisory
         if: failure()
-        uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212ae857c29f4b  # v2.0.0
+        uses: rustsec/audit-check@3ae01282e2311f82d96cc2181b31c4fbe3dd00c0  # v2.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
