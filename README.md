@@ -1,8 +1,8 @@
 # PQC Scanner - Quantum-Safe Crypto Auditor
 
-[![CI](https://github.com/arcqubit/pdq-scanner/actions/workflows/ci.yml/badge.svg)](https://github.com/arcqubit/pdq-scanner/actions/workflows/ci.yml)
-[![Security Audit](https://github.com/arcqubit/pdq-scanner/actions/workflows/cargo-audit.yml/badge.svg)](https://github.com/arcqubit/pdq-scanner/actions/workflows/cargo-audit.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/arcqubit/pdq-scanner/badge)](https://securityscorecards.dev/viewer/?uri=github.com/arcqubit/pdq-scanner)
+[![CI](https://github.com/arcqubit/pqc-scanner/actions/workflows/ci.yml/badge.svg)](https://github.com/arcqubit/pqc-scanner/actions/workflows/ci.yml)
+[![Security Audit](https://github.com/arcqubit/pqc-scanner/actions/workflows/cargo-audit.yml/badge.svg)](https://github.com/arcqubit/pqc-scanner/actions/workflows/cargo-audit.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/arcqubit/pqc-scanner/badge)](https://securityscorecards.dev/viewer/?uri=github.com/arcqubit/pqc-scanner)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11462/badge)](https://www.bestpractices.dev/projects/11462)
 
 A high-performance Rust-based auditor for detecting quantum-vulnerable cryptographic algorithms in source code, compiled to WebAssembly for multi-platform deployment.
