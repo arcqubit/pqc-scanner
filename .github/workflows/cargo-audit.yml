@@ -37,27 +37,29 @@ jobs:
           toolchain: stable
 
       - name: Install cargo-audit
-        run: cargo install cargo-audit --version 0.20.1
+        run: cargo install cargo-audit --locked
 
       - name: Run cargo audit
-        run: cargo audit --json > audit-results.json || true
+        id: audit
+        run: |
+          cargo audit --json > audit-results.json
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
 
       - name: Upload audit results
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf892  # v4.4.3
+        if: always()
         with:
           name: audit-results
           path: audit-results.json
           retention-days: 30
 
       - name: Check for vulnerabilities
+        if: steps.audit.outputs.exit_code != '0'
         run: |
-          if cargo audit 2>&1 | grep -q "error:"; then
-            echo "::error::Security vulnerabilities detected!"
-            cargo audit
-            exit 1
-          else
-            echo "No security vulnerabilities detected."
-          fi
+          echo "::error::Security vulnerabilities detected!"
+          cargo audit
+          exit 1
 
       - name: Generate security advisory
         if: failure()
