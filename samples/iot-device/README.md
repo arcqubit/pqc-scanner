@@ -80,7 +80,7 @@ make test
 
 ```bash
 # From the pqc-scanner root directory
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/iot-device/src/ \
   --output reports/iot-device-report.json
 ```

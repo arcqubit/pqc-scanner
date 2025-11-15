@@ -73,7 +73,7 @@ pytest tests/test_crypto.py -v
 
 ```bash
 # From the pqc-scanner root directory
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/crypto-messenger/app/ \
   --output reports/crypto-messenger-report.json
 ```

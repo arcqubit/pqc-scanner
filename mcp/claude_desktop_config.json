@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "pqc-scanner": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/pqc-scanner/mcp/src/index.js"
+      ],
+      "description": "Post-Quantum Cryptography Scanner - Analyzes code for quantum-vulnerable algorithms",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

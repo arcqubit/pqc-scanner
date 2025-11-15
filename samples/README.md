@@ -64,27 +64,27 @@ make scan-samples
 
 ```bash
 # Legacy Banking
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/legacy-banking/src/ \
   --output reports/legacy-banking.json
 
 # Crypto Messenger
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/crypto-messenger/app/ \
   --output reports/crypto-messenger.json
 
 # Old Web Framework
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/old-web-framework/src/ \
   --output reports/old-web-framework.json
 
 # IoT Device
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/iot-device/src/ \
   --output reports/iot-device.json
 
 # Polyglot App
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/polyglot-app/ \
   --output reports/polyglot-app.json
 ```

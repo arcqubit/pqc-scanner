@@ -37,7 +37,7 @@ cat reports/legacy-banking-*.json | jq
 
 ```bash
 # Scan
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/legacy-banking/src/ \
   --output reports/legacy-banking.json
 
@@ -48,7 +48,7 @@ cargo run --example generate_compliance_report -- \
 
 ```bash
 # Scan
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/crypto-messenger/app/ \
   --output reports/crypto-messenger.json
 
@@ -59,7 +59,7 @@ cargo run --example generate_compliance_report -- \
 
 ```bash
 # Scan
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/old-web-framework/src/ \
   --output reports/old-web-framework.json
 
@@ -70,7 +70,7 @@ cargo run --example generate_compliance_report -- \
 
 ```bash
 # Scan
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/iot-device/src/ \
   --output reports/iot-device.json
 
@@ -81,7 +81,7 @@ cargo run --example generate_compliance_report -- \
 
 ```bash
 # Scan entire polyglot repository
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/polyglot-app/ \
   --output reports/polyglot-app.json
 
@@ -222,7 +222,7 @@ chmod +x scripts/scan-all-samples.sh
 ### Scan with Auto-Remediation
 
 ```bash
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/legacy-banking/src/ \
   --remediate \
   --output reports/legacy-banking-remediated.json
@@ -231,7 +231,7 @@ cargo run --example generate_compliance_report -- \
 ### Generate OSCAL Report
 
 ```bash
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/legacy-banking/src/ \
   --format oscal \
   --output reports/legacy-banking-oscal.json
@@ -242,7 +242,7 @@ cargo run --example generate_compliance_report -- \
 ```bash
 for sample in samples/*/; do
     echo "Scanning $(basename $sample)..."
-    cargo run --example generate_compliance_report -- \
+    cargo run --example scan_directory -- \
       --path "$sample" \
       --config "$sample/.pqc-scanner.toml" \
       --output "reports/$(basename $sample).json"

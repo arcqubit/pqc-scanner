@@ -56,3 +56,7 @@ debug = true
 [profile.release-binary]
 inherits = "release"
 panic = "abort"
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["wasm-bindgen", "serde-wasm-bindgen"]
+development = ["wasm-bindgen-test"]

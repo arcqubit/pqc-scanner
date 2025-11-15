@@ -78,7 +78,7 @@ mvn test
 
 ```bash
 # From the pqc-scanner root directory
-cargo run --example generate_compliance_report -- \
+cargo run --example scan_directory -- \
   --path samples/old-web-framework/src/ \
   --output reports/old-web-framework-report.json
 ```
