@@ -1,4 +1,4 @@
-# Rust WASM Quantum-Safe Crypto Auditor
+# PQC Scanner - Quantum-Safe Crypto Auditor
 
 [![CI](https://github.com/arcqubit/pdq-scanner/actions/workflows/ci.yml/badge.svg)](https://github.com/arcqubit/pdq-scanner/actions/workflows/ci.yml)
 [![Security Audit](https://github.com/arcqubit/pdq-scanner/actions/workflows/cargo-audit.yml/badge.svg)](https://github.com/arcqubit/pdq-scanner/actions/workflows/cargo-audit.yml)
@@ -177,7 +177,7 @@ console.log('OSCAL Version:', oscalReport.oscal_version);
 ## Project Structure
 
 ```
-rust-wasm-app/
+pqc-scanner/
 ├── src/
 │   ├── lib.rs          # WASM entry point & public API
 │   ├── types.rs        # Shared types, OSCAL schemas, and errors
@@ -207,7 +207,7 @@ rust-wasm-app/
 
 ## Auto-Remediation
 
-The scanner includes **intelligent auto-remediation** with template-based code fixes:
+The scanner may include in the future **intelligent auto-remediation** with template-based code fixes:
 
 ```rust
 use rust_wasm_app::{analyze, generate_remediations};
@@ -299,65 +299,6 @@ make scan-samples
 
 See [docs/SAMPLE_REPOSITORIES.md](docs/SAMPLE_REPOSITORIES.md) for details.
 
-## Model Context Protocol (MCP) Integration
-
-The PQC Scanner includes an MCP server for AI assistant integration:
-
-```bash
-# Setup MCP server
-cd mcp
-npm install
-
-# Configure Claude Desktop
-# Add to ~/Library/Application Support/Claude/claude_desktop_config.json:
-{
-  "mcpServers": {
-    "pqc-scanner": {
-      "command": "node",
-      "args": ["/path/to/pqc-scanner/mcp/src/index.js"]
-    }
-  }
-}
-```
-
-**Available Tools:**
-- `scan_code` - Scan directories for crypto vulnerabilities
-- `analyze_file` - Analyze single source files
-- `get_remediation` - Get migration recommendations
-- `validate_compliance` - Validate NIST 800-53 SC-13 compliance
-
-See [mcp/README.md](mcp/README.md) for complete documentation.
-
-## Phase 1 Status: ✅ COMPLETE
-
-- ✅ Rust core implementation
-- ✅ Multi-language parser (8 languages)
-- ✅ Pattern detector (10 crypto algorithms)
-- ✅ NIST 800-53 SC-13 compliance reporting
-- ✅ OSCAL 1.1.2 JSON output
-- ✅ 19 tests passing (100% success rate)
-- ✅ Performance benchmarks (all targets met)
-
-## Phase 2 Status: ✅ COMPLETE
-
-- ✅ Agent-booster integration for auto-remediation
-- ✅ Intelligent code transformation engine
-- ✅ Multi-language fix generation
-- ✅ Sample vulnerable repositories
-- ✅ Verification and validation workflow
-- ✅ Before/after comparison reports
-- ✅ Context-aware suggestions
-
-## Phase 3 Status: ✅ COMPLETE
-
-- ✅ NPM package publishing (`@arcqubit/pdq-scanner`)
-- ✅ GitHub release automation workflow
-- ✅ Distroless container image (ghcr.io/arcqubit/pdq-scanner)
-- ✅ GitHub Action for CI/CD integration
-- ✅ Complete deployment ecosystem
-
-See [docs/PHASE_3_DEPLOYMENT.md](docs/PHASE_3_DEPLOYMENT.md) for details.
-
 ## Installation & Distribution
 
 ### NPM Package
@@ -397,7 +338,6 @@ jobs:
           severity-threshold: 'high'
 ```
 
-See [docs/PHASE_3_DEPLOYMENT.md](docs/PHASE_3_DEPLOYMENT.md) for complete deployment guide.
 
 ## License
 
