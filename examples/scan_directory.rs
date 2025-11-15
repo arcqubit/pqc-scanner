@@ -134,7 +134,10 @@ fn main() {
     // Generate report
     let sc13_report = generate_sc13_report(&audit_result, Some(&path));
 
-    println!("Compliance Score: {}/100", sc13_report.summary.compliance_score);
+    println!(
+        "Compliance Score: {}/100",
+        sc13_report.summary.compliance_score
+    );
     println!("Risk Score: {}/100", audit_result.risk_score);
 
     // Export based on format
@@ -196,7 +199,11 @@ fn scan_directory_recursive(dir: &str, files: &mut Vec<(String, String, String)>
             let path_str = path.to_string_lossy().to_string();
 
             // Skip hidden directories and common ignore patterns
-            if path_str.contains("/.") || path_str.contains("node_modules") || path_str.contains("target") || path_str.contains("build") {
+            if path_str.contains("/.")
+                || path_str.contains("node_modules")
+                || path_str.contains("target")
+                || path_str.contains("build")
+            {
                 continue;
             }
 
@@ -214,13 +221,23 @@ fn scan_directory_recursive(dir: &str, files: &mut Vec<(String, String, String)>
 }
 
 fn detect_language(filename: &str) -> Option<String> {
-    if filename.ends_with(".js") || filename.ends_with(".jsx") || filename.ends_with(".ts") || filename.ends_with(".tsx") {
+    if filename.ends_with(".js")
+        || filename.ends_with(".jsx")
+        || filename.ends_with(".ts")
+        || filename.ends_with(".tsx")
+    {
         Some("javascript".to_string())
     } else if filename.ends_with(".py") {
         Some("python".to_string())
     } else if filename.ends_with(".java") {
         Some("java".to_string())
-    } else if filename.ends_with(".cpp") || filename.ends_with(".cc") || filename.ends_with(".cxx") || filename.ends_with(".c") || filename.ends_with(".h") || filename.ends_with(".hpp") {
+    } else if filename.ends_with(".cpp")
+        || filename.ends_with(".cc")
+        || filename.ends_with(".cxx")
+        || filename.ends_with(".c")
+        || filename.ends_with(".h")
+        || filename.ends_with(".hpp")
+    {
         Some("cpp".to_string())
     } else if filename.ends_with(".go") {
         Some("go".to_string())
