@@ -1,6 +1,6 @@
 [package]
 name = "pqc-scanner"
-version = "0.1.0"
+version = "2025.11.0"
 edition = "2024"
 authors = ["ArcQubit Team"]
 description = "Quantum-safe cryptography auditor for detecting vulnerable algorithms"
