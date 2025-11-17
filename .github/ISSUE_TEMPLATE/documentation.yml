@@ -1,0 +1,129 @@
+name: Documentation Issue
+description: Report missing, incorrect, or unclear documentation
+title: "[Docs]: "
+labels: ["documentation", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our documentation! Clear docs are essential for a great user experience.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm the following
+      options:
+        - label: I have searched existing documentation issues
+          required: true
+        - label: I have checked the latest documentation
+          required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Documentation Issue Type
+      description: What kind of documentation issue is this?
+      options:
+        - Missing documentation
+        - Incorrect/outdated information
+        - Unclear/confusing explanation
+        - Broken links
+        - Code examples don't work
+        - Typos or grammar
+        - API documentation incomplete
+        - Translation issue
+        - Other (specify below)
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Documentation Location
+      description: Where is the problematic documentation?
+      placeholder: "e.g., README.md, docs/api.md, or URL"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Describe the documentation issue in detail
+      placeholder: What is wrong or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Documentation
+      description: What should the documentation say or include?
+      placeholder: Describe what you expected to find...
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Documentation
+      description: What does it currently say? (if applicable)
+      placeholder: |
+        Quote the current documentation:
+        > Current text here
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested Fix
+      description: How would you fix or improve it?
+      placeholder: Provide your suggested text or changes...
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience
+      description: Who is most affected by this documentation issue?
+      multiple: true
+      options:
+        - New users/beginners
+        - Experienced users
+        - Contributors/developers
+        - API users
+        - CLI users
+        - WASM users
+        - Enterprise users
+        - All users
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this documentation fix?
+      options:
+        - Critical (prevents usage)
+        - High (significantly impacts understanding)
+        - Medium (causes confusion)
+        - Low (minor improvement)
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: Screenshots, links to related docs, etc.
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Can you help fix this?
+      options:
+        - label: I am willing to submit a pull request to fix this documentation

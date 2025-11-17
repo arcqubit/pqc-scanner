@@ -1,45 +1,195 @@
 # Code Owners for PQC Scanner
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Code owners are automatically requested for review when someone opens a pull request
+# that modifies code that they own. Order matters - last matching pattern takes precedence.
 
-# Default owners for everything in the repo
+# ===================================================================
+# Default Owners
+# ===================================================================
+
+# Default owner for everything in the repo
 * @arcqubit
 
-# Core scanning logic
+# ===================================================================
+# Core Rust Source Code
+# ===================================================================
+
+# Core scanning and detection logic
 /src/scanner.rs @arcqubit
 /src/detector.rs @arcqubit
 /src/analyzer.rs @arcqubit
+/src/patterns.rs @arcqubit
 
-# Remediation module
+# Remediation and recommendations
 /src/remediation.rs @arcqubit
 
-# WASM bindings
-/src/lib.rs @arcqubit
+# Compliance and reporting
+/src/compliance.rs @arcqubit
+/src/oscal.rs @arcqubit
 
-# Tests
+# WASM bindings and FFI
+/src/lib.rs @arcqubit
+/src/wasm_bindings.rs @arcqubit
+
+# Error handling and types
+/src/error.rs @arcqubit
+/src/types.rs @arcqubit
+
+# ===================================================================
+# Testing and Benchmarking
+# ===================================================================
+
+# Unit and integration tests
 /tests/ @arcqubit
+/tests/integration/ @arcqubit
+/tests/fixtures/ @arcqubit
+
+# Performance benchmarks
 /benches/ @arcqubit
 
-# GitHub workflows and CI/CD
+# ===================================================================
+# CI/CD and Automation
+# ===================================================================
+
+# All GitHub workflows
 /.github/ @arcqubit
 /.github/workflows/ @arcqubit
 
-# Security-critical files
-/SECURITY.md @arcqubit
-/.github/dependabot.yml @arcqubit
-/Cargo.lock @arcqubit
+# Specific critical workflows
+/.github/workflows/ci.yml @arcqubit
+/.github/workflows/release.yml @arcqubit
+/.github/workflows/scorecard.yml @arcqubit
+/.github/workflows/codeql.yml @arcqubit
+/.github/workflows/cargo-audit.yml @arcqubit
 
+# Dependabot and security scanning
+/.github/dependabot.yml @arcqubit
+/.github/workflows/trufflehog-scan.yml @arcqubit
+/.github/workflows/trivy-scan.yml @arcqubit
+
+# Issue and PR templates
+/.github/ISSUE_TEMPLATE/ @arcqubit
+/.github/PULL_REQUEST_TEMPLATE.md @arcqubit
+
+# ===================================================================
+# Security and Compliance
+# ===================================================================
+
+# Security policy and configurations
+/SECURITY.md @arcqubit
+/.trufflehog.yml @arcqubit
+/trivy.yaml @arcqubit
+/.trivyignore @arcqubit
+
+# Dependency lockfiles (security-critical)
+/Cargo.lock @arcqubit
+/mcp/package-lock.json @arcqubit
+/samples/**/package-lock.json @arcqubit
+
+# ===================================================================
 # Documentation
-/docs/ @arcqubit
+# ===================================================================
+
+# Main documentation
 /README.md @arcqubit
 /CONTRIBUTING.md @arcqubit
-/GOVERNANCE.md @arcqubit
+/CODE_OF_CONDUCT.md @arcqubit
+/SUPPORT.md @arcqubit
+/CHANGELOG.md @arcqubit
 
-# Build and deployment
-/Dockerfile @arcqubit
+# Documentation directory
+/docs/ @arcqubit
+/docs/architecture.md @arcqubit
+/docs/security-scanning.md @arcqubit
+/docs/openssf-scorecard-improvements.md @arcqubit
+/docs/CALVER.md @arcqubit
+
+# ===================================================================
+# Build Configuration and Dependencies
+# ===================================================================
+
+# Rust configuration
 /Cargo.toml @arcqubit
+/Cargo.lock @arcqubit
+
+# WASM and NPM
+/package.json @arcqubit
+/package-lock.json @arcqubit
+
+# Docker
+/Dockerfile @arcqubit
 /.dockerignore @arcqubit
 
-# Configuration
+# Build scripts
+/scripts/ @arcqubit
+/scripts/build.sh @arcqubit
+/scripts/release.sh @arcqubit
+/scripts/test.sh @arcqubit
+
+# Makefile
+/Makefile @arcqubit
+
+# ===================================================================
+# Configuration Files
+# ===================================================================
+
+# Version control
 /.gitignore @arcqubit
+/.gitattributes @arcqubit
+
+# Code formatting and linting
 /rustfmt.toml @arcqubit
+/.rustfmt.toml @arcqubit
 /.editorconfig @arcqubit
+/clippy.toml @arcqubit
+
+# IDE configurations
+/.vscode/ @arcqubit
+/.idea/ @arcqubit
+
+# ===================================================================
+# Examples and Samples
+# ===================================================================
+
+# Example code
+/examples/ @arcqubit
+/examples/generate_compliance_report.rs @arcqubit
+
+# Sample applications
+/samples/ @arcqubit
+/samples/crypto-messenger/ @arcqubit
+/samples/legacy-banking/ @arcqubit
+
+# ===================================================================
+# MCP Server Implementation
+# ===================================================================
+
+# MCP server code
+/mcp/ @arcqubit
+/mcp/src/ @arcqubit
+/mcp/package.json @arcqubit
+
+# ===================================================================
+# Release and Distribution
+# ===================================================================
+
+# Release configuration
+/.github/workflows/release.yml @arcqubit
+/scripts/release.sh @arcqubit
+
+# Versioning
+/VERSION @arcqubit
+
+# ===================================================================
+# GitHub Configuration
+# ===================================================================
+
+# Funding and sponsorship
+/.github/FUNDING.yml @arcqubit
+
+# Community health files
+/CODE_OF_CONDUCT.md @arcqubit
+/CONTRIBUTING.md @arcqubit
+/SUPPORT.md @arcqubit
+/SECURITY.md @arcqubit

@@ -1,0 +1,184 @@
+name: Performance Issue
+description: Report performance problems or slowness
+title: "[Performance]: "
+labels: ["performance", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a performance issue! Please provide benchmarking data if possible.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm the following
+      options:
+        - label: I have searched existing performance issues
+          required: true
+        - label: I have tested with the latest version
+          required: true
+        - label: I have profiled the performance issue
+          required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Performance Issue Description
+      description: Describe the performance problem
+      placeholder: What operation is slow or using too many resources?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: performance-type
+    attributes:
+      label: Performance Issue Type
+      description: What type of performance issue is this?
+      options:
+        - Slow execution time
+        - High memory usage
+        - High CPU usage
+        - Large binary size (WASM)
+        - Slow startup time
+        - Inefficient algorithm
+        - Other (specify below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: benchmarks
+    attributes:
+      label: Benchmark Results
+      description: Provide benchmark data if available
+      placeholder: |
+        Benchmark results:
+        - Operation: ...
+        - Time taken: ...
+        - Expected time: ...
+      render: shell
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How to reproduce the performance issue
+      placeholder: |
+        1. Run command '...'
+        2. Scan file of size '...'
+        3. Measure time with '...'
+    validations:
+      required: true
+
+  - type: input
+    id: file-size
+    attributes:
+      label: Input File Size
+      description: Size of the file being scanned (if applicable)
+      placeholder: "e.g., 10MB, 1000 LOC"
+
+  - type: textarea
+    id: current-performance
+    attributes:
+      label: Current Performance
+      description: What is the current performance?
+      placeholder: |
+        - Time: 10 seconds
+        - Memory: 500MB
+        - CPU: 100%
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-performance
+    attributes:
+      label: Expected Performance
+      description: What performance would you expect?
+      placeholder: |
+        - Expected time: < 1 second
+        - Expected memory: < 100MB
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: PQC Scanner Version
+      description: Which version are you testing?
+      placeholder: "e.g., 2025.11.0-beta.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Which platform?
+      options:
+        - Rust (native)
+        - WASM (bundler)
+        - WASM (Node.js)
+        - WASM (web/browser)
+        - Docker
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: Which OS?
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - WSL
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: system-specs
+    attributes:
+      label: System Specifications
+      description: Your hardware specifications
+      placeholder: |
+        - CPU: ...
+        - RAM: ...
+        - Disk: SSD/HDD
+        - Architecture: x86_64/ARM64
+
+  - type: textarea
+    id: profiling-data
+    attributes:
+      label: Profiling Data
+      description: If you've profiled the issue, paste relevant data
+      placeholder: |
+        Profiling output (flamegraph, perf, etc.)
+      render: shell
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested Optimization
+      description: Do you have ideas for optimization?
+      placeholder: Describe potential optimizations...
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: Add any other context here...
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Can you help optimize this?
+      options:
+        - label: I am willing to submit a pull request with optimizations
+        - label: I can provide profiling data
+        - label: I can help with benchmarking
