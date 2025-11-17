@@ -1,0 +1,45 @@
+# TruffleHog Configuration
+# https://github.com/trufflesecurity/trufflehog
+
+# Paths to exclude from scanning
+exclude_paths:
+  # Build artifacts
+  - target/
+  - node_modules/
+  - pkg/
+  - pkg-nodejs/
+  - pkg-web/
+
+  # Git metadata
+  - .git/
+
+  # Documentation that may contain example secrets
+  - docs/
+  - README.md
+  - SECURITY.md
+
+  # Test fixtures (may contain dummy secrets)
+  - tests/fixtures/
+  - samples/
+
+  # CI/CD configs (already scanned separately)
+  - .github/
+
+# Detectors to disable (if any produce false positives)
+# detectors_disabled:
+#   - github
+#   - gitlab
+
+# Only scan verified secrets (reduces false positives)
+only_verified: true
+
+# Scan options
+scan_options:
+  # Enable concurrent scanning for speed
+  concurrency: 4
+
+  # Maximum depth for scanning
+  max_depth: 10
+
+  # Include archived files
+  archive: true

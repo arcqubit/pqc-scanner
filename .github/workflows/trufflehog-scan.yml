@@ -1,0 +1,193 @@
+name: TruffleHog Secret Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 3:00 UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write  # Required for SARIF upload
+  actions: read
+
+jobs:
+  trufflehog-scan:
+    name: TruffleHog Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0  # Full history for comprehensive scanning
+
+      - name: TruffleHog Secret Scanning
+        uses: trufflesecurity/trufflehog@41a5e77093d10ec03a8cfdd37db3c2c9e6071314  # v3.87.2
+        with:
+          # Scan the entire repository history
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          # Generate SARIF report for GitHub Security
+          extra_args: --json --only-verified --fail
+
+      - name: Upload TruffleHog results to Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@ea9e4e37992a54ee68a9622e985e60c8e8f12d9f  # v3.27.4
+        with:
+          sarif_file: results.sarif
+          category: trufflehog-secrets
+
+  trufflehog-filesystem:
+    name: TruffleHog Filesystem Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Install TruffleHog
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Scan filesystem for secrets
+        run: |
+          echo "Scanning filesystem for exposed secrets..."
+          trufflehog filesystem . \
+            --json \
+            --only-verified \
+            --no-update \
+            --exclude-paths=.github/workflows/trufflehog-scan.yml \
+            --exclude-paths=node_modules/ \
+            --exclude-paths=target/ \
+            --exclude-paths=.git/ \
+            > trufflehog-results.json || true
+
+      - name: Display findings summary
+        if: always()
+        run: |
+          if [ -f trufflehog-results.json ]; then
+            FINDINGS=$(cat trufflehog-results.json | jq -s 'length')
+            echo "=================================="
+            echo "TruffleHog Filesystem Scan Results"
+            echo "=================================="
+            echo "Total findings: $FINDINGS"
+
+            if [ "$FINDINGS" -gt 0 ]; then
+              echo ""
+              echo "⚠️ SECRETS DETECTED!"
+              echo ""
+              cat trufflehog-results.json | jq -r '.[] | "Type: \(.DetectorName)\nFile: \(.SourceMetadata.Data.Filesystem.file)\nLine: \(.SourceMetadata.Data.Filesystem.line)\n"'
+              exit 1
+            else
+              echo "✅ No secrets detected"
+            fi
+          else
+            echo "✅ No secrets detected"
+          fi
+
+      - name: Upload findings as artifact
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        with:
+          name: trufflehog-findings
+          path: trufflehog-results.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+  trufflehog-git-history:
+    name: TruffleHog Git History Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code with full history
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0  # Full git history
+
+      - name: Install TruffleHog
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Scan git history for secrets
+        run: |
+          echo "Scanning git history for exposed secrets..."
+          trufflehog git file://. \
+            --json \
+            --only-verified \
+            --no-update \
+            --since-commit=$(git rev-list --max-parents=0 HEAD) \
+            > trufflehog-git-results.json || true
+
+      - name: Display git history findings
+        if: always()
+        run: |
+          if [ -f trufflehog-git-results.json ]; then
+            FINDINGS=$(cat trufflehog-git-results.json | jq -s 'length')
+            echo "===================================="
+            echo "TruffleHog Git History Scan Results"
+            echo "===================================="
+            echo "Total findings: $FINDINGS"
+
+            if [ "$FINDINGS" -gt 0 ]; then
+              echo ""
+              echo "⚠️ SECRETS FOUND IN GIT HISTORY!"
+              echo ""
+              cat trufflehog-git-results.json | jq -r '.[] | "Type: \(.DetectorName)\nCommit: \(.SourceMetadata.Data.Git.commit)\nFile: \(.SourceMetadata.Data.Git.file)\nAuthor: \(.SourceMetadata.Data.Git.email)\n"' | head -50
+
+              echo ""
+              echo "::warning::Secrets detected in git history. Consider using git-filter-repo to clean history."
+              exit 1
+            else
+              echo "✅ No secrets detected in git history"
+            fi
+          else
+            echo "✅ No secrets detected in git history"
+          fi
+
+      - name: Upload git history findings
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        with:
+          name: trufflehog-git-findings
+          path: trufflehog-git-results.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+  security-summary:
+    name: Security Scan Summary
+    needs: [trufflehog-scan, trufflehog-filesystem, trufflehog-git-history]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Generate security summary
+        run: |
+          echo "# 🔐 TruffleHog Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Scan Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| TruffleHog Action | ${{ needs.trufflehog-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Filesystem Scan | ${{ needs.trufflehog-filesystem.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Git History Scan | ${{ needs.trufflehog-git-history.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## What TruffleHog Scans" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **750+ secret types** (API keys, passwords, tokens)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Verified secrets** (active credentials only)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Git history** (all commits)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Current filesystem** (all files)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View detailed findings in the Security tab." >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,26 @@
+# Trivy Ignore File
+# https://aquasecurity.github.io/trivy/latest/docs/configuration/filtering/
+
+# ===================================================
+# Ignored Vulnerabilities (with justification)
+# ===================================================
+
+# Example: Ignore specific CVE in development dependencies
+# CVE-2024-12345  # Dev dependency, not in production
+
+# ===================================================
+# False Positives
+# ===================================================
+
+# Add CVE IDs here that are confirmed false positives
+# Include justification comments for each
+
+# ===================================================
+# Accepted Risks (Document approval)
+# ===================================================
+
+# Add CVE IDs for accepted risks with:
+# - Business justification
+# - Compensating controls
+# - Risk acceptance date
+# - Reviewer approval

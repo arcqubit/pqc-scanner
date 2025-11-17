@@ -1,0 +1,115 @@
+# Trivy Configuration
+# https://aquasecurity.github.io/trivy/latest/docs/configuration/
+
+# Scan settings
+scan:
+  # Security issues to detect
+  security-checks:
+    - vuln       # Vulnerabilities
+    - secret     # Exposed secrets
+    - config     # Misconfigurations
+    - license    # License compliance
+
+  # Scanners to use
+  scanners:
+    - vuln
+    - secret
+    - misconfig
+    - license
+
+# Vulnerability settings
+vulnerability:
+  # Vulnerability types to detect
+  type:
+    - os         # Operating system packages
+    - library    # Language-specific dependencies
+
+  # Severity levels to report
+  severity:
+    - CRITICAL
+    - HIGH
+    - MEDIUM
+    - LOW
+
+# Secret scanning settings
+secret:
+  # Enable secret scanning
+  enabled: true
+
+  # Secret detection config
+  config:
+    # Skip files that are likely to have test secrets
+    skip-files:
+      - "**/*_test.go"
+      - "**/*_test.rs"
+      - "**/test_*.py"
+      - "**/tests/**"
+      - "**/samples/**"
+
+# Misconfiguration settings
+misconfig:
+  # Enable misconfiguration scanning
+  enabled: true
+
+  # Include deprecated checks
+  include-deprecated-checks: false
+
+  # Helm values files
+  helm-values:
+    - values.yaml
+    - values.yml
+
+# License scanning settings
+license:
+  # Enable license scanning
+  enabled: true
+
+  # Forbidden licenses (will fail scan)
+  forbidden:
+    - GPL-2.0
+    - GPL-3.0
+    - AGPL-1.0
+    - AGPL-3.0
+
+  # Restricted licenses (will warn)
+  restricted:
+    - MPL-2.0
+    - EPL-1.0
+
+# Output settings
+output:
+  # Default output format
+  format: table
+
+  # Show progress
+  quiet: false
+
+# Cache settings
+cache:
+  # Enable caching
+  enabled: true
+
+  # Cache backend (fs, redis, or blank for memory)
+  backend: fs
+
+# Database settings
+db:
+  # Skip database update (useful for CI)
+  skip-update: false
+
+  # Database repository
+  repository: "ghcr.io/aquasecurity/trivy-db"
+
+# Ignore unfixed vulnerabilities
+ignore-unfixed: false
+
+# Skip verification of jar files
+skip-java-db-update: false
+
+# Timeouts
+timeout: 5m0s
+
+# Registry settings (for container scanning)
+registry:
+  # Skip TLS verification
+  insecure: false
