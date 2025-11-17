@@ -1,6 +1,6 @@
 # Multi-stage build for minimal distroless container
 # Stage 1: Build the WASM binaries
-FROM rust:1.83-slim as builder
+FROM rust:1.91-slim as builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
