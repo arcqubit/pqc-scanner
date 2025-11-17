@@ -98,7 +98,10 @@ pub fn generate_unified_report(
 
     // Generate unified recommendations
     let mut recommendations = Vec::new();
-    recommendations.push("Unified Compliance Assessment: Both NIST 800-53 SC-13 and ITSG-33 SC-13 are assessed".to_string());
+    recommendations.push(
+        "Unified Compliance Assessment: Both NIST 800-53 SC-13 and ITSG-33 SC-13 are assessed"
+            .to_string(),
+    );
     recommendations.push(
         "Use CMVP-validated cryptographic modules to satisfy both U.S. and Canadian requirements"
             .to_string(),
@@ -448,11 +451,7 @@ fn generate_canadian_findings(
                 evidence_type: EvidenceType::StaticScan,
                 description: format!(
                     "Detected {} (CCCS Status: {}) at line {} column {}: {}",
-                    crypto_type_str,
-                    cccs_approval_status,
-                    vuln.line,
-                    vuln.column,
-                    vuln.message
+                    crypto_type_str, cccs_approval_status, vuln.line, vuln.column, vuln.message
                 ),
                 source_location: Some(source_location),
                 collected_at: timestamp.to_string(),
@@ -566,7 +565,9 @@ fn generate_canadian_finding_description(
             );
         }
         CCCSApprovalStatus::Deprecated => {
-            desc.push_str("This algorithm is DEPRECATED by CCCS and should be migrated immediately. ");
+            desc.push_str(
+                "This algorithm is DEPRECATED by CCCS and should be migrated immediately. ",
+            );
         }
         CCCSApprovalStatus::ConditionallyApproved => {
             desc.push_str("This algorithm is CONDITIONALLY APPROVED for legacy systems only. ");
@@ -610,10 +611,8 @@ fn generate_canadian_remediation(
         }
         CCCSApprovalStatus::ConditionallyApproved => {
             let conditions = algorithm_database::get_approval_conditions(crypto_type);
-            let mut remediation = format!(
-                "{} is conditionally approved. Conditions: ",
-                crypto_type
-            );
+            let mut remediation =
+                format!("{} is conditionally approved. Conditions: ", crypto_type);
             remediation.push_str(&conditions.join("; "));
             remediation.push_str(
                 ". Recommended: Plan migration to post-quantum algorithms (CRYSTALS-Kyber, CRYSTALS-Dilithium).",
@@ -770,8 +769,11 @@ mod tests {
     #[test]
     fn test_generate_itsg33_report() {
         let audit_result = create_test_audit_result();
-        let report =
-            generate_itsg33_report(&audit_result, SecurityClassification::ProtectedA, Some("test.js"));
+        let report = generate_itsg33_report(
+            &audit_result,
+            SecurityClassification::ProtectedA,
+            Some("test.js"),
+        );
 
         assert_eq!(report.control_assessment.control_id, "ITSG-33 SC-13");
         assert_eq!(

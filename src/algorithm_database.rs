@@ -144,18 +144,12 @@ pub fn is_cccs_approved(crypto_type: &CryptoType) -> bool {
 
 /// Check if algorithm is prohibited by CCCS
 pub fn is_cccs_prohibited(crypto_type: &CryptoType) -> bool {
-    matches!(
-        get_cccs_status(crypto_type),
-        CCCSApprovalStatus::Prohibited
-    )
+    matches!(get_cccs_status(crypto_type), CCCSApprovalStatus::Prohibited)
 }
 
 /// Check if algorithm is deprecated
 pub fn is_cccs_deprecated(crypto_type: &CryptoType) -> bool {
-    matches!(
-        get_cccs_status(crypto_type),
-        CCCSApprovalStatus::Deprecated
-    )
+    matches!(get_cccs_status(crypto_type), CCCSApprovalStatus::Deprecated)
 }
 
 /// Get classification requirements
@@ -270,10 +264,16 @@ pub fn get_approved_algorithms(classification: SecurityClassification) -> Vec<St
             if let Some(reqs) = get_classification_requirements(classification) {
                 // For algorithms with key sizes, verify they meet minimum requirements
                 if entry.algorithm == "AES" {
-                    return entry.approved_key_sizes.iter().any(|&size| size >= reqs.minimum_aes_key_size);
+                    return entry
+                        .approved_key_sizes
+                        .iter()
+                        .any(|&size| size >= reqs.minimum_aes_key_size);
                 }
                 if entry.algorithm == "RSA" {
-                    return entry.approved_key_sizes.iter().any(|&size| size >= reqs.minimum_rsa_key_size);
+                    return entry
+                        .approved_key_sizes
+                        .iter()
+                        .any(|&size| size >= reqs.minimum_rsa_key_size);
                 }
                 true
             } else {

@@ -21,8 +21,7 @@ pub use compliance::{
 pub use remediation::{CodeFix, RemediationResult, RemediationSummary, generate_remediations};
 pub use types::{
     AuditResult, AuditStats, CryptoType, ITSG33Report, Language, OscalAssessmentResults,
-    SC13AssessmentReport, SecurityClassification, Severity, UnifiedComplianceReport,
-    Vulnerability,
+    SC13AssessmentReport, SecurityClassification, Severity, UnifiedComplianceReport, Vulnerability,
 };
 
 #[cfg(target_arch = "wasm32")]
