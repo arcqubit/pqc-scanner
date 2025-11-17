@@ -247,12 +247,13 @@ fn generate_canadian_summary(
         }
 
         // Track weak key sizes
-        if let Some(key_size) = vuln.key_size
-            && !algorithm_database::validate_key_size(&vuln.crypto_type, key_size, classification)
-        {
-            let key_info = format!("{} {}-bit", crypto_name, key_size);
-            if !weak_keys.contains(&key_info) {
-                weak_keys.push(key_info);
+        #[allow(clippy::collapsible_if)]
+        if let Some(key_size) = vuln.key_size {
+            if !algorithm_database::validate_key_size(&vuln.crypto_type, key_size, classification) {
+                let key_info = format!("{} {}-bit", crypto_name, key_size);
+                if !weak_keys.contains(&key_info) {
+                    weak_keys.push(key_info);
+                }
             }
         }
     }
