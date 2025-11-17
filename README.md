@@ -8,8 +8,6 @@
 
 A high-performance Rust-based auditor for detecting quantum-vulnerable cryptographic algorithms in source code, compiled to WebAssembly for multi-platform deployment.
 
-**Version**: 2025.11.0-beta.1 ([CalVer](docs/CALVER.md))
-
 ## Features
 
 - **Multi-language Support**: Rust, JavaScript, TypeScript, Python, Java, Go, C++, C#
