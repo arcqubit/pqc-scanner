@@ -63,7 +63,7 @@ updates:
         patterns:
           - "*"
 
-  # NPM dependencies (for any Node.js tooling)
+  # NPM dependencies - Root (if present)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -88,11 +88,80 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    # Ignore dev dependencies for major updates
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-        dependency-type: "development"
+
+  # NPM dependencies - MCP Server
+  - package-ecosystem: "npm"
+    directory: "/mcp"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "arcqubit"
+    labels:
+      - "dependencies"
+      - "npm"
+      - "mcp-server"
+      - "automated"
+    commit-message:
+      prefix: "chore(mcp)"
+      include: "scope"
+    groups:
+      mcp-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # NPM dependencies - Sample Apps (for testing)
+  - package-ecosystem: "npm"
+    directory: "/samples/legacy-banking"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "arcqubit"
+    labels:
+      - "dependencies"
+      - "npm"
+      - "samples"
+      - "automated"
+    commit-message:
+      prefix: "chore(samples)"
+      include: "scope"
+
+  # Python dependencies - Sample Apps
+  - package-ecosystem: "pip"
+    directory: "/samples/crypto-messenger"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "arcqubit"
+    labels:
+      - "dependencies"
+      - "python"
+      - "samples"
+      - "automated"
+    commit-message:
+      prefix: "chore(samples)"
+      include: "scope"
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   # Docker dependencies (if using Dockerfile)
   - package-ecosystem: "docker"

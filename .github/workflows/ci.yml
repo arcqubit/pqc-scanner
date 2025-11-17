@@ -188,3 +188,64 @@ jobs:
             echo "are only used in WASM builds and are correctly ignored in Cargo.toml"
             exit 0
           }
+
+  vulnerability-scan:
+    name: Vulnerability Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af  # v4.1.0
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+        with:
+          python-version: '3.12'
+
+      - name: Audit MCP Server dependencies
+        run: |
+          echo "Auditing MCP Server NPM dependencies..."
+          cd mcp
+          npm install --package-lock-only
+          npm audit --audit-level=moderate || {
+            echo "::warning::NPM vulnerabilities detected in MCP server"
+            exit 0
+          }
+
+      - name: Audit Sample App (legacy-banking) dependencies
+        run: |
+          echo "Auditing legacy-banking sample NPM dependencies..."
+          cd samples/legacy-banking
+          npm install --package-lock-only
+          npm audit --audit-level=moderate || {
+            echo "::warning::NPM vulnerabilities detected in legacy-banking sample"
+            exit 0
+          }
+
+      - name: Audit Python dependencies
+        run: |
+          echo "Auditing Python dependencies in samples..."
+          cd samples/crypto-messenger
+          pip install pip-audit
+          pip-audit --requirement requirements.txt --vulnerability-service osv || {
+            echo "::warning::Python vulnerabilities detected in crypto-messenger sample"
+            exit 0
+          }
+
+      - name: Report vulnerability scan summary
+        if: always()
+        run: |
+          echo "==================================="
+          echo "Vulnerability Scan Summary"
+          echo "==================================="
+          echo "✅ Rust dependencies: Scanned by cargo-audit workflow"
+          echo "✅ NPM dependencies: Scanned for mcp/ and samples/"
+          echo "✅ Python dependencies: Scanned for samples/"
+          echo ""
+          echo "Note: Sample applications may contain intentionally"
+          echo "vulnerable code for testing purposes."
