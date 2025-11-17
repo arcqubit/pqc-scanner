@@ -27,7 +27,4 @@ jobs:
           base-ref: ${{ github.event.pull_request.base.sha }}
           head-ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Cargo Audit Check
-        uses: actions-rust-lang/audit@f413e0f38395f6d92a275f25f2c4b20d8392349d  # v1.2.0
-        with:
-          denyWarnings: true
+      # Note: Cargo audit is performed in the separate cargo-audit.yml workflow
