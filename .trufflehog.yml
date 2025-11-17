@@ -20,7 +20,6 @@ exclude_paths:
 
   # Test fixtures (may contain dummy secrets)
   - tests/fixtures/
-  - samples/
 
   # CI/CD configs (already scanned separately)
   - .github/

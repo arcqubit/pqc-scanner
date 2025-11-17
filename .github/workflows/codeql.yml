@@ -50,11 +50,6 @@ jobs:
           cd mcp && npm ci || npm install
         continue-on-error: true
 
-      - name: Install dependencies (Samples)
-        run: |
-          cd samples/legacy-banking && npm ci || npm install
-        continue-on-error: true
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@ea9e4e37992a54ee68a9622e985e60c8e8f12d9f  # v3.27.4
         with:

@@ -44,7 +44,6 @@ secret:
       - "**/*_test.rs"
       - "**/test_*.py"
       - "**/tests/**"
-      - "**/samples/**"
 
 # Misconfiguration settings
 misconfig:
