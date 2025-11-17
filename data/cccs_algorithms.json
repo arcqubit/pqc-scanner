@@ -1,0 +1,284 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "updated": "2025-11-17",
+    "source": "CCCS ITSP.40.111 - Cryptographic Algorithms for UNCLASSIFIED, PROTECTED A, and PROTECTED B Information",
+    "description": "CCCS-approved cryptographic algorithms and their classification status"
+  },
+  "algorithms": {
+    "AES": {
+      "algorithm": "AES",
+      "cccs_status": "approved",
+      "itsp_reference": "ITSP.40.111 Annex A",
+      "approved_key_sizes": [128, 192, 256],
+      "approved_modes": ["GCM", "CCM", "CBC", "CTR"],
+      "cmvp_required": true,
+      "conditions": [],
+      "sunset_date": null,
+      "description": "Advanced Encryption Standard - Approved for all classification levels"
+    },
+    "RSA": {
+      "algorithm": "RSA",
+      "cccs_status": "conditionally-approved",
+      "itsp_reference": "ITSP.40.111 Section 4.1",
+      "approved_key_sizes": [2048, 3072, 4096],
+      "approved_modes": ["OAEP", "PSS"],
+      "cmvp_required": true,
+      "conditions": [
+        "Minimum 2048-bit keys for legacy systems only",
+        "3072-bit keys recommended for new deployments",
+        "Plan post-quantum migration by 2030",
+        "Use only for legacy system compatibility"
+      ],
+      "sunset_date": "2030-12-31",
+      "description": "RSA - Conditionally approved for legacy systems, quantum-vulnerable"
+    },
+    "ECDSA": {
+      "algorithm": "ECDSA",
+      "cccs_status": "conditionally-approved",
+      "itsp_reference": "ITSP.40.111 Section 4.2",
+      "approved_key_sizes": [256, 384, 521],
+      "approved_modes": ["P-256", "P-384", "P-521"],
+      "cmvp_required": true,
+      "conditions": [
+        "Use NIST P-curves only",
+        "Minimum P-256 for Protected A/B",
+        "P-384 or P-521 for Protected C",
+        "Plan post-quantum migration by 2030"
+      ],
+      "sunset_date": "2030-12-31",
+      "description": "Elliptic Curve Digital Signature Algorithm - Conditionally approved, quantum-vulnerable"
+    },
+    "ECDH": {
+      "algorithm": "ECDH",
+      "cccs_status": "conditionally-approved",
+      "itsp_reference": "ITSP.40.111 Section 4.3",
+      "approved_key_sizes": [256, 384, 521],
+      "approved_modes": ["P-256", "P-384", "P-521"],
+      "cmvp_required": true,
+      "conditions": [
+        "Use NIST P-curves only",
+        "Minimum P-256 for Protected A/B",
+        "Ephemeral keys required",
+        "Plan post-quantum migration by 2030"
+      ],
+      "sunset_date": "2030-12-31",
+      "description": "Elliptic Curve Diffie-Hellman - Conditionally approved, quantum-vulnerable"
+    },
+    "DSA": {
+      "algorithm": "DSA",
+      "cccs_status": "deprecated",
+      "itsp_reference": "ITSP.40.111 Section 5.1",
+      "approved_key_sizes": [],
+      "approved_modes": [],
+      "cmvp_required": false,
+      "conditions": [
+        "No longer approved for new systems",
+        "Migrate to ECDSA or post-quantum alternatives"
+      ],
+      "sunset_date": "2024-12-31",
+      "description": "Digital Signature Algorithm - Deprecated"
+    },
+    "DH": {
+      "algorithm": "Diffie-Hellman",
+      "cccs_status": "conditionally-approved",
+      "itsp_reference": "ITSP.40.111 Section 4.4",
+      "approved_key_sizes": [2048, 3072, 4096],
+      "approved_modes": [],
+      "cmvp_required": true,
+      "conditions": [
+        "Minimum 2048-bit for legacy systems",
+        "3072-bit recommended",
+        "Use ephemeral keys (DHE)",
+        "Plan post-quantum migration by 2030"
+      ],
+      "sunset_date": "2030-12-31",
+      "description": "Diffie-Hellman key exchange - Conditionally approved, quantum-vulnerable"
+    },
+    "SHA-1": {
+      "algorithm": "SHA-1",
+      "cccs_status": "prohibited",
+      "itsp_reference": "ITSP.40.111 Section 5.2",
+      "approved_key_sizes": [],
+      "approved_modes": [],
+      "cmvp_required": false,
+      "conditions": [
+        "Cryptographically broken",
+        "Must not be used for any new deployments",
+        "Immediate migration required"
+      ],
+      "sunset_date": "2020-01-01",
+      "description": "SHA-1 - Prohibited due to collision vulnerabilities"
+    },
+    "MD5": {
+      "algorithm": "MD5",
+      "cccs_status": "prohibited",
+      "itsp_reference": "ITSP.40.111 Section 5.3",
+      "approved_key_sizes": [],
+      "approved_modes": [],
+      "cmvp_required": false,
+      "conditions": [
+        "Cryptographically broken",
+        "Must not be used under any circumstances",
+        "Immediate migration required"
+      ],
+      "sunset_date": "2012-01-01",
+      "description": "MD5 - Prohibited due to severe collision vulnerabilities"
+    },
+    "SHA-2": {
+      "algorithm": "SHA-2",
+      "cccs_status": "approved",
+      "itsp_reference": "ITSP.40.111 Annex A",
+      "approved_key_sizes": [224, 256, 384, 512],
+      "approved_modes": ["SHA-224", "SHA-256", "SHA-384", "SHA-512"],
+      "cmvp_required": true,
+      "conditions": [],
+      "sunset_date": null,
+      "description": "SHA-2 family - Approved for all classification levels"
+    },
+    "SHA-3": {
+      "algorithm": "SHA-3",
+      "cccs_status": "approved",
+      "itsp_reference": "ITSP.40.111 Annex A",
+      "approved_key_sizes": [224, 256, 384, 512],
+      "approved_modes": ["SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512"],
+      "cmvp_required": true,
+      "conditions": [],
+      "sunset_date": null,
+      "description": "SHA-3 family - Approved for all classification levels"
+    },
+    "DES": {
+      "algorithm": "DES",
+      "cccs_status": "prohibited",
+      "itsp_reference": "ITSP.40.111 Section 5.4",
+      "approved_key_sizes": [],
+      "approved_modes": [],
+      "cmvp_required": false,
+      "conditions": [
+        "Cryptographically broken",
+        "Key length too short (56 bits)",
+        "Must not be used under any circumstances"
+      ],
+      "sunset_date": "2005-01-01",
+      "description": "DES - Prohibited due to insufficient key length"
+    },
+    "3DES": {
+      "algorithm": "3DES",
+      "cccs_status": "deprecated",
+      "itsp_reference": "ITSP.40.111 Section 5.5",
+      "approved_key_sizes": [],
+      "approved_modes": [],
+      "cmvp_required": false,
+      "conditions": [
+        "No longer approved for new systems",
+        "Legacy systems only until 2025",
+        "Migrate to AES immediately"
+      ],
+      "sunset_date": "2023-12-31",
+      "description": "Triple DES - Deprecated, migration required"
+    },
+    "RC4": {
+      "algorithm": "RC4",
+      "cccs_status": "prohibited",
+      "itsp_reference": "ITSP.40.111 Section 5.6",
+      "approved_key_sizes": [],
+      "approved_modes": [],
+      "cmvp_required": false,
+      "conditions": [
+        "Cryptographically broken",
+        "Biases in keystream",
+        "Must not be used under any circumstances"
+      ],
+      "sunset_date": "2015-01-01",
+      "description": "RC4 - Prohibited due to keystream biases"
+    },
+    "CRYSTALS-Kyber": {
+      "algorithm": "CRYSTALS-Kyber",
+      "cccs_status": "under-review",
+      "itsp_reference": "ITSP.40.111 Section 6.1 (Post-Quantum)",
+      "approved_key_sizes": [512, 768, 1024],
+      "approved_modes": ["Kyber512", "Kyber768", "Kyber1024"],
+      "cmvp_required": true,
+      "conditions": [
+        "NIST PQC standard (2024)",
+        "Recommended for new deployments",
+        "Will be approved upon CMVP validation availability"
+      ],
+      "sunset_date": null,
+      "description": "CRYSTALS-Kyber - Post-quantum key encapsulation mechanism (under review for approval)"
+    },
+    "CRYSTALS-Dilithium": {
+      "algorithm": "CRYSTALS-Dilithium",
+      "cccs_status": "under-review",
+      "itsp_reference": "ITSP.40.111 Section 6.2 (Post-Quantum)",
+      "approved_key_sizes": [2, 3, 5],
+      "approved_modes": ["Dilithium2", "Dilithium3", "Dilithium5"],
+      "cmvp_required": true,
+      "conditions": [
+        "NIST PQC standard (2024)",
+        "Recommended for new deployments",
+        "Will be approved upon CMVP validation availability"
+      ],
+      "sunset_date": null,
+      "description": "CRYSTALS-Dilithium - Post-quantum digital signature scheme (under review for approval)"
+    },
+    "SPHINCS+": {
+      "algorithm": "SPHINCS+",
+      "cccs_status": "under-review",
+      "itsp_reference": "ITSP.40.111 Section 6.3 (Post-Quantum)",
+      "approved_key_sizes": [128, 192, 256],
+      "approved_modes": ["SPHINCS+-128f", "SPHINCS+-192f", "SPHINCS+-256f"],
+      "cmvp_required": true,
+      "conditions": [
+        "NIST PQC standard (2024)",
+        "Stateless hash-based signatures",
+        "Will be approved upon CMVP validation availability"
+      ],
+      "sunset_date": null,
+      "description": "SPHINCS+ - Post-quantum stateless hash-based signature scheme (under review for approval)"
+    },
+    "HMAC": {
+      "algorithm": "HMAC",
+      "cccs_status": "approved",
+      "itsp_reference": "ITSP.40.111 Annex A",
+      "approved_key_sizes": [256, 384, 512],
+      "approved_modes": ["HMAC-SHA256", "HMAC-SHA384", "HMAC-SHA512"],
+      "cmvp_required": true,
+      "conditions": [
+        "Must use with approved hash function (SHA-2 or SHA-3)"
+      ],
+      "sunset_date": null,
+      "description": "HMAC - Approved for message authentication with SHA-2/SHA-3"
+    }
+  },
+  "classification_requirements": {
+    "UNCLASSIFIED": {
+      "minimum_aes_key_size": 128,
+      "minimum_rsa_key_size": 2048,
+      "minimum_ecc_key_size": 256,
+      "approved_hash": ["SHA-256", "SHA-384", "SHA-512", "SHA3-256"],
+      "cmvp_required": false
+    },
+    "PROTECTED_A": {
+      "minimum_aes_key_size": 128,
+      "minimum_rsa_key_size": 2048,
+      "minimum_ecc_key_size": 256,
+      "approved_hash": ["SHA-256", "SHA-384", "SHA-512"],
+      "cmvp_required": true
+    },
+    "PROTECTED_B": {
+      "minimum_aes_key_size": 256,
+      "minimum_rsa_key_size": 3072,
+      "minimum_ecc_key_size": 384,
+      "approved_hash": ["SHA-384", "SHA-512"],
+      "cmvp_required": true
+    },
+    "PROTECTED_C": {
+      "minimum_aes_key_size": 256,
+      "minimum_rsa_key_size": 4096,
+      "minimum_ecc_key_size": 521,
+      "approved_hash": ["SHA-512"],
+      "cmvp_required": true
+    }
+  }
+}

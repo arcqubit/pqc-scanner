@@ -1,7 +1,9 @@
 // PQC Scanner - Quantum-Safe Crypto Audit Library
 // Core Rust implementation for detecting quantum-vulnerable cryptography
 
+pub mod algorithm_database;
 pub mod audit;
+pub mod canadian_compliance;
 pub mod compliance;
 pub mod detector;
 pub mod parser;
@@ -10,13 +12,17 @@ pub mod types;
 
 // Re-export public API
 pub use audit::{AuditError, analyze, score_vulnerability};
+pub use canadian_compliance::{
+    export_itsg33_json, export_unified_json, generate_itsg33_report, generate_unified_report,
+};
 pub use compliance::{
     export_oscal_json, export_sc13_json, generate_oscal_json, generate_sc13_report,
 };
 pub use remediation::{CodeFix, RemediationResult, RemediationSummary, generate_remediations};
 pub use types::{
-    AuditResult, AuditStats, CryptoType, Language, OscalAssessmentResults, SC13AssessmentReport,
-    Severity, Vulnerability,
+    AuditResult, AuditStats, CryptoType, ITSG33Report, Language, OscalAssessmentResults,
+    SC13AssessmentReport, SecurityClassification, Severity, UnifiedComplianceReport,
+    Vulnerability,
 };
 
 #[cfg(target_arch = "wasm32")]
@@ -86,6 +92,64 @@ pub fn generate_remediation(
     let remediation = remediation::generate_remediations(&audit_result, file_path);
 
     serde_wasm_bindgen::to_value(&remediation).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+// WASM-compatible ITSG-33 Canadian compliance report generation
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn generate_itsg33_compliance_report(
+    source: &str,
+    language: &str,
+    classification: &str,
+    file_path: Option<String>,
+) -> Result<JsValue, JsValue> {
+    let audit_result =
+        audit::analyze(source, language).map_err(|e| JsValue::from_str(&e.to_string()))?;
+
+    let security_classification = match classification.to_lowercase().as_str() {
+        "unclassified" => SecurityClassification::Unclassified,
+        "protected-a" | "protected_a" => SecurityClassification::ProtectedA,
+        "protected-b" | "protected_b" => SecurityClassification::ProtectedB,
+        "protected-c" | "protected_c" => SecurityClassification::ProtectedC,
+        _ => SecurityClassification::ProtectedA, // Default to Protected A
+    };
+
+    let report = canadian_compliance::generate_itsg33_report(
+        &audit_result,
+        security_classification,
+        file_path.as_deref(),
+    );
+
+    serde_wasm_bindgen::to_value(&report).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+// WASM-compatible unified NIST + Canadian compliance report generation
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn generate_unified_compliance_report(
+    source: &str,
+    language: &str,
+    classification: &str,
+    file_path: Option<String>,
+) -> Result<JsValue, JsValue> {
+    let audit_result =
+        audit::analyze(source, language).map_err(|e| JsValue::from_str(&e.to_string()))?;
+
+    let security_classification = match classification.to_lowercase().as_str() {
+        "unclassified" => SecurityClassification::Unclassified,
+        "protected-a" | "protected_a" => SecurityClassification::ProtectedA,
+        "protected-b" | "protected_b" => SecurityClassification::ProtectedB,
+        "protected-c" | "protected_c" => SecurityClassification::ProtectedC,
+        _ => SecurityClassification::ProtectedA,
+    };
+
+    let report = canadian_compliance::generate_unified_report(
+        &audit_result,
+        security_classification,
+        file_path.as_deref(),
+    );
+
+    serde_wasm_bindgen::to_value(&report).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 #[cfg(test)]
