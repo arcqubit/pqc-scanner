@@ -199,10 +199,16 @@ fn remediate_sha1(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
         new_code,
         confidence: 0.9,
         algorithm: "SHA-1 → SHA-256".to_string(),
-        explanation:
-            "Replaced deprecated SHA-1 hash with SHA-256. SHA-1 is vulnerable to collision attacks."
-                .to_string(),
-        auto_applicable: true,
+        explanation: "Replaced deprecated SHA-1 hash with SHA-256. SHA-1 is vulnerable to collision attacks and prohibited for digital signatures by NIST since 2013.".to_string(),
+        patch_available: true,
+        review_notes: vec![
+            "Verify SHA-1 usage context (signatures vs checksums)".to_string(),
+            "Update tests to expect SHA-256 output (64 hex chars)".to_string(),
+            "Check for Git commit signatures or other SHA-1 dependencies".to_string(),
+            "NIST: SHA-1 prohibited for digital signatures per FIPS 186-4".to_string(),
+            "CCCS: SHA-1 prohibited per ITSP.40.111 Section 5.2".to_string(),
+        ],
+        patch_file: None,
     })
 }
 
@@ -213,7 +219,7 @@ fn remediate_rsa(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
     // Check if this is a weak key size (< 2048 bits)
     let is_weak_key = vuln.key_size.is_some_and(|size| size < 2048);
 
-    let (new_code, confidence, explanation, auto_applicable) = if is_weak_key {
+    let (new_code, confidence, explanation, patch_available, review_notes) = if is_weak_key {
         // For weak keys, suggest minimum 2048-bit RSA as interim solution
         let replacement = if let Some(size) = vuln.key_size {
             old_code.replace(&size.to_string(), "2048")
@@ -224,16 +230,32 @@ fn remediate_rsa(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
         (
             replacement,
             0.7,
-            "Upgraded RSA key size to 2048 bits (minimum secure size). CRITICAL: Plan migration to post-quantum algorithms (CRYSTALS-Dilithium for signatures, CRYSTALS-Kyber for encryption) as RSA is vulnerable to quantum attacks.".to_string(),
-            false, // Requires manual review due to quantum vulnerability
+            "Upgraded RSA key size to 2048 bits (minimum secure size per NIST SP 800-57). CRITICAL: RSA is quantum-vulnerable. Plan migration to CRYSTALS-Dilithium (signatures) or CRYSTALS-Kyber (encryption).".to_string(),
+            true,
+            vec![
+                "Verify key size upgrade doesn't break existing integrations".to_string(),
+                "Check if key generation performance is acceptable".to_string(),
+                "Update key storage and certificate infrastructure".to_string(),
+                "NIST: RSA minimum 2048 bits per SP 800-57".to_string(),
+                "CCCS: RSA conditionally approved, sunset 2030 per ITSP.40.111".to_string(),
+                "PQC Migration: Plan for CRYSTALS-Dilithium (NIST FIPS 204)".to_string(),
+            ],
         )
     } else {
-        // For stronger RSA, just provide quantum migration warning
+        // For stronger RSA, provide quantum migration guidance
         (
             old_code.clone(),
             0.5,
-            "WARNING: RSA is vulnerable to quantum computing attacks. Recommend migrating to CRYSTALS-Dilithium (signatures) or CRYSTALS-Kyber (encryption). No automatic fix available - requires architectural changes.".to_string(),
-            false,
+            "RSA is quantum-vulnerable. NIST recommends migrating to post-quantum algorithms by 2030. Consider CRYSTALS-Dilithium (signatures) or CRYSTALS-Kyber (encryption).".to_string(),
+            false, // No patch - requires architectural changes
+            vec![
+                "RSA is quantum-vulnerable regardless of key size".to_string(),
+                "NIST FIPS 204: CRYSTALS-Dilithium for digital signatures".to_string(),
+                "NIST FIPS 203: CRYSTALS-Kyber for key encapsulation".to_string(),
+                "Migration timeline: NIST recommends completion by 2030".to_string(),
+                "CCCS: RSA sunset date 2030 per ITSP.40.111 Section 4.1".to_string(),
+                "Consider hybrid crypto during transition period".to_string(),
+            ],
         )
     };
 
@@ -250,7 +272,9 @@ fn remediate_rsa(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
             "RSA → PQC migration recommended".to_string()
         },
         explanation,
-        auto_applicable,
+        patch_available,
+        review_notes,
+        patch_file: None,
     })
 }
 
@@ -272,6 +296,11 @@ fn remediate_des_3des(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> 
     };
 
     let algorithm = if is_3des { "3DES" } else { "DES" };
+    let (itsp_ref, sunset) = if is_3des {
+        ("ITSP.40.111 Section 5.5", "2023")
+    } else {
+        ("ITSP.40.111 Section 5.4", "N/A - Prohibited")
+    };
 
     Some(CodeFix {
         file_path: file_path.to_string(),
@@ -280,12 +309,22 @@ fn remediate_des_3des(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> 
         old_code,
         new_code,
         confidence: 0.75,
-        algorithm: format!("{} → AES-256", algorithm),
+        algorithm: format!("{} → AES-256-GCM", algorithm),
         explanation: format!(
-            "Replaced deprecated {} cipher with AES-256-GCM. {} has known vulnerabilities and small block size. Ensure proper key management and use authenticated encryption mode (GCM).",
+            "Replaced deprecated {} cipher with AES-256-GCM. {} has known vulnerabilities, small block size (64 bits), and is prohibited/deprecated by NIST and CCCS. AES-GCM provides authenticated encryption.",
             algorithm, algorithm
         ),
-        auto_applicable: false, // Requires manual review for mode and key setup
+        patch_available: true,
+        review_notes: vec![
+            format!("{} block size: 64 bits (vulnerable to birthday attacks)", algorithm),
+            "AES requires 128/192/256-bit keys vs DES 56/112/168 bits".to_string(),
+            "Must specify AES mode: recommend GCM for authenticated encryption".to_string(),
+            "Update key derivation and IV generation for AES".to_string(),
+            format!("NIST: {} prohibited per SP 800-57", algorithm),
+            format!("CCCS: {} deprecated/prohibited per {}, sunset {}", algorithm, itsp_ref, sunset),
+            "Verify all encrypted data can be re-encrypted with AES".to_string(),
+        ],
+        patch_file: None,
     })
 }
 
@@ -325,7 +364,9 @@ mod tests {
         assert_eq!(fix.algorithm, "MD5 → SHA-256");
         assert_eq!(fix.new_code, "hash = hashlib.sha256(data).hexdigest()");
         assert!(fix.confidence > 0.8);
-        assert!(fix.auto_applicable);
+        assert!(fix.patch_available);
+        assert!(!fix.review_notes.is_empty());
+        assert!(fix.review_notes.iter().any(|n| n.contains("NIST") || n.contains("CCCS")));
     }
 
     #[test]
@@ -339,7 +380,7 @@ mod tests {
         let fix = remediate_md5(&vuln, "test.js").unwrap();
 
         assert!(fix.new_code.contains("SHA256"));
-        assert!(fix.auto_applicable);
+        assert!(fix.patch_available);
     }
 
     #[test]
@@ -351,7 +392,7 @@ mod tests {
         assert_eq!(fix.algorithm, "SHA-1 → SHA-256");
         assert_eq!(fix.new_code, "hash = hashlib.sha256(data)");
         assert!(fix.confidence >= 0.9);
-        assert!(fix.auto_applicable);
+        assert!(fix.patch_available);
     }
 
     #[test]
@@ -363,8 +404,9 @@ mod tests {
 
         assert_eq!(fix.algorithm, "RSA-1024 → RSA-2048 (interim)");
         assert!(fix.new_code.contains("2048"));
-        assert!(!fix.auto_applicable); // Requires manual review
+        assert!(fix.patch_available); // Patch available for key size upgrade
         assert!(fix.explanation.contains("CRYSTALS"));
+        assert!(!fix.review_notes.is_empty());
     }
 
     #[test]
@@ -375,9 +417,10 @@ mod tests {
         let fix = remediate_rsa(&vuln, "test.py").unwrap();
 
         assert!(fix.algorithm.contains("PQC migration"));
-        assert!(!fix.auto_applicable);
+        assert!(!fix.patch_available); // No patch - requires architectural changes
         assert!(fix.explanation.contains("quantum"));
         assert!(fix.confidence < 0.7);
+        assert!(!fix.review_notes.is_empty());
     }
 
     #[test]
@@ -387,10 +430,10 @@ mod tests {
 
         let fix = remediate_des_3des(&vuln, "test.py").unwrap();
 
-        assert_eq!(fix.algorithm, "DES → AES-256");
+        assert_eq!(fix.algorithm, "DES → AES-256-GCM");
         assert!(fix.new_code.contains("AES"));
         assert!(!fix.new_code.contains("DES"));
-        assert!(!fix.auto_applicable);
+        assert!(fix.patch_available);
         assert!(fix.explanation.contains("GCM"));
     }
 
@@ -401,7 +444,7 @@ mod tests {
 
         let fix = remediate_des_3des(&vuln, "test.py").unwrap();
 
-        assert_eq!(fix.algorithm, "3DES → AES-256");
+        assert_eq!(fix.algorithm, "3DES → AES-256-GCM");
         assert!(fix.new_code.contains("AES"));
         assert!(!fix.new_code.contains("TripleDES"));
     }
@@ -435,8 +478,8 @@ mod tests {
 
         assert_eq!(remediation.fixes.len(), 4);
         assert_eq!(remediation.summary.total_vulnerabilities, 4);
-        assert!(remediation.summary.auto_fixable >= 2); // MD5 and SHA1
-        assert!(remediation.summary.manual_review_required >= 2); // RSA and DES
+        assert_eq!(remediation.summary.remediable, 4); // All have remediation
+        assert_eq!(remediation.summary.patch_available, 4); // All can generate patches
         assert!(remediation.summary.average_confidence > 0.0);
     }
 
@@ -453,6 +496,8 @@ mod tests {
         let remediation = generate_remediations(&audit_result, "test.py");
 
         assert_eq!(remediation.fixes.len(), 0);
+        assert_eq!(remediation.summary.remediable, 0);
+        assert_eq!(remediation.summary.manual_only, 1);
         assert_eq!(remediation.warnings.len(), 1);
         assert!(remediation.warnings[0].contains("ECDSA"));
     }
@@ -461,7 +506,7 @@ mod tests {
     fn test_remediation_summary_statistics() {
         let mut audit_result = AuditResult::new(Language::JavaScript, 50);
 
-        // Add mix of auto-fixable and manual vulnerabilities
+        // Add mix of patch-available and no-patch vulnerabilities
         audit_result.add_vulnerability(create_test_vulnerability(
             CryptoType::Md5,
             "crypto.createHash('md5')",
@@ -481,8 +526,8 @@ mod tests {
         let remediation = generate_remediations(&audit_result, "app.js");
 
         assert_eq!(remediation.summary.total_vulnerabilities, 3);
-        assert_eq!(remediation.summary.auto_fixable, 2); // MD5 and SHA1
-        assert_eq!(remediation.summary.manual_review_required, 1); // RSA
+        assert_eq!(remediation.summary.remediable, 3); // All have remediation
+        assert_eq!(remediation.summary.patch_available, 3); // All can generate patches
         assert!(remediation.summary.average_confidence > 0.7);
     }
 
@@ -497,7 +542,9 @@ mod tests {
             confidence: 0.85,
             algorithm: "MD5 → SHA-256".to_string(),
             explanation: "Test explanation".to_string(),
-            auto_applicable: true,
+            patch_available: true,
+            review_notes: vec!["Test note".to_string()],
+            patch_file: None,
         };
 
         let json = serde_json::to_string(&fix).unwrap();
@@ -505,6 +552,6 @@ mod tests {
 
         assert_eq!(fix.file_path, deserialized.file_path);
         assert_eq!(fix.confidence, deserialized.confidence);
-        assert_eq!(fix.auto_applicable, deserialized.auto_applicable);
+        assert_eq!(fix.patch_available, deserialized.patch_available);
     }
 }

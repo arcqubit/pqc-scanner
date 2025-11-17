@@ -28,8 +28,12 @@ def hash_password(password):
         println!("  Old code: {}", fix.old_code);
         println!("  New code: {}", fix.new_code);
         println!("  Confidence: {:.1}%", fix.confidence * 100.0);
-        println!("  Auto-applicable: {}", fix.auto_applicable);
+        println!("  Patch available: {}", fix.patch_available);
         println!("  Explanation: {}", fix.explanation);
+        println!("\n  Review checklist:");
+        for note in &fix.review_notes {
+            println!("    - {}", note);
+        }
     }
 
     // Example 2: Multiple Vulnerabilities
@@ -63,11 +67,9 @@ def process_data(data, key):
         "  Total vulnerabilities: {}",
         remediation.summary.total_vulnerabilities
     );
-    println!("  Auto-fixable: {}", remediation.summary.auto_fixable);
-    println!(
-        "  Manual review required: {}",
-        remediation.summary.manual_review_required
-    );
+    println!("  Remediable: {}", remediation.summary.remediable);
+    println!("  Patch available: {}", remediation.summary.patch_available);
+    println!("  Manual only: {}", remediation.summary.manual_only);
     println!(
         "  Average confidence: {:.1}%",
         remediation.summary.average_confidence * 100.0
@@ -79,9 +81,10 @@ def process_data(data, key):
         println!("  Type: {}", fix.algorithm);
         println!("  Line {}: {}", fix.line, fix.old_code);
         println!("  Suggested: {}", fix.new_code);
-        println!("  Auto-applicable: {}", fix.auto_applicable);
-        if !fix.auto_applicable {
-            println!("  ⚠ Manual review required!");
+        println!("  Patch available: {}", fix.patch_available);
+        println!("  ⚠ Review notes:");
+        for note in &fix.review_notes {
+            println!("    - {}", note);
         }
     }
 
@@ -129,9 +132,13 @@ key = RSA.generate(1024)
         println!("Issue: {}", fix.algorithm);
         println!("Current: {}", fix.old_code);
         println!("Interim fix: {}", fix.new_code);
-        println!("Requires manual review: {}", !fix.auto_applicable);
+        println!("Patch available: {}", fix.patch_available);
         println!("\nGuidance:");
         println!("  {}", fix.explanation);
+        println!("\nReview checklist:");
+        for note in &fix.review_notes {
+            println!("  - {}", note);
+        }
     }
 
     // Example 5: DES/3DES Remediation

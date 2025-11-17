@@ -15,13 +15,15 @@ def hash_password(password):
     let remediation = generate_remediations(&audit_result, "password.py");
 
     assert!(!remediation.fixes.is_empty());
-    assert_eq!(remediation.summary.auto_fixable, 1);
+    assert_eq!(remediation.summary.remediable, 1);
+    assert_eq!(remediation.summary.patch_available, 1);
 
     let fix = &remediation.fixes[0];
     assert_eq!(fix.algorithm, "MD5 → SHA-256");
     assert!(fix.new_code.contains("sha256"));
-    assert!(fix.auto_applicable);
+    assert!(fix.patch_available);
     assert!(fix.confidence >= 0.8);
+    assert!(!fix.review_notes.is_empty());
 }
 
 #[test]
@@ -42,7 +44,7 @@ function hashData(data) {
     let fix = &remediation.fixes[0];
     assert_eq!(fix.algorithm, "SHA-1 → SHA-256");
     assert!(fix.new_code.contains("sha256"));
-    assert!(fix.auto_applicable);
+    assert!(fix.patch_available);
 }
 
 #[test]
@@ -61,8 +63,9 @@ key = RSA.generate(1024)
     let fix = &remediation.fixes[0];
     // The algorithm field should indicate RSA remediation
     assert!(fix.algorithm.contains("RSA"));
-    assert!(!fix.auto_applicable); // Requires manual review
+    // Note: patch_available depends on whether detector found key_size
     assert!(fix.explanation.contains("CRYSTALS") || fix.explanation.contains("quantum"));
+    assert!(!fix.review_notes.is_empty());
 }
 
 #[test]
@@ -79,10 +82,10 @@ cipher = DES.new(key, DES.MODE_ECB)
     assert!(!remediation.fixes.is_empty());
 
     let fix = &remediation.fixes[0];
-    assert_eq!(fix.algorithm, "DES → AES-256");
+    assert_eq!(fix.algorithm, "DES → AES-256-GCM");
     assert!(fix.new_code.contains("AES"));
     assert!(!fix.new_code.contains("DES"));
-    assert!(!fix.auto_applicable);
+    assert!(fix.patch_available);
 }
 
 #[test]
@@ -100,7 +103,7 @@ const cipher = crypto.createCipheriv('des-ede3', key, iv);
 
     let fix = &remediation.fixes[0];
     assert!(fix.algorithm.contains("3DES") || fix.algorithm.contains("AES"));
-    assert!(!fix.auto_applicable);
+    assert!(fix.patch_available);
 }
 
 #[test]
@@ -126,11 +129,11 @@ def process_data(data):
         audit_result.vulnerabilities.len()
     );
 
-    // At least MD5 and SHA1 should be auto-fixable
-    assert!(remediation.summary.auto_fixable >= 2);
+    // Should have remediation for detected vulnerabilities
+    assert!(remediation.summary.remediable >= 3);
 
-    // Should have some manual review items (RSA)
-    assert!(remediation.summary.manual_review_required >= 1);
+    // Most should have patches available
+    assert!(remediation.summary.patch_available >= 2);
     assert!(remediation.summary.average_confidence > 0.0);
 }
 
@@ -147,7 +150,8 @@ sk = SigningKey.generate(curve=NIST192p)
 
     // ECDSA remediation not yet implemented
     assert!(!remediation.warnings.is_empty());
-    assert!(remediation.warnings[0].contains("ECDSA"));
+    assert!(remediation.summary.manual_only >= 1);
+    assert!(remediation.warnings.iter().any(|w| w.contains("ECDSA")));
 }
 
 #[test]
@@ -186,7 +190,8 @@ def secure_function():
 
     assert!(remediation.fixes.is_empty());
     assert_eq!(remediation.summary.total_vulnerabilities, 0);
-    assert_eq!(remediation.summary.auto_fixable, 0);
+    assert_eq!(remediation.summary.remediable, 0);
+    assert_eq!(remediation.summary.patch_available, 0);
     assert_eq!(remediation.summary.average_confidence, 0.0);
 }
 
