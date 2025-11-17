@@ -6,7 +6,6 @@ name: "CodeQL Configuration"
 # Paths to scan
 paths:
   - mcp/src
-  - samples
 
 # Paths to ignore
 paths-ignore:
