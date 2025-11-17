@@ -1,0 +1,149 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "updated": "2025-11-17",
+    "source": "NIST/CCCS Cryptographic Module Validation Program",
+    "description": "Sample CMVP certificates for common cryptographic libraries",
+    "note": "This is a sample database. For production use, integrate with NIST CMVP API or maintain updated certificate list."
+  },
+  "certificates": [
+    {
+      "certificate_number": "4282",
+      "vendor": "OpenSSL Software Foundation",
+      "module_name": "OpenSSL FIPS Object Module",
+      "validation_level": "Level1",
+      "algorithms": ["AES", "RSA", "ECDSA", "SHA-256", "SHA-384", "SHA-512", "HMAC"],
+      "expiry_date": null,
+      "status": "active",
+      "description": "OpenSSL FIPS module validated for FIPS 140-2"
+    },
+    {
+      "certificate_number": "3966",
+      "vendor": "Microsoft Corporation",
+      "module_name": "Cryptographic Primitives Library",
+      "validation_level": "Level1",
+      "algorithms": ["AES", "RSA", "ECDSA", "ECDH", "SHA-256", "SHA-384", "SHA-512"],
+      "expiry_date": null,
+      "status": "active",
+      "description": "Windows cryptographic library"
+    },
+    {
+      "certificate_number": "4011",
+      "vendor": "IBM Corporation",
+      "module_name": "IBM Crypto for C",
+      "validation_level": "Level1",
+      "algorithms": ["AES", "3DES", "RSA", "ECDSA", "SHA-256", "SHA-512"],
+      "expiry_date": null,
+      "status": "active",
+      "description": "IBM cryptographic library"
+    },
+    {
+      "certificate_number": "3615",
+      "vendor": "Oracle Corporation",
+      "module_name": "Oracle Java JCE",
+      "validation_level": "Level1",
+      "algorithms": ["AES", "RSA", "SHA-256", "SHA-384", "SHA-512"],
+      "expiry_date": null,
+      "status": "active",
+      "description": "Java Cryptography Extension"
+    },
+    {
+      "certificate_number": "4118",
+      "vendor": "Bouncy Castle",
+      "module_name": "BC-FJA (Bouncy Castle FIPS Java API)",
+      "validation_level": "Level1",
+      "algorithms": ["AES", "RSA", "ECDSA", "SHA-2", "SHA-3"],
+      "expiry_date": null,
+      "status": "active",
+      "description": "Bouncy Castle FIPS certified Java cryptography"
+    },
+    {
+      "certificate_number": "3747",
+      "vendor": "Certicom Corp.",
+      "module_name": "Security Builder FIPS Core",
+      "validation_level": "Level1",
+      "algorithms": ["AES", "RSA", "ECDSA", "ECDH", "SHA-256"],
+      "expiry_date": null,
+      "status": "active",
+      "description": "Certicom cryptographic module"
+    },
+    {
+      "certificate_number": "2398",
+      "vendor": "RSA Security",
+      "module_name": "RSA BSAFE Crypto-C ME",
+      "validation_level": "Level1",
+      "algorithms": ["AES", "3DES", "RSA", "SHA-1", "SHA-256"],
+      "expiry_date": "2023-12-31",
+      "status": "historical",
+      "description": "Legacy RSA cryptographic module"
+    },
+    {
+      "certificate_number": "4536",
+      "vendor": "Amazon Web Services",
+      "module_name": "AWS-LC Cryptographic Module",
+      "validation_level": "Level1",
+      "algorithms": ["AES", "RSA", "ECDSA", "ECDH", "SHA-256", "SHA-384", "SHA-512"],
+      "expiry_date": null,
+      "status": "active",
+      "description": "AWS libcrypto FIPS module"
+    },
+    {
+      "certificate_number": "4407",
+      "vendor": "wolfSSL Inc.",
+      "module_name": "wolfCrypt FIPS",
+      "validation_level": "Level1",
+      "algorithms": ["AES", "RSA", "ECDSA", "SHA-256", "SHA-384", "SHA-512"],
+      "expiry_date": null,
+      "status": "active",
+      "description": "wolfSSL FIPS cryptographic module"
+    },
+    {
+      "certificate_number": "3709",
+      "vendor": "Cisco Systems",
+      "module_name": "Cisco FIPS Object Module",
+      "validation_level": "Level2",
+      "algorithms": ["AES", "3DES", "RSA", "ECDSA", "SHA-256"],
+      "expiry_date": null,
+      "status": "active",
+      "description": "Cisco IOS cryptographic module"
+    }
+  ],
+  "library_mappings": {
+    "openssl": {
+      "library_name": "OpenSSL",
+      "common_packages": ["openssl", "libssl", "crypto"],
+      "cmvp_cert_numbers": ["4282"],
+      "notes": "Verify FIPS mode is enabled"
+    },
+    "bcrypt": {
+      "library_name": "Microsoft CNG/Bcrypt",
+      "common_packages": ["bcrypt", "cng"],
+      "cmvp_cert_numbers": ["3966"],
+      "notes": "Windows native cryptography"
+    },
+    "java.security": {
+      "library_name": "Java JCE",
+      "common_packages": ["java.security", "javax.crypto"],
+      "cmvp_cert_numbers": ["3615"],
+      "notes": "Oracle Java Cryptography Extension"
+    },
+    "bouncycastle": {
+      "library_name": "Bouncy Castle",
+      "common_packages": ["org.bouncycastle"],
+      "cmvp_cert_numbers": ["4118"],
+      "notes": "Use BC-FJA for FIPS compliance"
+    },
+    "aws-lc": {
+      "library_name": "AWS-LC",
+      "common_packages": ["aws-lc", "aws-lc-rs"],
+      "cmvp_cert_numbers": ["4536"],
+      "notes": "AWS libcrypto fork of BoringSSL"
+    },
+    "wolfssl": {
+      "library_name": "wolfSSL",
+      "common_packages": ["wolfssl", "wolfcrypt"],
+      "cmvp_cert_numbers": ["4407"],
+      "notes": "Embedded systems crypto library"
+    }
+  }
+}
