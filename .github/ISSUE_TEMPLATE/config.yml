@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/arcqubit/pqc-scanner/discussions
+    about: Ask questions, share ideas, and engage with the community
+  - name: Security Vulnerability
+    url: https://github.com/arcqubit/pqc-scanner/security/advisories/new
+    about: Report security vulnerabilities privately (DO NOT use public issues)
+  - name: Support
+    url: https://github.com/arcqubit/pqc-scanner/blob/main/SUPPORT.md
+    about: Get help with installation, usage, and troubleshooting
