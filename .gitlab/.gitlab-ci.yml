@@ -1,0 +1,436 @@
+# GitLab CI/CD Configuration for pqc-scanner
+# Version: 2025.11.0
+# Documentation: https://docs.gitlab.com/ee/ci/
+
+# Global settings
+workflow:
+  rules:
+    # Run on main and develop branches
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"
+    # Run on merge requests
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Run on tags (releases)
+    - if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/
+    # Manual pipeline runs
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+variables:
+  CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+  # Disable incremental compilation for CI
+  CARGO_INCREMENTAL: "0"
+  # Security: Use minimal profile for faster builds
+  CARGO_PROFILE_DEV_DEBUG: "0"
+
+# Define pipeline stages
+stages:
+  - validate
+  - test
+  - build
+  - security
+  - package
+  - publish
+
+# Default settings for all jobs
+default:
+  image: rust:1.83-bookworm
+  before_script:
+    - rustc --version
+    - cargo --version
+  cache:
+    key:
+      files:
+        - Cargo.lock
+    paths:
+      - .cargo/registry
+      - .cargo/git
+      - target/
+    policy: pull-push
+
+# ============================================================================
+# VALIDATE STAGE
+# ============================================================================
+
+format-check:
+  stage: validate
+  script:
+    - rustup component add rustfmt
+    - cargo fmt -- --check
+  cache:
+    policy: pull
+
+lint-clippy:
+  stage: validate
+  script:
+    - rustup component add clippy
+    - cargo clippy --all-targets --all-features -- -D warnings
+  cache:
+    policy: pull
+
+dependency-check:
+  stage: validate
+  image: rust:1.83-bookworm
+  script:
+    - cargo tree --all-features
+    - cargo tree --duplicates
+  allow_failure: true
+  cache:
+    policy: pull
+
+# ============================================================================
+# TEST STAGE
+# ============================================================================
+
+unit-tests:
+  stage: test
+  script:
+    - cargo test --verbose --all-features
+  artifacts:
+    reports:
+      junit: target/junit.xml
+    when: always
+  coverage: '/^\s*lines:\s*\d+\.\d+\%/'
+
+integration-tests:
+  stage: test
+  script:
+    - cargo test --test integration_tests --verbose
+  allow_failure: false
+
+wasm-tests:
+  stage: test
+  before_script:
+    - rustup target add wasm32-unknown-unknown
+    - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+  script:
+    - wasm-pack test --node
+  cache:
+    key: wasm-cache
+    paths:
+      - .cargo/registry
+      - .cargo/git
+      - target/
+
+code-coverage:
+  stage: test
+  image: rust:1.83-bookworm
+  before_script:
+    - cargo install cargo-tarpaulin --version 0.31.2 --locked
+  script:
+    - cargo tarpaulin --out Xml --output-dir coverage --verbose
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura.xml
+    paths:
+      - coverage/
+    expire_in: 30 days
+  coverage: '/^\d+\.\d+% coverage/'
+  allow_failure: true
+
+# ============================================================================
+# BUILD STAGE
+# ============================================================================
+
+build-binary:
+  stage: build
+  script:
+    - cargo build --release --verbose
+    - ls -lh target/release/pqc-scanner || echo "Binary not found"
+  artifacts:
+    paths:
+      - target/release/pqc-scanner
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+    - tags
+
+build-wasm-bundler:
+  stage: build
+  before_script:
+    - rustup target add wasm32-unknown-unknown
+    - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+  script:
+    - wasm-pack build --target bundler --out-dir pkg --release
+    - ls -lh pkg/
+  artifacts:
+    paths:
+      - pkg/
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+    - tags
+
+build-wasm-nodejs:
+  stage: build
+  before_script:
+    - rustup target add wasm32-unknown-unknown
+    - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+  script:
+    - wasm-pack build --target nodejs --out-dir pkg-nodejs --release
+    - ls -lh pkg-nodejs/
+  artifacts:
+    paths:
+      - pkg-nodejs/
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+    - tags
+
+build-wasm-web:
+  stage: build
+  before_script:
+    - rustup target add wasm32-unknown-unknown
+    - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+  script:
+    - wasm-pack build --target web --out-dir pkg-web --release
+    - ls -lh pkg-web/
+  artifacts:
+    paths:
+      - pkg-web/
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+    - tags
+
+benchmark:
+  stage: build
+  script:
+    - cargo bench --no-run --verbose
+  artifacts:
+    paths:
+      - target/release/deps/benchmarks-*
+    expire_in: 1 week
+  allow_failure: true
+  only:
+    - main
+    - develop
+
+# ============================================================================
+# SECURITY STAGE
+# ============================================================================
+
+security-audit:
+  stage: security
+  before_script:
+    - cargo install cargo-audit --version 0.22.0 --locked
+  script:
+    - cargo audit --json > audit-results.json
+  artifacts:
+    reports:
+      security: audit-results.json
+    paths:
+      - audit-results.json
+    expire_in: 30 days
+  allow_failure: true
+
+unsafe-code-detection:
+  stage: security
+  before_script:
+    - cargo install cargo-geiger --version 0.11.7 --locked
+  script:
+    - cargo geiger --all-features --all-targets --exclude-tests || echo "Unsafe code detected"
+  allow_failure: true
+
+sbom-generation:
+  stage: security
+  before_script:
+    - cargo install cargo-sbom --version 0.9.1 --locked
+    - cargo install cargo-cyclonedx --version 0.5.4 --locked
+  script:
+    - cargo sbom --output-format spdx_json_2_3 > sbom-spdx.json
+    - cargo cyclonedx --format json --spec-version 1.5 --output-cdx sbom-cyclonedx.json
+    - cargo tree --all-features > sbom-dependencies.txt
+  artifacts:
+    paths:
+      - sbom-*.json
+      - sbom-dependencies.txt
+    expire_in: 90 days
+  only:
+    - main
+    - tags
+
+container-scan:
+  stage: security
+  image: docker:27-dind
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - apk add --no-cache curl
+    - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+  script:
+    - docker build -t pqc-scanner:${CI_COMMIT_SHORT_SHA} .
+    - trivy image --exit-code 0 --severity HIGH,CRITICAL pqc-scanner:${CI_COMMIT_SHORT_SHA}
+  allow_failure: true
+  only:
+    - main
+    - tags
+  needs:
+    - build-binary
+
+# ============================================================================
+# PACKAGE STAGE
+# ============================================================================
+
+package-artifacts:
+  stage: package
+  image: alpine:3.19
+  before_script:
+    - apk add --no-cache tar gzip coreutils
+  script:
+    - |
+      VERSION="${CI_COMMIT_TAG#v}"
+      if [ -z "$VERSION" ]; then
+        VERSION="${CI_COMMIT_SHORT_SHA}"
+      fi
+
+      # Create binary archive
+      if [ -f target/release/pqc-scanner ]; then
+        mkdir -p release-artifacts
+        cp target/release/pqc-scanner release-artifacts/
+        tar -czf pqc-scanner-${VERSION}-linux-x86_64.tar.gz -C release-artifacts pqc-scanner
+      fi
+
+      # Create WASM archives
+      tar -czf pqc-scanner-wasm-bundler-${VERSION}.tar.gz pkg/
+      tar -czf pqc-scanner-wasm-nodejs-${VERSION}.tar.gz pkg-nodejs/
+      tar -czf pqc-scanner-wasm-web-${VERSION}.tar.gz pkg-web/
+      tar -czf pqc-scanner-wasm-all-${VERSION}.tar.gz pkg/ pkg-nodejs/ pkg-web/
+
+      # Generate checksums
+      sha256sum pqc-scanner-*.tar.gz > checksums.txt
+
+      ls -lh pqc-scanner-*.tar.gz
+  artifacts:
+    paths:
+      - pqc-scanner-*.tar.gz
+      - checksums.txt
+    expire_in: 1 month
+  only:
+    - main
+    - tags
+  needs:
+    - build-binary
+    - build-wasm-bundler
+    - build-wasm-nodejs
+    - build-wasm-web
+
+build-container:
+  stage: package
+  image: docker:27-dind
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: "/certs"
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      # Build multi-arch image
+      docker buildx create --use
+      docker buildx build \
+        --platform linux/amd64,linux/arm64 \
+        --tag $IMAGE_TAG \
+        --tag $CI_REGISTRY_IMAGE:latest \
+        --push \
+        .
+  only:
+    - main
+    - tags
+  needs:
+    - build-binary
+
+# ============================================================================
+# PUBLISH STAGE
+# ============================================================================
+
+publish-gitlab-release:
+  stage: publish
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  script:
+    - |
+      VERSION="${CI_COMMIT_TAG#v}"
+
+      # Extract changelog for this version
+      if [ -f CHANGELOG.md ]; then
+        DESCRIPTION=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d')
+      else
+        DESCRIPTION="Release $VERSION"
+      fi
+
+      # Create GitLab release
+      release-cli create \
+        --name "Release v$VERSION" \
+        --tag-name "$CI_COMMIT_TAG" \
+        --description "$DESCRIPTION" \
+        --assets-link "{\"name\":\"Binary (Linux x86_64)\",\"url\":\"${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/pqc-scanner-${VERSION}-linux-x86_64.tar.gz?job=package-artifacts\"}" \
+        --assets-link "{\"name\":\"WASM (All Targets)\",\"url\":\"${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/pqc-scanner-wasm-all-${VERSION}.tar.gz?job=package-artifacts\"}" \
+        --assets-link "{\"name\":\"Checksums\",\"url\":\"${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/checksums.txt?job=package-artifacts\"}"
+  only:
+    - tags
+  needs:
+    - package-artifacts
+
+publish-npm:
+  stage: publish
+  image: node:20-bookworm
+  before_script:
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+  script:
+    - cd pkg
+    - npm publish --access public --provenance
+  only:
+    - tags
+  when: manual
+  needs:
+    - build-wasm-bundler
+
+publish-container-registry:
+  stage: publish
+  image: docker:27-dind
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      VERSION="${CI_COMMIT_TAG#v}"
+
+      # Tag and push version-specific image
+      docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+      docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:$VERSION
+      docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:latest
+      docker push $CI_REGISTRY_IMAGE:$VERSION
+      docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - tags
+  needs:
+    - build-container
+
+# ============================================================================
+# SCHEDULED JOBS
+# ============================================================================
+
+nightly-security-scan:
+  stage: security
+  before_script:
+    - cargo install cargo-audit --version 0.22.0 --locked
+  script:
+    - cargo audit
+  only:
+    - schedules
+  allow_failure: false

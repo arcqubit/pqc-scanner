@@ -1,0 +1,215 @@
+# ArgoCD Application Definition for pqc-scanner
+# Version: 2025.11.0
+# Documentation: https://argo-cd.readthedocs.io/
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pqc-scanner
+  namespace: argocd
+  # Finalizer to ensure proper cleanup
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  # Labels for organization and filtering
+  labels:
+    app: pqc-scanner
+    team: security
+    component: scanner
+    environment: production
+  # Annotations for additional metadata
+  annotations:
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: security-team
+    argocd-image-updater.argoproj.io/image-list: pqc-scanner=ghcr.io/arcqubit/pqc-scanner
+    argocd-image-updater.argoproj.io/pqc-scanner.update-strategy: semver
+
+spec:
+  # Project in ArgoCD
+  project: default
+
+  # Source repository configuration
+  source:
+    # Git repository URL
+    repoURL: https://github.com/arcqubit/pqc-scanner.git
+    # Target revision (branch, tag, or commit SHA)
+    targetRevision: main
+    # Path to Kubernetes manifests
+    path: argocd/manifests
+
+    # Kustomize build options
+    kustomize:
+      # Version of Kustomize to use
+      version: v5.0.0
+      # Name prefix for all resources
+      namePrefix: pqc-
+      # Common labels applied to all resources
+      commonLabels:
+        app: pqc-scanner
+        managed-by: argocd
+      # Images to override
+      images:
+        - ghcr.io/arcqubit/pqc-scanner:latest
+
+  # Destination cluster and namespace
+  destination:
+    # Kubernetes cluster (in-cluster or named cluster)
+    server: https://kubernetes.default.svc
+    # Target namespace
+    namespace: pqc-scanner
+
+  # Sync policy configuration
+  syncPolicy:
+    # Automated sync configuration
+    automated:
+      # Automatically sync when repository changes
+      prune: true
+      # Automatically sync when app is out of sync
+      selfHeal: true
+      # Allow empty resources (useful for initial setup)
+      allowEmpty: false
+
+    # Sync options
+    syncOptions:
+      # Create namespace if it doesn't exist
+      - CreateNamespace=true
+      # Validate resources against Kubernetes API
+      - Validate=true
+      # Use server-side apply (recommended for CRDs)
+      - ServerSideApply=true
+      # Prune last (safer for dependencies)
+      - PruneLast=true
+      # Respect ignore differences
+      - RespectIgnoreDifferences=true
+
+    # Retry configuration for failed syncs
+    retry:
+      # Maximum number of retry attempts
+      limit: 5
+      # Backoff configuration
+      backoff:
+        # Initial backoff duration
+        duration: 5s
+        # Maximum backoff duration
+        maxDuration: 3m
+        # Backoff factor (exponential)
+        factor: 2
+
+  # Ignore differences in specific fields
+  ignoreDifferences:
+    # Ignore differences in replica count (for HPA)
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+    # Ignore differences in last-applied-configuration annotation
+    - group: "*"
+      kind: "*"
+      jqPathExpressions:
+        - .metadata.annotations."kubectl.kubernetes.io/last-applied-configuration"
+
+  # Health assessment configuration
+  health:
+    # Custom health checks
+    # None needed for standard Deployment resources
+
+  # Resource tracking method
+  revisionHistoryLimit: 10
+
+---
+# ArgoCD Application for Development Environment
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pqc-scanner-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: pqc-scanner
+    team: security
+    environment: development
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/arcqubit/pqc-scanner.git
+    targetRevision: develop
+    path: argocd/manifests
+
+    kustomize:
+      version: v5.0.0
+      namePrefix: pqc-dev-
+      commonLabels:
+        app: pqc-scanner
+        environment: dev
+      # Use development overlay
+      images:
+        - ghcr.io/arcqubit/pqc-scanner:develop
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pqc-scanner-dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+    syncOptions:
+      - CreateNamespace=true
+      - Validate=true
+
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        maxDuration: 1m
+        factor: 2
+
+---
+# ArgoCD Application for Staging Environment
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pqc-scanner-staging
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app: pqc-scanner
+    team: security
+    environment: staging
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/arcqubit/pqc-scanner.git
+    targetRevision: main
+    path: argocd/manifests
+
+    kustomize:
+      version: v5.0.0
+      namePrefix: pqc-staging-
+      commonLabels:
+        app: pqc-scanner
+        environment: staging
+      images:
+        - ghcr.io/arcqubit/pqc-scanner:latest
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pqc-scanner-staging
+
+  syncPolicy:
+    # Manual sync for staging (requires approval)
+    syncOptions:
+      - CreateNamespace=true
+      - Validate=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        maxDuration: 2m
+        factor: 2

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scanner-config
+  labels:
+    app: pqc-scanner
+    component: scanner
+data:
+  # Logging configuration
+  log_level: "info"
+
+  # Scanner configuration
+  scan_timeout: "300"
+  max_file_size: "10485760"  # 10MB
+
+  # Performance tuning
+  worker_threads: "4"
+  max_concurrent_scans: "10"
+
+  # Feature flags
+  enable_metrics: "true"
+  enable_health_check: "true"
+
+  # Output configuration
+  output_format: "json"
+  include_recommendations: "true"
