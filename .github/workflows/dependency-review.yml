@@ -28,6 +28,6 @@ jobs:
           head-ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Cargo Audit Check
-        uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212ae857c29f4b  # v2.0.0
+        uses: actions-rust-lang/audit@f413e0f38395f6d92a275f25f2c4b20d8392349d  # v1.2.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          denyWarnings: true

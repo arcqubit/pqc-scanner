@@ -28,12 +28,12 @@ jobs:
           fetch-depth: 0  # Full history for comprehensive scanning
 
       - name: TruffleHog Secret Scanning
-        uses: trufflesecurity/trufflehog-actions-scan@fa1c262fef49c10fc49fd98d3ebb9dfd265b80cc  # v0.3.0
+        uses: trufflesecurity/trufflehog@main
         with:
           # Scan the entire repository
           path: ./
           # Only verified secrets
-          extra_args: --only-verified
+          extra_args: --only-verified --fail
 
   trufflehog-filesystem:
     name: TruffleHog Filesystem Scan
