@@ -27,7 +27,4 @@ jobs:
           base-ref: ${{ github.event.pull_request.base.sha }}
           head-ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Cargo Audit Check
-        uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212ae857c29f4b  # v2.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      # Note: Cargo audit is performed in the separate cargo-audit.yml workflow
