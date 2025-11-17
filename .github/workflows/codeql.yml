@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
   actions: read
 
 jobs:
@@ -20,6 +19,10 @@ jobs:
     name: Analyze Code with CodeQL
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write  # Required for CodeQL SARIF upload
+      actions: read
 
     strategy:
       fail-fast: false

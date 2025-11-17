@@ -58,10 +58,9 @@ We release security patches for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.2.x   | :white_check_mark: |
-| 1.1.x   | :white_check_mark: |
-| 1.0.x   | :x: |
-| < 1.0   | :x: |
+| 2025.11.x (latest)   | :white_check_mark: |
+| 2025.10.x   | :white_check_mark: |
+| < 2025.10   | :x: |
 
 ### Security Advisories
 
@@ -76,6 +75,7 @@ This project uses multiple security tools:
 - **Dependabot**: Automated dependency vulnerability scanning
 - **CodeQL**: Static analysis security testing (SAST)
 - **Cargo Audit**: Rust security advisory database checks
+- **OpenSSF Scorecard**: Weekly supply chain security assessment
 - **Secret Scanning**: Detects accidentally committed secrets
 
 ## Security Best Practices for Contributors
@@ -113,7 +113,72 @@ We maintain supply chain security through:
 - **Cargo.lock committed**: Ensures reproducible builds
 - **Dependency review**: All dependency updates reviewed by maintainers
 - **SBOM generation**: Software Bill of Materials included with releases
-- **Signed releases**: All release artifacts are checksummed
+- **Signed releases**: All releases cryptographically signed with Sigstore
+- **SLSA Provenance**: SLSA Build Level 3 attestations for all artifacts
+
+#### Verifying Signed Releases
+
+All PQC Scanner releases are cryptographically signed using [Sigstore](https://www.sigstore.dev/):
+
+```bash
+# Install cosign
+brew install cosign  # macOS
+# or: https://docs.sigstore.dev/cosign/installation/
+
+# Download release and signature
+wget https://github.com/arcqubit/pqc-scanner/releases/download/v2025.11.0/pqc-scanner-2025.11.0-linux-x86_64.tar.gz
+wget https://github.com/arcqubit/pqc-scanner/releases/download/v2025.11.0/pqc-scanner-2025.11.0-linux-x86_64.tar.gz.sigstore.json
+
+# Verify signature
+cosign verify-blob \
+  --bundle pqc-scanner-2025.11.0-linux-x86_64.tar.gz.sigstore.json \
+  --certificate-identity "https://github.com/arcqubit/pqc-scanner/.github/workflows/release.yml@refs/tags/v2025.11.0" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  pqc-scanner-2025.11.0-linux-x86_64.tar.gz
+```
+
+Expected output: `Verified OK`
+
+#### Verifying SLSA Provenance
+
+All releases include [SLSA Build Level 3](https://slsa.dev/) provenance:
+
+```bash
+# Install slsa-verifier
+wget https://github.com/slsa-framework/slsa-verifier/releases/download/v2.6.0/slsa-verifier-linux-amd64
+sudo mv slsa-verifier-linux-amd64 /usr/local/bin/slsa-verifier
+sudo chmod +x /usr/local/bin/slsa-verifier
+
+# Download provenance
+wget https://github.com/arcqubit/pqc-scanner/releases/download/v2025.11.0/multiple.intoto.jsonl
+
+# Verify provenance
+slsa-verifier verify-artifact \
+  --provenance-path multiple.intoto.jsonl \
+  --source-uri github.com/arcqubit/pqc-scanner \
+  pqc-scanner-2025.11.0-linux-x86_64.tar.gz
+```
+
+Expected output: `Verified SLSA provenance`
+
+#### Verifying Container Images
+
+Docker images are signed and attested:
+
+```bash
+# Verify image signature
+cosign verify \
+  --certificate-identity "https://github.com/arcqubit/pqc-scanner/.github/workflows/release.yml@refs/heads/main" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghcr.io/arcqubit/pqc-scanner:2025.11.0
+
+# Verify SBOM attestation
+cosign verify-attestation \
+  --type spdxjson \
+  --certificate-identity "https://github.com/arcqubit/pqc-scanner/.github/workflows/release.yml@refs/heads/main" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghcr.io/arcqubit/pqc-scanner:2025.11.0
+```
 
 ## Vulnerability Disclosure Policy
 
@@ -144,7 +209,20 @@ We recognize security researchers who help improve our security:
 - [Rust Security Guidelines](https://anssi-fr.github.io/rust-guide/)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 
+## OpenSSF Best Practices
+
+Current OpenSSF Scorecard: [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/arcqubit/pqc-scanner/badge)](https://securityscorecards.dev/viewer/?uri=github.com/arcqubit/pqc-scanner)
+
+We follow [OpenSSF Best Practices](https://www.bestpractices.dev/):
+
+- ✅ **Token Permissions**: Minimal necessary permissions in GitHub Actions
+- ✅ **Signed Releases**: All releases signed with Sigstore
+- ✅ **SLSA Provenance**: SLSA Level 3 build provenance
+- ✅ **Dependency Scanning**: Automated vulnerability scanning
+- ✅ **Branch Protection**: Required reviews for main branch
+- ✅ **Security Policy**: This document
+
 ---
 
-**Last Updated**: 2025-11-11
-**Policy Version**: 1.0.0
+**Last Updated**: 2025-11-17
+**Policy Version**: 2.0.0

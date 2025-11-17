@@ -19,13 +19,15 @@ on:
 permissions:
   contents: read
   issues: write
-  security-events: write
 
 jobs:
   security-audit:
     name: Cargo Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write  # Required for SARIF upload
 
     steps:
       - name: Checkout repository

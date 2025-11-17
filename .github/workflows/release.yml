@@ -24,8 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      contents: write
-      id-token: write
+      contents: write       # Required: Create GitHub releases
+      id-token: write       # Required: Sigstore signing
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+      VERSION: ${{ steps.changelog.outputs.VERSION }}
 
     steps:
       - name: Checkout code
@@ -89,6 +92,49 @@ jobs:
           # Generate checksums
           sha256sum pdq-scanner-*.tar.gz > checksums.txt
 
+      - name: Generate artifact hashes for SLSA
+        id: hash
+        run: |
+          set -euo pipefail
+          # Generate SHA256 hashes in base64 format for SLSA provenance
+          sha256sum pdq-scanner-*.tar.gz > SHA256SUMS
+          echo "hashes=$(cat SHA256SUMS | base64 -w0)" >> $GITHUB_OUTPUT
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da  # v3.7.0
+
+      - name: Sign release artifacts with Sigstore
+        run: |
+          VERSION="${{ steps.changelog.outputs.VERSION }}"
+
+          # Sign all release archives
+          for file in pdq-scanner-*.tar.gz; do
+            echo "Signing $file with Sigstore..."
+            cosign sign-blob \
+              --yes \
+              --bundle "${file}.sigstore.json" \
+              "$file"
+          done
+
+          # Sign checksums file
+          cosign sign-blob \
+            --yes \
+            --bundle checksums.txt.sigstore.json \
+            checksums.txt
+
+      - name: Verify signatures
+        run: |
+          VERSION="${{ steps.changelog.outputs.VERSION }}"
+
+          for file in pdq-scanner-*.tar.gz; do
+            echo "Verifying signature for $file..."
+            cosign verify-blob \
+              --bundle "${file}.sigstore.json" \
+              --certificate-identity "https://github.com/${{ github.repository }}/.github/workflows/release.yml@refs/tags/v${VERSION}" \
+              --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+              "$file"
+          done
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191  # v2.0.8
         with:
@@ -99,7 +145,10 @@ jobs:
           prerelease: ${{ github.event.inputs.prerelease || false }}
           files: |
             pdq-scanner-*.tar.gz
+            pdq-scanner-*.tar.gz.sigstore.json
             checksums.txt
+            checksums.txt.sigstore.json
+            SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -160,3 +209,41 @@ jobs:
         with:
           name: sbom
           path: sbom.json
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da  # v3.7.0
+
+      - name: Sign container image
+        run: |
+          echo "Signing container image with Sigstore..."
+          cosign sign --yes \
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}
+
+      - name: Generate SBOM attestation for container
+        run: |
+          echo "Generating SBOM attestation..."
+          cosign attest --yes \
+            --predicate sbom.json \
+            --type spdxjson \
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}
+
+      - name: Verify container signature
+        run: |
+          echo "Verifying container signature..."
+          cosign verify \
+            --certificate-identity "https://github.com/${{ github.repository }}/.github/workflows/release.yml@refs/tags/v${{ steps.version.outputs.VERSION }}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}
+
+  generate-provenance:
+    name: Generate SLSA Provenance
+    needs: create-release
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    with:
+      base64-subjects: "${{ needs.create-release.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "v${{ needs.create-release.outputs.VERSION }}"
