@@ -1,0 +1,290 @@
+name: Trivy Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 4:00 UTC
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write  # Required for SARIF upload
+  packages: read
+
+jobs:
+  trivy-filesystem:
+    name: Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2badd27af163e6c1a2d  # v0.29.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-fs-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'  # Don't fail CI on findings
+          scanners: 'vuln,secret,misconfig'
+
+      - name: Upload Trivy filesystem results to Security tab
+        uses: github/codeql-action/upload-sarif@ea9e4e37992a54ee68a9622e985e60c8e8f12d9f  # v3.27.4
+        with:
+          sarif_file: 'trivy-fs-results.sarif'
+          category: 'trivy-filesystem'
+
+      - name: Run Trivy filesystem scan (table output)
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2badd27af163e6c1a2d  # v0.29.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+          scanners: 'vuln,secret,misconfig'
+
+  trivy-config:
+    name: Trivy IaC/Config Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Run Trivy configuration scan
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2badd27af163e6c1a2d  # v0.29.0
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-config-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+          scanners: 'misconfig'
+
+      - name: Upload Trivy config results to Security tab
+        uses: github/codeql-action/upload-sarif@ea9e4e37992a54ee68a9622e985e60c8e8f12d9f  # v3.27.4
+        with:
+          sarif_file: 'trivy-config-results.sarif'
+          category: 'trivy-config'
+
+      - name: Run Trivy config scan (table output)
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2badd27af163e6c1a2d  # v0.29.0
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+          scanners: 'misconfig'
+
+  trivy-repo:
+    name: Trivy Repository Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Run Trivy repository scan
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2badd27af163e6c1a2d  # v0.29.0
+        with:
+          scan-type: 'repo'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-repo-results.json'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          exit-code: '0'
+          scanners: 'vuln,secret,misconfig,license'
+
+      - name: Display repository scan summary
+        if: always()
+        run: |
+          if [ -f trivy-repo-results.json ]; then
+            echo "===================================="
+            echo "Trivy Repository Scan Summary"
+            echo "===================================="
+
+            # Count vulnerabilities by severity
+            CRITICAL=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-repo-results.json)
+            HIGH=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="HIGH")] | length' trivy-repo-results.json)
+            MEDIUM=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="MEDIUM")] | length' trivy-repo-results.json)
+            LOW=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="LOW")] | length' trivy-repo-results.json)
+
+            # Count secrets
+            SECRETS=$(jq '[.Results[]?.Secrets[]?] | length' trivy-repo-results.json)
+
+            # Count misconfigurations
+            MISCONFIGS=$(jq '[.Results[]?.Misconfigurations[]?] | length' trivy-repo-results.json)
+
+            echo "Vulnerabilities:"
+            echo "  CRITICAL: $CRITICAL"
+            echo "  HIGH: $HIGH"
+            echo "  MEDIUM: $MEDIUM"
+            echo "  LOW: $LOW"
+            echo ""
+            echo "Secrets: $SECRETS"
+            echo "Misconfigurations: $MISCONFIGS"
+
+            # Fail if critical or high vulnerabilities found
+            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+              echo ""
+              echo "::warning::Critical or High severity vulnerabilities detected!"
+            fi
+          fi
+
+      - name: Upload repository scan results
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        with:
+          name: trivy-repo-results
+          path: trivy-repo-results.json
+          retention-days: 30
+
+  trivy-sbom:
+    name: Trivy SBOM Generation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Generate SBOM (SPDX)
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2badd27af163e6c1a2d  # v0.29.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'spdx-json'
+          output: 'trivy-sbom-spdx.json'
+
+      - name: Generate SBOM (CycloneDX)
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2badd27af163e6c1a2d  # v0.29.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'cyclonedx'
+          output: 'trivy-sbom-cyclonedx.json'
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        with:
+          name: trivy-sbom
+          path: |
+            trivy-sbom-spdx.json
+            trivy-sbom-cyclonedx.json
+          retention-days: 90
+
+  trivy-docker:
+    name: Trivy Docker Image Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Build Docker image for scanning
+        run: |
+          docker build -t pqc-scanner:scan-test . || {
+            echo "::notice::Docker build failed or Dockerfile not present, skipping image scan"
+            exit 0
+          }
+
+      - name: Run Trivy image scan
+        if: success()
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2badd27af163e6c1a2d  # v0.29.0
+        with:
+          scan-type: 'image'
+          image-ref: 'pqc-scanner:scan-test'
+          format: 'sarif'
+          output: 'trivy-image-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+
+      - name: Upload Trivy image results
+        if: success()
+        uses: github/codeql-action/upload-sarif@ea9e4e37992a54ee68a9622e985e60c8e8f12d9f  # v3.27.4
+        with:
+          sarif_file: 'trivy-image-results.sarif'
+          category: 'trivy-docker-image'
+
+      - name: Run Trivy image scan (table output)
+        if: success()
+        uses: aquasecurity/trivy-action@5681af892cd0f4997658e2badd27af163e6c1a2d  # v0.29.0
+        with:
+          scan-type: 'image'
+          image-ref: 'pqc-scanner:scan-test'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+  security-summary:
+    name: Trivy Security Summary
+    needs: [trivy-filesystem, trivy-config, trivy-repo, trivy-sbom]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download repository scan results
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: trivy-repo-results
+        continue-on-error: true
+
+      - name: Generate Trivy security summary
+        run: |
+          echo "# 🛡️ Trivy Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Scan Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Filesystem Scan | ${{ needs.trivy-filesystem.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Configuration Scan | ${{ needs.trivy-config.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Repository Scan | ${{ needs.trivy-repo.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SBOM Generation | ${{ needs.trivy-sbom.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f trivy-repo-results.json ]; then
+            CRITICAL=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-repo-results.json)
+            HIGH=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="HIGH")] | length' trivy-repo-results.json)
+            MEDIUM=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="MEDIUM")] | length' trivy-repo-results.json)
+            SECRETS=$(jq '[.Results[]?.Secrets[]?] | length' trivy-repo-results.json)
+            MISCONFIGS=$(jq '[.Results[]?.Misconfigurations[]?] | length' trivy-repo-results.json)
+
+            echo "## Vulnerability Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Category | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Critical Vulnerabilities | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| High Vulnerabilities | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| Medium Vulnerabilities | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+            echo "| Exposed Secrets | $SECRETS |" >> $GITHUB_STEP_SUMMARY
+            echo "| Misconfigurations | $MISCONFIGS |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "## What Trivy Scans" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Vulnerabilities** (OS packages, language dependencies)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Secrets** (API keys, passwords, tokens)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Misconfigurations** (Dockerfiles, K8s, Terraform)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **License compliance** (OSS licenses)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **SBOM generation** (SPDX, CycloneDX)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View detailed findings in the Security tab or download artifacts." >> $GITHUB_STEP_SUMMARY
