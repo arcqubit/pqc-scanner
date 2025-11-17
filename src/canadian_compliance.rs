@@ -236,24 +236,23 @@ fn generate_canadian_summary(
         }
 
         // Categorize by CCCS status
-        if algorithm_database::is_cccs_prohibited(&vuln.crypto_type) {
-            if !cccs_prohibited.contains(&crypto_name) {
-                cccs_prohibited.push(crypto_name.clone());
-            }
-        } else if algorithm_database::is_cccs_deprecated(&vuln.crypto_type) {
-            if !cccs_deprecated_list.contains(&crypto_name) {
-                cccs_deprecated_list.push(crypto_name.clone());
-            }
+        if algorithm_database::is_cccs_prohibited(&vuln.crypto_type)
+            && !cccs_prohibited.contains(&crypto_name)
+        {
+            cccs_prohibited.push(crypto_name.clone());
+        } else if algorithm_database::is_cccs_deprecated(&vuln.crypto_type)
+            && !cccs_deprecated_list.contains(&crypto_name)
+        {
+            cccs_deprecated_list.push(crypto_name.clone());
         }
 
         // Track weak key sizes
-        if let Some(key_size) = vuln.key_size {
-            if !algorithm_database::validate_key_size(&vuln.crypto_type, key_size, classification)
-            {
-                let key_info = format!("{} {}-bit", crypto_name, key_size);
-                if !weak_keys.contains(&key_info) {
-                    weak_keys.push(key_info);
-                }
+        if let Some(key_size) = vuln.key_size
+            && !algorithm_database::validate_key_size(&vuln.crypto_type, key_size, classification)
+        {
+            let key_info = format!("{} {}-bit", crypto_name, key_size);
+            if !weak_keys.contains(&key_info) {
+                weak_keys.push(key_info);
             }
         }
     }
@@ -713,9 +712,9 @@ fn generate_canadian_recommendations(
             .to_string(),
     );
 
-    recommendations.push(format!(
-        "Reference: ITSG-33 Annex 3A SC-13, ITSP.40.111 (Cryptographic Algorithms), ITSP.40.062 (Network Protocols), CMVP (Cryptographic Module Validation Program)."
-    ));
+    recommendations.push(
+        "Reference: ITSG-33 Annex 3A SC-13, ITSP.40.111 (Cryptographic Algorithms), ITSP.40.062 (Network Protocols), CMVP (Cryptographic Module Validation Program).".to_string()
+    );
 
     recommendations
 }
