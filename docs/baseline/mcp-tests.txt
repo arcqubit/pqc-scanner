@@ -1,0 +1,2 @@
+✅ MCP test: Manual verification - server starts successfully
+PQC Scanner MCP Server running on stdio

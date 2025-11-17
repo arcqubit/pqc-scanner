@@ -1,0 +1,4 @@
+-rwxrwxrwx 2 bowma bowma 2.0M Nov 17 17:46 target/release/pqc-scanner
+-rwxrwxrwx 2 bowma bowma 2.0M Nov 17 09:20 target/release/pqc-scanner-cli
+-rwxrwxrwx 1 bowma bowma  564 Nov 17 09:20 target/release/pqc-scanner-cli.d
+-rwxrwxrwx 1 bowma bowma  847 Nov 17 17:46 target/release/pqc-scanner.d
