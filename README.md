@@ -501,19 +501,48 @@ const fixes = generate_remediation(source, 'python', 'crypto.py');
 
 ## Sample Repositories
 
-Test the scanner against real-world vulnerable codebases:
+Test the scanner against real-world vulnerable codebases in our dedicated samples repository:
+
+**Repository**: [github.com/arcqubit/pqc-scanner-samples](https://github.com/arcqubit/pqc-scanner-samples)
+
+### Quick Start
 
 ```bash
-# Run automated scans
-make scan-samples
+# Clone the samples repository
+git clone https://github.com/arcqubit/pqc-scanner-samples.git
+
+# Scan individual samples
+pqc-scanner scan pqc-scanner-samples/legacy-banking/
+pqc-scanner scan pqc-scanner-samples/crypto-messenger/
+pqc-scanner scan pqc-scanner-samples/polyglot-app/
+
+# Or scan all samples
+pqc-scanner scan pqc-scanner-samples/
 ```
 
-**Available Sample Repos:**
-- **legacy-banking**: Financial app with RSA-1024 and MD5
-- **crypto-messenger**: Chat app with weak ECDH curves
-- **old-web-framework**: Framework using SHA-1 and 3DES
+### Available Samples
 
-See [docs/SAMPLE_REPOSITORIES.md](docs/SAMPLE_REPOSITORIES.md) for details.
+| Sample | Language | Vulnerabilities | LOC | Description |
+|--------|----------|----------------|-----|-------------|
+| **legacy-banking** | JavaScript | 15 | 8,247 | Financial app with RSA-1024, MD5, weak JWT |
+| **crypto-messenger** | Python | 12 | 4,892 | Chat app with ECDH P-192, SHA-1, weak DH |
+| **old-web-framework** | Java | 18 | 12,456 | Web framework using SHA-1, 3DES, weak SSL |
+| **iot-device** | C++ | 14 | 3,127 | IoT firmware with DES, RC4, hardcoded keys |
+| **polyglot-app** | Multi | 35+ | 5,137 | Mixed languages with comprehensive vulnerabilities |
+
+**Total**: 94+ vulnerabilities across 33,859 lines of code
+
+### Features
+
+- **Real-world patterns**: Authentic vulnerable code patterns found in legacy systems
+- **Multi-language coverage**: JavaScript, Python, Java, C++, Go, Rust, C#
+- **Comprehensive documentation**: Each sample includes vulnerability index and benchmarks
+- **CI/CD ready**: Pre-configured for automated security testing
+- **Educational focus**: Ideal for security training and testing
+
+For detailed vulnerability catalogs, performance benchmarks, and usage examples, see:
+- **[Samples Repository](https://github.com/arcqubit/pqc-scanner-samples)** - Main samples repo
+- **[docs/SAMPLES.md](docs/SAMPLES.md)** - Local reference guide
 
 ## Installation & Distribution
 
