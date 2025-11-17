@@ -138,7 +138,7 @@ def process_data(data):
 }
 
 #[test]
-fn test_unsupported_algorithm_warning() {
+fn test_ecdsa_remediation() {
     let source = r#"
 from ecdsa import SigningKey, NIST192p
 
@@ -148,10 +148,18 @@ sk = SigningKey.generate(curve=NIST192p)
     let audit_result = analyze(source, "python").unwrap();
     let remediation = generate_remediations(&audit_result, "ecdsa.py");
 
-    // ECDSA remediation not yet implemented
-    assert!(!remediation.warnings.is_empty());
-    assert!(remediation.summary.manual_only >= 1);
-    assert!(remediation.warnings.iter().any(|w| w.contains("ECDSA")));
+    // ECDSA now has remediation available
+    assert!(!remediation.fixes.is_empty());
+    assert!(remediation.summary.remediable >= 1);
+
+    // Find the ECDSA fix
+    let ecdsa_fix = remediation.fixes.iter().find(|f| f.algorithm.contains("ECDSA"));
+    assert!(ecdsa_fix.is_some());
+
+    let fix = ecdsa_fix.unwrap();
+    assert!(fix.algorithm.contains("Ed25519") || fix.algorithm.contains("Dilithium"));
+    assert!(fix.patch_available);
+    assert!(!fix.review_notes.is_empty());
 }
 
 #[test]

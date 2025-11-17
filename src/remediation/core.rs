@@ -104,6 +104,31 @@ pub fn generate_remediations(audit_result: &AuditResult, file_path: &str) -> Rem
                     fixes.push(fix);
                 }
             }
+            CryptoType::Ecdsa => {
+                if let Some(fix) = remediate_ecdsa(vuln, file_path) {
+                    fixes.push(fix);
+                }
+            }
+            CryptoType::Ecdh => {
+                if let Some(fix) = remediate_ecdh(vuln, file_path) {
+                    fixes.push(fix);
+                }
+            }
+            CryptoType::Dsa => {
+                if let Some(fix) = remediate_dsa(vuln, file_path) {
+                    fixes.push(fix);
+                }
+            }
+            CryptoType::DiffieHellman => {
+                if let Some(fix) = remediate_diffie_hellman(vuln, file_path) {
+                    fixes.push(fix);
+                }
+            }
+            CryptoType::Rc4 => {
+                if let Some(fix) = remediate_rc4(vuln, file_path) {
+                    fixes.push(fix);
+                }
+            }
             _ => {
                 // Add warning for unsupported remediation types
                 warnings.push(format!(
@@ -328,6 +353,195 @@ fn remediate_des_3des(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> 
     })
 }
 
+/// Generate remediation for ECDSA usage
+fn remediate_ecdsa(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
+    let old_code = vuln.context.trim().to_string();
+
+    // Suggest Ed25519 as interim, CRYSTALS-Dilithium as PQC target
+    let new_code = if old_code.contains("ECDSA") {
+        old_code.replace("ECDSA", "Ed25519")
+    } else if old_code.contains("ecdsa") {
+        old_code.replace("ecdsa", "ed25519")
+    } else if old_code.contains("EC") && old_code.contains("Sign") {
+        old_code.replace("EC", "Ed25519")
+    } else {
+        old_code.clone()
+    };
+
+    Some(CodeFix {
+        file_path: file_path.to_string(),
+        line: vuln.line,
+        column: vuln.column,
+        old_code,
+        new_code,
+        confidence: 0.65,
+        algorithm: "ECDSA → Ed25519 (interim) or CRYSTALS-Dilithium (PQC)".to_string(),
+        explanation: "ECDSA is quantum-vulnerable. Interim solution: Ed25519 (modern elliptic curve). Long-term: CRYSTALS-Dilithium (NIST FIPS 204). Ed25519 offers better performance and security than ECDSA but remains quantum-vulnerable.".to_string(),
+        patch_available: true,
+        review_notes: vec![
+            "Ed25519 is an interim solution - still quantum-vulnerable".to_string(),
+            "NIST FIPS 204: CRYSTALS-Dilithium for post-quantum signatures".to_string(),
+            "Ed25519 benefits: Faster, smaller keys, immunity to timing attacks".to_string(),
+            "Verify signature verification code handles Ed25519 format".to_string(),
+            "CCCS: ECDSA conditionally approved, sunset 2030 per ITSP.40.111 Section 4.2".to_string(),
+            "Plan migration to CRYSTALS-Dilithium by 2030".to_string(),
+            "Consider hybrid signatures during transition (Ed25519 + Dilithium)".to_string(),
+        ],
+        patch_file: None,
+    })
+}
+
+/// Generate remediation for ECDH usage
+fn remediate_ecdh(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
+    let old_code = vuln.context.trim().to_string();
+
+    // Suggest X25519 as interim, CRYSTALS-Kyber as PQC target
+    let new_code = if old_code.contains("ECDH") {
+        old_code.replace("ECDH", "X25519")
+    } else if old_code.contains("ecdh") {
+        old_code.replace("ecdh", "x25519")
+    } else if old_code.contains("EC") && (old_code.contains("DH") || old_code.contains("KeyExchange")) {
+        old_code.replace("ECDH", "X25519")
+    } else {
+        old_code.clone()
+    };
+
+    Some(CodeFix {
+        file_path: file_path.to_string(),
+        line: vuln.line,
+        column: vuln.column,
+        old_code,
+        new_code,
+        confidence: 0.65,
+        algorithm: "ECDH → X25519 (interim) or CRYSTALS-Kyber (PQC)".to_string(),
+        explanation: "ECDH is quantum-vulnerable. Interim solution: X25519 (Curve25519 key exchange). Long-term: CRYSTALS-Kyber (NIST FIPS 203) for key encapsulation. X25519 offers better performance than NIST curves but remains quantum-vulnerable.".to_string(),
+        patch_available: true,
+        review_notes: vec![
+            "X25519 is an interim solution - still quantum-vulnerable".to_string(),
+            "NIST FIPS 203: CRYSTALS-Kyber for post-quantum key encapsulation".to_string(),
+            "X25519 benefits: Constant-time, resistant to side-channel attacks".to_string(),
+            "Verify key exchange protocol handles X25519 format (32-byte keys)".to_string(),
+            "CCCS: ECDH conditionally approved, sunset 2030 per ITSP.40.111 Section 4.3".to_string(),
+            "Must use ephemeral keys for forward secrecy".to_string(),
+            "Plan migration to CRYSTALS-Kyber by 2030".to_string(),
+            "Consider hybrid KEM during transition (X25519 + Kyber)".to_string(),
+        ],
+        patch_file: None,
+    })
+}
+
+/// Generate remediation for DSA usage
+fn remediate_dsa(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
+    let old_code = vuln.context.trim().to_string();
+
+    // Suggest Ed25519 or RSA-2048 as interim, CRYSTALS-Dilithium as PQC target
+    let new_code = if old_code.contains("DSA") {
+        old_code.replace("DSA", "Ed25519")
+    } else if old_code.contains("dsa") {
+        old_code.replace("dsa", "ed25519")
+    } else {
+        old_code.clone()
+    };
+
+    Some(CodeFix {
+        file_path: file_path.to_string(),
+        line: vuln.line,
+        column: vuln.column,
+        old_code,
+        new_code,
+        confidence: 0.70,
+        algorithm: "DSA → Ed25519 or RSA-2048 (interim) or CRYSTALS-Dilithium (PQC)".to_string(),
+        explanation: "DSA is deprecated and quantum-vulnerable. Interim solutions: Ed25519 (preferred) or RSA-2048. Long-term: CRYSTALS-Dilithium (NIST FIPS 204). DSA has known weaknesses including vulnerability to poor random number generation.".to_string(),
+        patch_available: true,
+        review_notes: vec![
+            "DSA deprecated by NIST - migrate immediately".to_string(),
+            "Ed25519 preferred over RSA for new implementations".to_string(),
+            "NIST FIPS 204: CRYSTALS-Dilithium for post-quantum signatures".to_string(),
+            "DSA weaknesses: Vulnerable to nonce reuse, weak RNG".to_string(),
+            "CCCS: DSA deprecated per ITSP.40.111, sunset 2024".to_string(),
+            "Verify signature verification supports new algorithm".to_string(),
+            "Plan migration to CRYSTALS-Dilithium by 2030".to_string(),
+        ],
+        patch_file: None,
+    })
+}
+
+/// Generate remediation for Diffie-Hellman usage
+fn remediate_diffie_hellman(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
+    let old_code = vuln.context.trim().to_string();
+
+    // Suggest ECDH/X25519 as interim, CRYSTALS-Kyber as PQC target
+    let new_code = if old_code.contains("DiffieHellman") {
+        old_code.replace("DiffieHellman", "X25519")
+    } else if old_code.contains("DH") {
+        old_code.replace("DH", "ECDH")
+    } else {
+        old_code.clone()
+    };
+
+    Some(CodeFix {
+        file_path: file_path.to_string(),
+        line: vuln.line,
+        column: vuln.column,
+        old_code,
+        new_code,
+        confidence: 0.65,
+        algorithm: "Diffie-Hellman → ECDH/X25519 (interim) or CRYSTALS-Kyber (PQC)".to_string(),
+        explanation: "Classic Diffie-Hellman is quantum-vulnerable and slower than modern alternatives. Interim: ECDH with P-256 or X25519. Long-term: CRYSTALS-Kyber (NIST FIPS 203). DHE (ephemeral DH) preferred over static DH for forward secrecy.".to_string(),
+        patch_available: true,
+        review_notes: vec![
+            "Classic DH is quantum-vulnerable - upgrade required".to_string(),
+            "NIST FIPS 203: CRYSTALS-Kyber for post-quantum KEM".to_string(),
+            "Interim: ECDH with P-256+ or X25519 (preferred)".to_string(),
+            "Ensure ephemeral keys (DHE/ECDHE) for forward secrecy".to_string(),
+            "Minimum DH: 2048 bits if must use; prefer ECDH".to_string(),
+            "CCCS: DH conditionally approved, sunset 2030 per ITSP.40.111 Section 4.4".to_string(),
+            "Verify protocol supports chosen key exchange method".to_string(),
+            "Plan migration to CRYSTALS-Kyber by 2030".to_string(),
+        ],
+        patch_file: None,
+    })
+}
+
+/// Generate remediation for RC4 usage
+fn remediate_rc4(vuln: &Vulnerability, file_path: &str) -> Option<CodeFix> {
+    let old_code = vuln.context.trim().to_string();
+
+    // Suggest AES-256-GCM or ChaCha20-Poly1305
+    let new_code = if old_code.contains("RC4") {
+        old_code.replace("RC4", "AES-256-GCM")
+    } else if old_code.contains("rc4") {
+        old_code.replace("rc4", "aes-256-gcm")
+    } else if old_code.contains("ARCFOUR") {
+        old_code.replace("ARCFOUR", "AES-256-GCM")
+    } else {
+        old_code.clone()
+    };
+
+    Some(CodeFix {
+        file_path: file_path.to_string(),
+        line: vuln.line,
+        column: vuln.column,
+        old_code,
+        new_code,
+        confidence: 0.80,
+        algorithm: "RC4 → AES-256-GCM or ChaCha20-Poly1305".to_string(),
+        explanation: "RC4 is completely broken and prohibited. Multiple keystream biases make it vulnerable to practical attacks. Recommended: AES-256-GCM (hardware-accelerated) or ChaCha20-Poly1305 (software-optimized). Both provide authenticated encryption.".to_string(),
+        patch_available: true,
+        review_notes: vec![
+            "RC4 is completely broken - immediate replacement required".to_string(),
+            "AES-256-GCM: Best for hardware with AES-NI acceleration".to_string(),
+            "ChaCha20-Poly1305: Best for software-only or mobile".to_string(),
+            "Both provide authenticated encryption (AEAD)".to_string(),
+            "Update IV/nonce generation for chosen cipher".to_string(),
+            "NIST: RC4 prohibited per SP 800-175B".to_string(),
+            "CCCS: RC4 prohibited per ITSP.40.111 Section 5.6".to_string(),
+            "Verify all encrypted data can be re-encrypted".to_string(),
+        ],
+        patch_file: None,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -485,8 +699,10 @@ mod tests {
 
     #[test]
     fn test_generate_remediations_unsupported() {
+        // This test now verifies that previously unsupported algorithms now have remediation
         let mut audit_result = AuditResult::new(Language::Python, 100);
 
+        // ECDSA now has remediation
         audit_result.add_vulnerability(create_test_vulnerability(
             CryptoType::Ecdsa,
             "ecdsa.SigningKey()",
@@ -495,11 +711,14 @@ mod tests {
 
         let remediation = generate_remediations(&audit_result, "test.py");
 
-        assert_eq!(remediation.fixes.len(), 0);
-        assert_eq!(remediation.summary.remediable, 0);
-        assert_eq!(remediation.summary.manual_only, 1);
-        assert_eq!(remediation.warnings.len(), 1);
-        assert!(remediation.warnings[0].contains("ECDSA"));
+        // ECDSA should now have a fix available
+        assert_eq!(remediation.fixes.len(), 1);
+        assert_eq!(remediation.summary.remediable, 1);
+        assert_eq!(remediation.summary.manual_only, 0);
+        assert_eq!(remediation.warnings.len(), 0);
+
+        // Verify the fix is for ECDSA
+        assert!(remediation.fixes[0].algorithm.contains("ECDSA"));
     }
 
     #[test]
@@ -553,5 +772,127 @@ mod tests {
         assert_eq!(fix.file_path, deserialized.file_path);
         assert_eq!(fix.confidence, deserialized.confidence);
         assert_eq!(fix.patch_available, deserialized.patch_available);
+    }
+
+    #[test]
+    fn test_remediate_ecdsa() {
+        let vuln = create_test_vulnerability(
+            CryptoType::Ecdsa,
+            "from ecdsa import SigningKey; sk = SigningKey.generate()",
+            None,
+        );
+
+        let fix = remediate_ecdsa(&vuln, "test.py").unwrap();
+
+        assert!(fix.algorithm.contains("ECDSA"));
+        assert!(fix.algorithm.contains("Ed25519") || fix.algorithm.contains("Dilithium"));
+        assert!(fix.new_code.contains("ed25519") || fix.new_code.contains("Ed25519"));
+        assert!(fix.patch_available);
+        assert!(fix.confidence >= 0.6);
+        assert!(fix.explanation.contains("quantum"));
+        assert!(!fix.review_notes.is_empty());
+        assert!(fix.review_notes.iter().any(|n| n.contains("CRYSTALS-Dilithium")));
+    }
+
+    #[test]
+    fn test_remediate_ecdh() {
+        let vuln = create_test_vulnerability(
+            CryptoType::Ecdh,
+            "crypto.createECDH('secp256k1')",
+            None,
+        );
+
+        let fix = remediate_ecdh(&vuln, "test.js").unwrap();
+
+        assert!(fix.algorithm.contains("ECDH"));
+        assert!(fix.algorithm.contains("X25519") || fix.algorithm.contains("Kyber"));
+        assert!(fix.new_code.contains("X25519") || fix.new_code.contains("x25519"));
+        assert!(fix.patch_available);
+        assert!(fix.confidence >= 0.6);
+        assert!(fix.explanation.contains("quantum"));
+        assert!(!fix.review_notes.is_empty());
+        assert!(fix.review_notes.iter().any(|n| n.contains("CRYSTALS-Kyber")));
+    }
+
+    #[test]
+    fn test_remediate_dsa() {
+        let vuln = create_test_vulnerability(
+            CryptoType::Dsa,
+            "from Crypto.PublicKey import DSA; key = DSA.generate(2048)",
+            None,
+        );
+
+        let fix = remediate_dsa(&vuln, "test.py").unwrap();
+
+        assert_eq!(fix.algorithm, "DSA → Ed25519 or RSA-2048 (interim) or CRYSTALS-Dilithium (PQC)");
+        assert!(fix.new_code.contains("Ed25519") || fix.new_code.contains("ed25519"));
+        assert!(fix.patch_available);
+        assert!(fix.confidence >= 0.7);
+        assert!(fix.explanation.contains("deprecated"));
+        assert!(!fix.review_notes.is_empty());
+        assert!(fix.review_notes.iter().any(|n| n.contains("deprecated")));
+    }
+
+    #[test]
+    fn test_remediate_diffie_hellman() {
+        let vuln = create_test_vulnerability(
+            CryptoType::DiffieHellman,
+            "DiffieHellman.generate()",
+            None,
+        );
+
+        let fix = remediate_diffie_hellman(&vuln, "test.js").unwrap();
+
+        assert!(fix.algorithm.contains("Diffie-Hellman"));
+        assert!(fix.algorithm.contains("ECDH") || fix.algorithm.contains("Kyber"));
+        assert!(fix.patch_available);
+        assert!(fix.confidence >= 0.6);
+        assert!(fix.explanation.contains("quantum"));
+        assert!(!fix.review_notes.is_empty());
+        assert!(fix.review_notes.iter().any(|n| n.contains("CRYSTALS-Kyber") || n.contains("ephemeral")));
+    }
+
+    #[test]
+    fn test_remediate_rc4() {
+        let vuln = create_test_vulnerability(
+            CryptoType::Rc4,
+            "crypto.createCipheriv('rc4', key, '')",
+            None,
+        );
+
+        let fix = remediate_rc4(&vuln, "test.js").unwrap();
+
+        assert_eq!(fix.algorithm, "RC4 → AES-256-GCM or ChaCha20-Poly1305");
+        assert!(fix.new_code.contains("aes-256-gcm") || fix.new_code.contains("AES-256-GCM"));
+        assert!(fix.patch_available);
+        assert!(fix.confidence >= 0.8);
+        assert!(fix.explanation.contains("broken") || fix.explanation.contains("prohibited"));
+        assert!(!fix.review_notes.is_empty());
+        assert!(fix.review_notes.iter().any(|n| n.contains("ChaCha20")));
+    }
+
+    #[test]
+    fn test_all_algorithms_have_remediation() {
+        let mut audit_result = AuditResult::new(Language::Python, 100);
+
+        // Add all 10 crypto types
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::Md5, "md5", None));
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::Sha1, "sha1", None));
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::Rsa, "rsa", Some(2048)));
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::Des, "des", None));
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::TripleDes, "3des", None));
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::Ecdsa, "ecdsa", None));
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::Ecdh, "ecdh", None));
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::Dsa, "dsa", None));
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::DiffieHellman, "dh", None));
+        audit_result.add_vulnerability(create_test_vulnerability(CryptoType::Rc4, "rc4", None));
+
+        let remediation = generate_remediations(&audit_result, "test.py");
+
+        // All 10 should have remediation
+        assert_eq!(remediation.fixes.len(), 10);
+        assert_eq!(remediation.summary.total_vulnerabilities, 10);
+        assert_eq!(remediation.summary.remediable, 10);
+        assert!(remediation.warnings.is_empty());
     }
 }

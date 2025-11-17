@@ -44,18 +44,26 @@
 //!
 //! ## Supported Remediations
 //!
-//! ### Phase 1 (Current)
+//! ### ✅ Complete Algorithm Coverage (10/10 crypto types)
+//!
+//! #### Hash Functions
 //! - **MD5** → SHA-256 (85% confidence, patch available)
 //! - **SHA-1** → SHA-256 (90% confidence, patch available)
-//! - **RSA weak keys** → RSA-2048 interim (70% confidence, patch available)
-//! - **DES/3DES** → AES-256-GCM (75% confidence, patch available)
 //!
-//! ### Phase 2 (Planned)
-//! - **ECDSA** → Ed25519 or CRYSTALS-Dilithium
-//! - **ECDH** → X25519 or CRYSTALS-Kyber
-//! - **DSA** → Ed25519 or CRYSTALS-Dilithium
-//! - **Diffie-Hellman** → ECDH or CRYSTALS-Kyber
-//! - **RC4** → AES-256-GCM or ChaCha20-Poly1305
+//! #### Symmetric Ciphers
+//! - **DES** → AES-256-GCM (75% confidence, patch available)
+//! - **3DES** → AES-256-GCM (75% confidence, patch available)
+//! - **RC4** → AES-256-GCM or ChaCha20-Poly1305 (80% confidence, patch available)
+//!
+//! #### Asymmetric Cryptography
+//! - **RSA weak keys** → RSA-2048 interim (70% confidence, patch available)
+//! - **RSA strong keys** → CRYSTALS-Dilithium guidance (50% confidence, no patch)
+//! - **DSA** → Ed25519 or CRYSTALS-Dilithium (70% confidence, patch available)
+//! - **ECDSA** → Ed25519 or CRYSTALS-Dilithium (65% confidence, patch available)
+//!
+//! #### Key Exchange
+//! - **Diffie-Hellman** → ECDH/X25519 or CRYSTALS-Kyber (65% confidence, patch available)
+//! - **ECDH** → X25519 or CRYSTALS-Kyber (65% confidence, patch available)
 
 // Re-export public API from core module
 pub use core::{CodeFix, RemediationResult, RemediationSummary, generate_remediations};
