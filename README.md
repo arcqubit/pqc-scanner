@@ -504,9 +504,6 @@ const fixes = generate_remediation(source, 'python', 'crypto.py');
 Test the scanner against real-world vulnerable codebases:
 
 ```bash
-# Clone sample repositories
-git clone https://github.com/arcqubit/vulnerable-crypto-examples.git samples/
-
 # Run automated scans
 make scan-samples
 ```
@@ -524,20 +521,20 @@ See [docs/SAMPLE_REPOSITORIES.md](docs/SAMPLE_REPOSITORIES.md) for details.
 
 ```bash
 # Install globally
-npm install -g @arcqubit/pdq-scanner
+npm install -g @arcqubit/pqc-scanner
 
 # Or as project dependency
-npm install @arcqubit/pdq-scanner
+npm install @arcqubit/pqc-scanner
 ```
 
 ### Docker Container
 
 ```bash
 # Pull latest image
-docker pull ghcr.io/arcqubit/pdq-scanner:latest
+docker pull ghcr.io/arcqubit/pqc-scanner:latest
 
 # Run scan
-docker run --rm -v $(pwd):/data ghcr.io/arcqubit/pdq-scanner:latest
+docker run --rm -v $(pwd):/data ghcr.io/arcqubit/pqc-scanner:latest
 ```
 
 ### GitHub Action
@@ -546,11 +543,11 @@ docker run --rm -v $(pwd):/data ghcr.io/arcqubit/pdq-scanner:latest
 name: Security Scan
 on: [push, pull_request]
 jobs:
-  pdq-scan:
+  pqc-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: arcqubit/pdq-scanner@v1
+      - uses: arcqubit/pqc-scanner@v1
         with:
           path: 'src/'
           fail-on-findings: true
