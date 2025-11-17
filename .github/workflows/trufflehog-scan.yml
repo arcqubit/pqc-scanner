@@ -28,21 +28,12 @@ jobs:
           fetch-depth: 0  # Full history for comprehensive scanning
 
       - name: TruffleHog Secret Scanning
-        uses: trufflesecurity/trufflehog@41a5e77093d10ec03a8cfdd37db3c2c9e6071314  # v3.87.2
+        uses: trufflesecurity/trufflehog-actions-scan@fa1c262fef49c10fc49fd98d3ebb9dfd265b80cc  # v0.3.0
         with:
-          # Scan the entire repository history
+          # Scan the entire repository
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          # Generate SARIF report for GitHub Security
-          extra_args: --json --only-verified --fail
-
-      - name: Upload TruffleHog results to Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@ea9e4e37992a54ee68a9622e985e60c8e8f12d9f  # v3.27.4
-        with:
-          sarif_file: results.sarif
-          category: trufflehog-secrets
+          # Only verified secrets
+          extra_args: --only-verified
 
   trufflehog-filesystem:
     name: TruffleHog Filesystem Scan
