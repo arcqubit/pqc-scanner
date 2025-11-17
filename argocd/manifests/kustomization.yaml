@@ -1,0 +1,45 @@
+# Kustomization file for pqc-scanner
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Namespace for all resources
+namespace: pqc-scanner
+
+# Common labels applied to all resources
+commonLabels:
+  app: pqc-scanner
+  managed-by: argocd
+
+# Resources to include
+resources:
+  - deployment.yaml
+  - service.yaml
+  - serviceaccount.yaml
+  - configmap.yaml
+  - hpa.yaml
+
+# Images to use (can be overridden by ArgoCD)
+images:
+  - name: ghcr.io/arcqubit/pqc-scanner
+    newTag: latest
+
+# ConfigMap generator for environment-specific config
+configMapGenerator:
+  - name: scanner-env
+    literals:
+      - ENVIRONMENT=production
+      - VERSION=2025.11.0
+
+# Resource name prefix
+# namePrefix: pqc-
+
+# Resource name suffix
+# nameSuffix: -prod
+
+# Common annotations
+commonAnnotations:
+  app.kubernetes.io/name: pqc-scanner
+  app.kubernetes.io/version: "2025.11.0"
+  app.kubernetes.io/component: scanner
+  app.kubernetes.io/part-of: security-tools
+  app.kubernetes.io/managed-by: argocd

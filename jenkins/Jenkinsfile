@@ -1,0 +1,370 @@
+// Jenkins Declarative Pipeline for pqc-scanner
+// Version: 2025.11.0
+// Documentation: https://www.jenkins.io/doc/book/pipeline/
+
+pipeline {
+    agent {
+        docker {
+            image 'rust:1.83-bookworm'
+            args '-v $HOME/.cargo:/root/.cargo -v $HOME/.rustup:/root/.rustup'
+        }
+    }
+
+    options {
+        // Keep last 30 builds
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+        // Timeout after 60 minutes
+        timeout(time: 60, unit: 'MINUTES')
+        // Disable concurrent builds
+        disableConcurrentBuilds()
+        // Timestamps in console output
+        timestamps()
+        // ANSI color output
+        ansiColor('xterm')
+    }
+
+    environment {
+        CARGO_HOME = "${WORKSPACE}/.cargo"
+        CARGO_TERM_COLOR = 'always'
+        RUST_BACKTRACE = '1'
+        CARGO_INCREMENTAL = '0'
+        // NPM token from Jenkins credentials
+        NPM_TOKEN = credentials('npm-token')
+    }
+
+    stages {
+        stage('Environment Setup') {
+            steps {
+                script {
+                    echo "==============================================="
+                    echo "PQC Scanner Build Pipeline"
+                    echo "Branch: ${env.GIT_BRANCH}"
+                    echo "Commit: ${env.GIT_COMMIT}"
+                    echo "Build: ${env.BUILD_NUMBER}"
+                    echo "==============================================="
+                }
+                sh '''
+                    rustc --version
+                    cargo --version
+                    echo "Workspace: ${WORKSPACE}"
+                '''
+            }
+        }
+
+        stage('Validate') {
+            parallel {
+                stage('Format Check') {
+                    steps {
+                        sh '''
+                            rustup component add rustfmt
+                            cargo fmt -- --check
+                        '''
+                    }
+                }
+
+                stage('Lint (Clippy)') {
+                    steps {
+                        sh '''
+                            rustup component add clippy
+                            cargo clippy --all-targets --all-features -- -D warnings
+                        '''
+                    }
+                }
+
+                stage('Dependency Check') {
+                    steps {
+                        sh '''
+                            cargo tree --all-features
+                            cargo tree --duplicates || true
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            parallel {
+                stage('Unit Tests') {
+                    steps {
+                        sh '''
+                            cargo test --verbose --all-features
+                        '''
+                    }
+                    post {
+                        always {
+                            // Archive test results if JUnit XML is generated
+                            junit allowEmptyResults: true, testResults: 'target/junit.xml'
+                        }
+                    }
+                }
+
+                stage('Integration Tests') {
+                    steps {
+                        sh '''
+                            cargo test --test integration_tests --verbose
+                        '''
+                    }
+                }
+
+                stage('WASM Tests') {
+                    steps {
+                        sh '''
+                            rustup target add wasm32-unknown-unknown
+                            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+                            wasm-pack test --node
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Security Scan') {
+            parallel {
+                stage('Dependency Audit') {
+                    steps {
+                        sh '''
+                            cargo install cargo-audit --version 0.22.0 --locked
+                            cargo audit --json > audit-results.json || true
+                        '''
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'audit-results.json', allowEmptyArchive: true
+                        }
+                    }
+                }
+
+                stage('Unsafe Code Detection') {
+                    steps {
+                        sh '''
+                            cargo install cargo-geiger --version 0.11.7 --locked
+                            cargo geiger --all-features --all-targets --exclude-tests || true
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            parallel {
+                stage('Build Binary') {
+                    steps {
+                        sh '''
+                            cargo build --release --verbose
+                            ls -lh target/release/pqc-scanner || echo "Binary not found"
+                        '''
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: 'target/release/pqc-scanner', allowEmptyArchive: true
+                        }
+                    }
+                }
+
+                stage('Build WASM (Bundler)') {
+                    steps {
+                        sh '''
+                            rustup target add wasm32-unknown-unknown
+                            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+                            wasm-pack build --target bundler --out-dir pkg --release
+                            ls -lh pkg/
+                        '''
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: 'pkg/**/*', allowEmptyArchive: true
+                        }
+                    }
+                }
+
+                stage('Build WASM (Node.js)') {
+                    steps {
+                        sh '''
+                            rustup target add wasm32-unknown-unknown
+                            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+                            wasm-pack build --target nodejs --out-dir pkg-nodejs --release
+                            ls -lh pkg-nodejs/
+                        '''
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: 'pkg-nodejs/**/*', allowEmptyArchive: true
+                        }
+                    }
+                }
+
+                stage('Build WASM (Web)') {
+                    steps {
+                        sh '''
+                            rustup target add wasm32-unknown-unknown
+                            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+                            wasm-pack build --target web --out-dir pkg-web --release
+                            ls -lh pkg-web/
+                        '''
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: 'pkg-web/**/*', allowEmptyArchive: true
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Benchmarks') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'develop'
+                }
+            }
+            steps {
+                sh '''
+                    cargo bench --no-run --verbose || true
+                '''
+            }
+        }
+
+        stage('Package') {
+            when {
+                anyOf {
+                    branch 'main'
+                    tag pattern: 'v*.*.*', comparator: 'REGEXP'
+                }
+            }
+            steps {
+                script {
+                    def version = env.TAG_NAME ? env.TAG_NAME.replaceFirst(/^v/, '') : env.GIT_COMMIT.take(8)
+
+                    sh """
+                        # Create binary archive
+                        if [ -f target/release/pqc-scanner ]; then
+                            mkdir -p release-artifacts
+                            cp target/release/pqc-scanner release-artifacts/
+                            tar -czf pqc-scanner-${version}-linux-x86_64.tar.gz -C release-artifacts pqc-scanner
+                        fi
+
+                        # Create WASM archives
+                        tar -czf pqc-scanner-wasm-bundler-${version}.tar.gz pkg/
+                        tar -czf pqc-scanner-wasm-nodejs-${version}.tar.gz pkg-nodejs/
+                        tar -czf pqc-scanner-wasm-web-${version}.tar.gz pkg-web/
+                        tar -czf pqc-scanner-wasm-all-${version}.tar.gz pkg/ pkg-nodejs/ pkg-web/
+
+                        # Generate checksums
+                        sha256sum pqc-scanner-*.tar.gz > checksums.txt
+
+                        ls -lh pqc-scanner-*.tar.gz
+                    """
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'pqc-scanner-*.tar.gz,checksums.txt', fingerprint: true
+                }
+            }
+        }
+
+        stage('SBOM Generation') {
+            when {
+                anyOf {
+                    branch 'main'
+                    tag pattern: 'v*.*.*', comparator: 'REGEXP'
+                }
+            }
+            steps {
+                sh '''
+                    cargo install cargo-sbom --version 0.9.1 --locked
+                    cargo install cargo-cyclonedx --version 0.5.4 --locked
+
+                    cargo sbom --output-format spdx_json_2_3 > sbom-spdx.json
+                    cargo cyclonedx --format json --spec-version 1.5 --output-cdx sbom-cyclonedx.json
+                    cargo tree --all-features > sbom-dependencies.txt
+                '''
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'sbom-*.json,sbom-dependencies.txt'
+                }
+            }
+        }
+
+        stage('Publish') {
+            when {
+                tag pattern: 'v*.*.*', comparator: 'REGEXP'
+            }
+            parallel {
+                stage('Publish NPM') {
+                    when {
+                        expression { env.PUBLISH_NPM == 'true' }
+                    }
+                    steps {
+                        sh '''
+                            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+                            cd pkg
+                            npm publish --access public --provenance || true
+                        '''
+                    }
+                }
+
+                stage('Create GitHub Release') {
+                    when {
+                        expression { env.GITHUB_TOKEN != null }
+                    }
+                    steps {
+                        script {
+                            def version = env.TAG_NAME.replaceFirst(/^v/, '')
+
+                            sh """
+                                # Install GitHub CLI if not available
+                                which gh || (curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+                                    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+                                    echo "deb [arch=\$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+                                    apt update && apt install gh -y)
+
+                                # Create release (if GH_TOKEN is set)
+                                gh release create ${TAG_NAME} \
+                                    pqc-scanner-*.tar.gz \
+                                    checksums.txt \
+                                    sbom-*.json \
+                                    --title "Release ${TAG_NAME}" \
+                                    --notes "See CHANGELOG.md for details" || echo "Release creation skipped"
+                            """
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean workspace
+            cleanWs deleteDirs: true, notFailBuild: true
+        }
+        success {
+            echo '✅ Build succeeded!'
+            script {
+                if (env.SLACK_WEBHOOK) {
+                    slackSend(
+                        color: 'good',
+                        message: "✅ Build #${env.BUILD_NUMBER} succeeded for ${env.JOB_NAME}\nBranch: ${env.GIT_BRANCH}\nCommit: ${env.GIT_COMMIT}"
+                    )
+                }
+            }
+        }
+        failure {
+            echo '❌ Build failed!'
+            script {
+                if (env.SLACK_WEBHOOK) {
+                    slackSend(
+                        color: 'danger',
+                        message: "❌ Build #${env.BUILD_NUMBER} failed for ${env.JOB_NAME}\nBranch: ${env.GIT_BRANCH}\nCommit: ${env.GIT_COMMIT}"
+                    )
+                }
+            }
+        }
+        unstable {
+            echo '⚠️ Build unstable'
+        }
+    }
+}

@@ -1,0 +1,210 @@
+# Travis CI Configuration for pqc-scanner
+# Version: 2025.11.0
+# Documentation: https://docs.travis-ci.com/
+
+# Use Ubuntu 22.04 (Jammy)
+dist: jammy
+
+# Programming language
+language: rust
+
+# Rust versions to test
+rust:
+  - stable
+
+# Operating systems
+os:
+  - linux
+
+# Build matrix
+jobs:
+  include:
+    # Linux builds
+    - name: "Linux - Format Check"
+      rust: stable
+      os: linux
+      script:
+        - cargo fmt -- --check
+
+    - name: "Linux - Clippy"
+      rust: stable
+      os: linux
+      script:
+        - cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: "Linux - Unit Tests"
+      rust: stable
+      os: linux
+      script:
+        - cargo test --verbose --all-features
+
+    - name: "Linux - Integration Tests"
+      rust: stable
+      os: linux
+      script:
+        - cargo test --test integration_tests --verbose
+
+    - name: "Linux - WASM Build (Bundler)"
+      rust: stable
+      os: linux
+      before_script:
+        - rustup target add wasm32-unknown-unknown
+        - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      script:
+        - wasm-pack build --target bundler --out-dir pkg --release
+        - ls -lh pkg/
+
+    - name: "Linux - WASM Build (Node.js)"
+      rust: stable
+      os: linux
+      before_script:
+        - rustup target add wasm32-unknown-unknown
+        - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      script:
+        - wasm-pack build --target nodejs --out-dir pkg-nodejs --release
+        - ls -lh pkg-nodejs/
+
+    - name: "Linux - WASM Build (Web)"
+      rust: stable
+      os: linux
+      before_script:
+        - rustup target add wasm32-unknown-unknown
+        - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      script:
+        - wasm-pack build --target web --out-dir pkg-web --release
+        - ls -lh pkg-web/
+
+    - name: "Linux - Binary Build"
+      rust: stable
+      os: linux
+      script:
+        - cargo build --release --verbose
+        - ls -lh target/release/pqc-scanner || echo "Binary not found"
+
+    - name: "Linux - Security Audit"
+      rust: stable
+      os: linux
+      before_script:
+        - cargo install cargo-audit --version 0.22.0 --locked
+      script:
+        - cargo audit
+      allow_failure: true
+
+    - name: "Linux - SBOM Generation"
+      rust: stable
+      os: linux
+      if: tag IS present
+      before_script:
+        - cargo install cargo-sbom --version 0.9.1 --locked
+      script:
+        - cargo sbom --output-format spdx_json_2_3 > sbom-spdx.json
+        - cargo tree --all-features > sbom-dependencies.txt
+
+    # macOS builds (optional)
+    - name: "macOS - Tests"
+      rust: stable
+      os: osx
+      osx_image: xcode15.2
+      script:
+        - cargo test --verbose
+      allow_failure: true
+
+# Cache cargo registry and target directory
+cache:
+  cargo: true
+  directories:
+    - $HOME/.cargo/registry
+    - $HOME/.cargo/git
+    - $TRAVIS_BUILD_DIR/target
+
+# Environment variables
+env:
+  global:
+    - CARGO_TERM_COLOR=always
+    - RUST_BACKTRACE=1
+
+# Install dependencies
+addons:
+  apt:
+    packages:
+      - build-essential
+
+# Notification settings
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+# Build stages
+stages:
+  - name: validate
+    if: type IN (push, pull_request)
+  - name: test
+    if: type IN (push, pull_request)
+  - name: build
+    if: type IN (push, pull_request)
+  - name: security
+    if: type IN (push, pull_request)
+  - name: deploy
+    if: tag IS present
+
+# Deploy stage (for tagged releases)
+before_deploy:
+  - |
+    if [ -n "$TRAVIS_TAG" ]; then
+      VERSION="${TRAVIS_TAG#v}"
+
+      # Build all targets
+      cargo build --release
+      rustup target add wasm32-unknown-unknown
+      curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      wasm-pack build --target bundler --out-dir pkg --release
+      wasm-pack build --target nodejs --out-dir pkg-nodejs --release
+      wasm-pack build --target web --out-dir pkg-web --release
+
+      # Create archives
+      if [ -f target/release/pqc-scanner ]; then
+        mkdir -p release-artifacts
+        cp target/release/pqc-scanner release-artifacts/
+        tar -czf "pqc-scanner-${VERSION}-linux-x86_64.tar.gz" -C release-artifacts pqc-scanner
+      fi
+
+      tar -czf "pqc-scanner-wasm-bundler-${VERSION}.tar.gz" pkg/
+      tar -czf "pqc-scanner-wasm-nodejs-${VERSION}.tar.gz" pkg-nodejs/
+      tar -czf "pqc-scanner-wasm-web-${VERSION}.tar.gz" pkg-web/
+      tar -czf "pqc-scanner-wasm-all-${VERSION}.tar.gz" pkg/ pkg-nodejs/ pkg-web/
+
+      # Generate checksums
+      sha256sum pqc-scanner-*.tar.gz > checksums.txt
+      ls -lh pqc-scanner-*.tar.gz
+    fi
+
+# GitHub Releases deployment
+deploy:
+  - provider: releases
+    api_key: $GITHUB_TOKEN
+    file_glob: true
+    file:
+      - pqc-scanner-*.tar.gz
+      - checksums.txt
+    skip_cleanup: true
+    on:
+      tags: true
+      condition: $TRAVIS_OS_NAME = linux && $TRAVIS_RUST_VERSION = stable
+    name: "Release $TRAVIS_TAG"
+    draft: false
+    prerelease: false
+
+  # NPM deployment (optional, manual trigger recommended)
+  - provider: npm
+    email: $NPM_EMAIL
+    api_token: $NPM_TOKEN
+    skip_cleanup: true
+    on:
+      tags: true
+      condition: $TRAVIS_OS_NAME = linux && $TRAVIS_RUST_VERSION = stable
+    edge: true
+
+# After deployment
+after_deploy:
+  - echo "Deployment complete for $TRAVIS_TAG"
