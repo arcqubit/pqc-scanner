@@ -4,7 +4,7 @@
 [![Security Audit](https://github.com/arcqubit/pqc-scanner/actions/workflows/cargo-audit.yml/badge.svg)](https://github.com/arcqubit/pqc-scanner/actions/workflows/cargo-audit.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/arcqubit/pqc-scanner/badge)](https://securityscorecards.dev/viewer/?uri=github.com/arcqubit/pqc-scanner)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11462/badge)](https://www.bestpractices.dev/projects/11462)
-[![CalVer](https://img.shields.io/badge/calver-2025.11.0--beta.1-22bfda.svg)](docs/CALVER.md)
+[![GitHub Release](https://img.shields.io/github/v/release/arcqubit/pqc-scanner?include_prereleases&label=calver&color=22bfda)](https://github.com/arcqubit/pqc-scanner/releases)
 
 A high-performance Rust-based auditor for detecting quantum-vulnerable cryptographic algorithms in source code, compiled to WebAssembly for multi-platform deployment.
 
