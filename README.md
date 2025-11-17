@@ -4,21 +4,24 @@
 [![Security Audit](https://github.com/arcqubit/pqc-scanner/actions/workflows/cargo-audit.yml/badge.svg)](https://github.com/arcqubit/pqc-scanner/actions/workflows/cargo-audit.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/arcqubit/pqc-scanner/badge)](https://securityscorecards.dev/viewer/?uri=github.com/arcqubit/pqc-scanner)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11462/badge)](https://www.bestpractices.dev/projects/11462)
-[![CalVer](https://img.shields.io/badge/calver-YYYY.MM.MICRO-22bfda.svg)](docs/CALVER.md)
+[![CalVer](https://img.shields.io/badge/calver-2025.11.0--beta.1-22bfda.svg)](docs/CALVER.md)
 
 A high-performance Rust-based auditor for detecting quantum-vulnerable cryptographic algorithms in source code, compiled to WebAssembly for multi-platform deployment.
 
-**Version**: 2025.11.0 ([CalVer](docs/CALVER.md))
+**Version**: 2025.11.0-beta.1 ([CalVer](docs/CALVER.md))
 
 ## Features
 
 - **Multi-language Support**: Rust, JavaScript, TypeScript, Python, Java, Go, C++, C#
 - **10 Crypto Detection Patterns**: RSA, ECDSA, ECDH, DSA, DH, MD5, SHA-1, DES, 3DES, RC4
 - **NIST 800-53 SC-13 Compliance Reports**: Automated assessment reports with data-driven evidence
+- **Canadian CCCS/CSE Compliance**: ITSG-33 SC-13, ITSP.40.111, ITSP.40.062, and CMVP validation
+- **Unified Compliance Reporting**: Combined NIST + Canadian compliance assessment
+- **Security Classification Support**: Unclassified, Protected A/B/C with classification-specific requirements
 - **OSCAL JSON Output**: Machine-readable compliance reports in OSCAL 1.1.2 format
 - **WASM Compilation**: <500KB gzipped, runs in browser/Node.js/Deno
 - **High Performance**: 28x faster than target (0.35ms for 1000 LOC)
-- **Comprehensive Testing**: 19 tests passing, >90% code coverage
+- **Comprehensive Testing**: 62 tests passing, >90% code coverage
 ## Quick Start
 
 ```bash
@@ -177,25 +180,238 @@ const oscalReport = generate_oscal_report(source, 'javascript', 'app.js');
 console.log('OSCAL Version:', oscalReport.oscal_version);
 ```
 
+## Canadian CCCS/CSE Cryptographic Compliance (NEW in 2025.11.0-beta.1)
+
+The scanner now provides comprehensive support for **Canadian Government cryptographic compliance standards**, enabling assessment against:
+
+- **ITSG-33 SC-13**: Cryptographic Protection control (Canadian equivalent to NIST 800-53 SC-13)
+- **ITSP.40.111**: Cryptographic Algorithms for UNCLASSIFIED, PROTECTED A, and PROTECTED B Information
+- **ITSP.40.062**: Guidance on Securely Configuring Network Protocols
+- **CMVP**: Cryptographic Module Validation Program (joint NIST/CCCS)
+
+### Security Classification Support
+
+The scanner supports all Canadian security classification levels with classification-specific cryptographic requirements:
+
+| Classification | Min AES | Min RSA | Min ECC | Approved Hash | CMVP Required |
+|----------------|---------|---------|---------|---------------|---------------|
+| **Unclassified** | 128-bit | 2048-bit | 256-bit | SHA-256+ | No |
+| **Protected A** | 128-bit | 2048-bit | 256-bit | SHA-256+ | Yes |
+| **Protected B** | 256-bit | 3072-bit | 384-bit | SHA-384+ | Yes |
+| **Protected C** | 256-bit | 4096-bit | 521-bit | SHA-512 | Yes |
+
+### CCCS Algorithm Approval Status
+
+The scanner validates algorithms against CCCS approval status per ITSP.40.111:
+
+- **Approved**: AES (128/192/256), SHA-2 (256/384/512), SHA-3, HMAC
+- **Conditionally Approved**: RSA (2048+), ECDSA, ECDH, DH - Quantum-vulnerable, sunset 2030
+- **Deprecated**: 3DES (sunset 2023), DSA (sunset 2024)
+- **Prohibited**: MD5, SHA-1, DES, RC4 - Immediate migration required
+- **Under Review**: CRYSTALS-Kyber, CRYSTALS-Dilithium, SPHINCS+ (Post-Quantum)
+
+### Canadian Compliance Usage
+
+```rust
+use pqc_scanner::{
+    analyze,
+    generate_itsg33_report,
+    generate_unified_report,
+    SecurityClassification,
+    export_itsg33_json,
+    export_unified_json
+};
+
+let source = r#"
+    const hash = crypto.createHash('md5');
+    const rsa = crypto.generateKeyPair('rsa', { modulusLength: 2048 });
+"#;
+
+// 1. Perform audit
+let audit_result = analyze(source, "javascript").unwrap();
+
+// 2. Generate ITSG-33 SC-13 Assessment Report for Protected A
+let itsg33_report = generate_itsg33_report(
+    &audit_result,
+    SecurityClassification::ProtectedA,
+    Some("example.js")
+);
+
+println!("ITSG-33 Control: {}", itsg33_report.control_assessment.control_id);
+println!("Classification: {}", itsg33_report.control_assessment.security_classification);
+println!("Compliance Score: {}/100", itsg33_report.summary.compliance_score);
+println!("ITSP.40.111 Compliant: {}", itsg33_report.summary.itsp_40_111_compliant);
+println!("CCCS Prohibited: {:?}", itsg33_report.summary.cccs_prohibited_algorithms);
+
+// 3. Generate Unified NIST + Canadian Report
+let unified_report = generate_unified_report(
+    &audit_result,
+    SecurityClassification::ProtectedB,
+    Some("example.js")
+);
+
+println!("NIST Compliance: {}/100", unified_report.nist_summary.compliance_score);
+println!("Canadian Compliance: {}/100", unified_report.canadian_summary.compliance_score);
+
+// 4. Export to JSON
+let json = export_itsg33_json(&itsg33_report).unwrap();
+std::fs::write("itsg33-report.json", json).unwrap();
+
+let unified_json = export_unified_json(&unified_report).unwrap();
+std::fs::write("unified-compliance-report.json", unified_json).unwrap();
+```
+
+### WASM API for Canadian Compliance
+
+```javascript
+import init, {
+    generate_itsg33_compliance_report,
+    generate_unified_compliance_report
+} from './pkg/pqc_scanner.js';
+
+await init();
+
+const source = `
+    const hash = crypto.createHash('md5');
+    const rsa = crypto.generateKeyPair('rsa', { modulusLength: 2048 });
+`;
+
+// Generate ITSG-33 report for Protected A
+const itsg33Report = generate_itsg33_compliance_report(
+    source,
+    'javascript',
+    'protected-a',
+    'example.js'
+);
+
+console.log('ITSG-33 Compliance Score:', itsg33Report.summary.compliance_score);
+console.log('ITSP.40.111 Compliant:', itsg33Report.summary.itsp_40_111_compliant);
+console.log('Classification Compliant:', itsg33Report.summary.classification_compliant);
+console.log('CCCS Prohibited Algorithms:', itsg33Report.summary.cccs_prohibited_algorithms);
+console.log('CMVP Validated/Required:',
+    `${itsg33Report.summary.cmvp_validated_count}/${itsg33Report.summary.cmvp_required_count}`);
+
+// Generate unified NIST + Canadian report
+const unifiedReport = generate_unified_compliance_report(
+    source,
+    'javascript',
+    'protected-b',
+    'example.js'
+);
+
+console.log('Control Mapping:', unifiedReport.control_mapping);
+console.log('NIST Score:', unifiedReport.nist_summary.compliance_score);
+console.log('Canadian Score:', unifiedReport.canadian_summary.compliance_score);
+```
+
+### ITSG-33 Report Structure
+
+The ITSG-33 assessment report provides comprehensive Canadian compliance data:
+
+- **Control Assessment**: ITSG-33 SC-13 implementation and assessment status
+- **Security Classification**: Unclassified, Protected A/B/C with classification-specific validation
+- **Canadian Summary**:
+  - CCCS algorithm approval status (Approved/Deprecated/Prohibited)
+  - CMVP validation tracking (validated vs. required count)
+  - ITSP.40.111 and ITSP.40.062 compliance flags
+  - Classification-specific compliance assessment
+  - Quantum-vulnerable algorithm inventory
+- **Canadian Findings**: Enhanced findings with:
+  - CCCS approval status per algorithm
+  - ITSP reference citations (e.g., "ITSP.40.111 Section 5.3")
+  - Applicable security classifications
+  - CMVP certificate validation
+- **Recommendations**: Canadian-specific guidance with ITSP references
+
+### Unified Compliance Report
+
+The unified report combines both NIST 800-53 and ITSG-33 assessments:
+
+- **Dual Framework Assessment**: Side-by-side NIST and Canadian compliance
+- **Control Cross-Mapping**: SC-13 ↔ ITSG-33 SC-13 equivalence documentation
+- **Consolidated Recommendations**: Unified guidance satisfying both frameworks
+- **Shared Evidence**: Single evidence collection mapped to both frameworks
+
+### CMVP Certificate Database
+
+The scanner includes an offline database of CMVP-validated cryptographic modules:
+
+- **OpenSSL FIPS Object Module** (Cert #4282)
+- **Microsoft Cryptographic Primitives** (Cert #3966)
+- **Bouncy Castle BC-FJA** (Cert #4118)
+- **AWS-LC** (Cert #4536)
+- **wolfCrypt FIPS** (Cert #4407)
+- And more...
+
+### Compliance Scoring
+
+Canadian compliance scoring (0-100) uses penalty-based assessment:
+
+- **Prohibited algorithms**: -40 points each (MD5, SHA-1, DES, RC4)
+- **Deprecated algorithms**: -20 points each (3DES, DSA)
+- **Weak key sizes**: -15 points each (below classification minimum)
+- **Quantum-vulnerable**: -10 points per unique algorithm type
+
+**Example:**
+```
+Initial Score: 100
+- MD5 detected (prohibited): -40
+- RSA 2048-bit on Protected B (weak): -15
+- RSA detected (quantum-vulnerable): -10
+= Final Score: 35 (Non-compliant)
+```
+
+### Documentation
+
+For comprehensive Canadian compliance documentation, see:
+
+- **[docs/canadian-compliance.md](docs/canadian-compliance.md)**: Complete usage guide
+- **[CANADIAN_COMPLIANCE_IMPLEMENTATION.md](CANADIAN_COMPLIANCE_IMPLEMENTATION.md)**: Technical implementation details
+- **[examples/canadian_compliance_example.rs](examples/canadian_compliance_example.rs)**: Working code examples
+
+### Running Canadian Compliance Examples
+
+```bash
+# Run Canadian compliance example
+cargo run --example canadian_compliance_example
+
+# Expected output:
+# - ITSG-33 SC-13 Assessment (Protected A)
+# - ITSG-33 SC-13 Assessment (Protected B)
+# - Unified NIST + Canadian Compliance
+# - CCCS algorithm approval status
+# - CMVP validation tracking
+# - Classification-specific compliance
+```
+
 ## Project Structure
 
 ```
 pqc-scanner/
 ├── src/
-│   ├── lib.rs          # WASM entry point & public API
-│   ├── types.rs        # Shared types, OSCAL schemas, and errors
-│   ├── audit.rs        # Core audit logic
-│   ├── compliance.rs   # NIST 800-53 SC-13 & OSCAL reporting
-│   ├── remediation.rs  # Auto-remediation engine
-│   ├── parser.rs       # Multi-language parsing
-│   └── detector.rs     # Pattern detection
+│   ├── lib.rs                  # WASM entry point & public API
+│   ├── types.rs                # Shared types, OSCAL schemas, Canadian types
+│   ├── audit.rs                # Core audit logic
+│   ├── compliance.rs           # NIST 800-53 SC-13 & OSCAL reporting
+│   ├── canadian_compliance.rs  # ITSG-33 SC-13 & unified reporting
+│   ├── algorithm_database.rs   # CCCS algorithm & CMVP validation
+│   ├── remediation.rs          # Auto-remediation engine
+│   ├── parser.rs               # Multi-language parsing
+│   └── detector.rs             # Pattern detection
+├── data/
+│   ├── cccs_algorithms.json    # CCCS algorithm approval database
+│   └── cmvp_certificates.json  # CMVP certificate database
 ├── tests/
 │   ├── integration_tests.rs
 │   ├── remediation_test.rs
-│   └── fixtures/       # Test files
+│   └── fixtures/               # Test files
 ├── examples/
 │   ├── generate_compliance_report.rs
+│   ├── canadian_compliance_example.rs
 │   └── remediation_example.rs
+├── docs/
+│   ├── canadian-compliance.md  # Canadian compliance guide
+│   └── CALVER.md              # CalVer versioning guide
 ├── benches/
 │   └── benchmarks.rs
 └── Cargo.toml
