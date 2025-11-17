@@ -1,5 +1,6 @@
-use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
 use pqc_scanner::analyze;
+use std::hint::black_box;
 
 fn benchmark_file_parsing(c: &mut Criterion) {
     let source = generate_code_sample(1000);
