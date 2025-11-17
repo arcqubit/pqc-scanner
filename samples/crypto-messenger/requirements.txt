@@ -4,4 +4,4 @@
 Flask==3.1.0            # Updated from 3.0.0 for security patches
 cryptography==44.0.0    # Updated from 41.0.7 for security patches
 pycryptodome==3.21.0    # Updated from 3.19.0 for security patches
-pytest==8.3.4           # Updated from 7.4.3 for security patches
+pytest==9.0.1           # Updated from 7.4.3 for security patches
