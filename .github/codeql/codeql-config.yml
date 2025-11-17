@@ -1,0 +1,22 @@
+# CodeQL Configuration
+# https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning
+
+name: "CodeQL Configuration"
+
+# Paths to scan
+paths:
+  - mcp/src
+  - samples
+
+# Paths to ignore
+paths-ignore:
+  - '**/node_modules'
+  - '**/dist'
+  - '**/build'
+  - '**/*.test.js'
+  - '**/*.test.ts'
+  - '**/tests'
+
+# Query suite to use
+queries:
+  - uses: security-and-quality
