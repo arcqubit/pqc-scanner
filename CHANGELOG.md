@@ -1,5 +1,12 @@
 # Changelog
 
+## [2025.11.20-beta.11](https://github.com/arcqubit/pqc-scanner/compare/pqc-scanner-v2025.11.19-beta.11...pqc-scanner-v2025.11.20-beta.11) (2025-11-18)
+
+
+### Bug Fixes
+
+* **security:** reduce excessive GitHub workflow permissions ([#39](https://github.com/arcqubit/pqc-scanner/issues/39)) ([9629309](https://github.com/arcqubit/pqc-scanner/commit/9629309e3f4ab81ab501a846fdd5cef7bd10dbc7))
+
 ## [2025.11.19-beta.11](https://github.com/arcqubit/pqc-scanner/compare/pqc-scanner-v2025.11.18-beta.11...pqc-scanner-v2025.11.19-beta.11) (2025-11-18)
 
 
