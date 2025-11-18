@@ -4,17 +4,18 @@ on:
   push:
     tags:
       - 'v*.*.*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version in CalVer format (e.g., 2025.11.0 for November 2025)'
-        required: true
-        type: string
-      prerelease:
-        description: 'Mark as pre-release'
-        required: false
-        type: boolean
-        default: false
+  # Manual releases disabled - use Release Please workflow
+  # workflow_dispatch:
+  #   inputs:
+  #     version:
+  #       description: 'Release version in CalVer format (e.g., 2025.11.0 for November 2025)'
+  #       required: true
+  #       type: string
+  #     prerelease:
+  #       description: 'Mark as pre-release'
+  #       required: false
+  #       type: boolean
+  #       default: false
 
 permissions: read-all
 
@@ -59,12 +60,19 @@ jobs:
       - name: Generate changelog
         id: changelog
         run: |
-          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          # Extract version from tag (removes 'v' prefix)
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-          # Extract changelog for this version
+          # Extract changelog for this version from Release Please generated CHANGELOG.md
           if [ -f CHANGELOG.md ]; then
+            # Release Please uses format: ## [version] (date)
             CHANGES=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d')
+            if [ -z "$CHANGES" ]; then
+              # Fallback: try without brackets
+              CHANGES=$(sed -n "/## $VERSION/,/## /p" CHANGELOG.md | sed '$d')
+            fi
             echo "CHANGES<<EOF" >> $GITHUB_OUTPUT
             echo "$CHANGES" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
@@ -142,7 +150,7 @@ jobs:
           name: Release v${{ steps.changelog.outputs.VERSION }}
           body: ${{ steps.changelog.outputs.CHANGES }}
           draft: false
-          prerelease: ${{ github.event.inputs.prerelease || false }}
+          prerelease: false
           files: |
             pdq-scanner-*.tar.gz
             pdq-scanner-*.tar.gz.sigstore.json
@@ -179,7 +187,7 @@ jobs:
       - name: Extract version
         id: version
         run: |
-          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          VERSION="${{ github.ref_name }}"
           echo "VERSION=${VERSION#v}" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
