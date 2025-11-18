@@ -1,6 +1,6 @@
 # Changelog
 
-## [2025.11.19](https://github.com/arcqubit/pqc-scanner/compare/pqc-scanner-v2025.11.18...pqc-scanner-v2025.11.19) (2025-11-18)
+## [2025.11.18.1-beta.11](https://github.com/arcqubit/pqc-scanner/compare/pqc-scanner-v2025.11.18...pqc-scanner-v2025.11.18.1-beta.11) (2025-11-18)
 
 
 ### ⚠ BREAKING CHANGES
