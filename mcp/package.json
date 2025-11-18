@@ -1,6 +1,6 @@
 {
   "name": "pqc-scanner-mcp-server",
-  "version": "2025.11.19-beta.11",
+  "version": "2025.11.20-beta.11",
   "description": "Model Context Protocol server for PQC Scanner - quantum-safe cryptography analysis",
   "main": "src/index.js",
   "type": "module",
