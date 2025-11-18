@@ -37,7 +37,7 @@ jobs:
       - name: Calculate date-based CalVer
         id: calver
         run: |
-          # CalVer format: YYYY.MM.DD.BUILD-beta.RUN_NUMBER
+          # CalVer format: YYYY.MM.DD-beta.BUILD (SemVer-compliant)
           YEAR=$(date -u +%Y)
           MONTH=$(date -u +%-m)
           DAY=$(date -u +%-d)
@@ -47,7 +47,8 @@ jobs:
           echo "Current version in manifest: $CURRENT"
 
           # Parse current version to extract BUILD number
-          if [[ "$CURRENT" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+          # Match format: YYYY.MM.DD-beta.BUILD
+          if [[ "$CURRENT" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-beta\.([0-9]+) ]]; then
             C_YEAR="${BASH_REMATCH[1]}"
             C_MONTH="${BASH_REMATCH[2]}"
             C_DAY="${BASH_REMATCH[3]}"
@@ -55,20 +56,20 @@ jobs:
 
             echo "Parsed: Year=$C_YEAR, Month=$C_MONTH, Day=$C_DAY, Build=$C_BUILD"
 
-            # Same date? Increment build. New date? Reset to 0.
+            # Same date? Increment build. New date? Reset to 1.
             if [ "$C_YEAR" == "$YEAR" ] && [ "$C_MONTH" == "$MONTH" ] && [ "$C_DAY" == "$DAY" ]; then
               BUILD=$((C_BUILD + 1))
               echo "Same date detected - incrementing build to $BUILD"
             else
-              BUILD=0
-              echo "New date detected - resetting build to 0"
+              BUILD=1
+              echo "New date detected - resetting build to 1"
             fi
           else
-            BUILD=0
-            echo "No valid version found - starting at build 0"
+            BUILD=1
+            echo "No valid version found - starting at build 1"
           fi
 
-          NEW_VERSION="${YEAR}.${MONTH}.${DAY}.${BUILD}-beta.${{ github.run_number }}"
+          NEW_VERSION="${YEAR}.${MONTH}.${DAY}-beta.${BUILD}"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "✅ Calculated version: $NEW_VERSION"
 
