@@ -1,4 +1,4 @@
-.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps scan-samples docker-build docker-push docker-test docker-login docker-clean docker-run
+.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps scan-samples docker-build docker-build-multiarch docker-build-push docker-push docker-test docker-login docker-clean docker-run
 
 # Default target - show help
 .DEFAULT_GOAL := help
@@ -105,26 +105,31 @@ PLATFORMS ?= linux/amd64,linux/arm64
 
 # Docker targets
 docker-build:
-	@echo "Building multi-arch Docker image with buildx..."
+	@echo "Building Docker image for local platform..."
+	docker buildx build \
+		--tag $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) \
+		--tag $(REGISTRY)/$(IMAGE_NAME):latest \
+		--tag $(REGISTRY)/$(IMAGE_NAME):beta \
+		--load \
+		.
+
+docker-build-multiarch:
+	@echo "Building multi-arch Docker image (no load, use for testing)..."
 	docker buildx build \
 		--platform $(PLATFORMS) \
 		--tag $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) \
 		--tag $(REGISTRY)/$(IMAGE_NAME):latest \
 		--tag $(REGISTRY)/$(IMAGE_NAME):beta \
-		--cache-from type=gha \
-		--cache-to type=gha,mode=max \
-		--load \
 		.
 
 docker-build-push:
 	@echo "Building and pushing multi-arch Docker image..."
+	@echo "Note: Ensure you are logged in with 'make docker-login' or 'docker login ghcr.io'"
 	docker buildx build \
 		--platform $(PLATFORMS) \
 		--tag $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) \
 		--tag $(REGISTRY)/$(IMAGE_NAME):latest \
 		--tag $(REGISTRY)/$(IMAGE_NAME):beta \
-		--cache-from type=gha \
-		--cache-to type=gha,mode=max \
 		--push \
 		.
 
@@ -170,13 +175,14 @@ help:
 	@echo "  make release        - Full release build"
 	@echo ""
 	@echo "Docker:"
-	@echo "  make docker-build   - Build multi-arch Docker image (amd64/arm64)"
-	@echo "  make docker-build-push - Build and push to registry"
-	@echo "  make docker-push    - Push existing image to registry"
-	@echo "  make docker-test    - Test Docker image locally"
-	@echo "  make docker-login   - Login to GitHub Container Registry"
-	@echo "  make docker-run     - Run container interactively"
-	@echo "  make docker-clean   - Remove local Docker images"
+	@echo "  make docker-build        - Build for local platform only (fast)"
+	@echo "  make docker-build-multiarch - Build multi-arch (amd64/arm64) without loading"
+	@echo "  make docker-build-push   - Build multi-arch and push to registry"
+	@echo "  make docker-push         - Push existing image to registry"
+	@echo "  make docker-test         - Test Docker image locally"
+	@echo "  make docker-login        - Login to GitHub Container Registry"
+	@echo "  make docker-run          - Run container interactively"
+	@echo "  make docker-clean        - Remove local Docker images"
 	@echo ""
 	@echo "Quality:"
 	@echo "  make lint           - Run clippy linter"
