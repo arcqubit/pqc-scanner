@@ -21,6 +21,21 @@ struct ScanOptions {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
+    // Handle --version and --help flags
+    if args.len() == 2 {
+        match args[1].as_str() {
+            "--version" | "-v" => {
+                print_version();
+                process::exit(0);
+            }
+            "--help" | "-h" => {
+                print_usage(&args[0]);
+                process::exit(0);
+            }
+            _ => {}
+        }
+    }
+
     if args.len() < 3 {
         print_usage(&args[0]);
         process::exit(1);
@@ -120,6 +135,19 @@ fn is_git_url(path: &str) -> bool {
         || path.ends_with(".git")
 }
 
+fn print_version() {
+    println!("    ___                 ____        __    _ __ ");
+    println!("   /   |  ____________ / __ \\__  __/ /_  (_) /_");
+    println!("  / /| | / ___/ ___/ // / / / / / / __ \\/ / __/");
+    println!(" / ___ |/ /  / /__/ // /_/ / /_/ / /_/ / / /_  ");
+    println!("/_/  |_/_/   \\___/_/ \\___\\_\\__,_/_.___/_/\\__/  ");
+    println!();
+    println!("PQC Scanner - Quantum-Safe Cryptography Auditor");
+    println!("Version: {}", env!("CARGO_PKG_VERSION"));
+    println!("License: MIT");
+    println!("Repository: https://github.com/arcqubit/pqc-scanner");
+}
+
 fn print_usage(program: &str) {
     eprintln!("    ___                 ____        __    _ __ ");
     eprintln!("   /   |  ____________ / __ \\__  __/ /_  (_) /_");
@@ -128,19 +156,26 @@ fn print_usage(program: &str) {
     eprintln!("/_/  |_/_/   \\___/_/ \\___\\_\\__,_/_.___/_/\\__/  ");
     eprintln!();
     eprintln!("PQC Scanner - Quantum-Safe Cryptography Auditor");
+    eprintln!("Version: {}", env!("CARGO_PKG_VERSION"));
     eprintln!();
-    eprintln!("Usage: {} scan <directory|repo-url> [OPTIONS]", program);
+    eprintln!("Usage: {} [OPTIONS] | {} scan <directory|repo-url> [OPTIONS]", program, program);
+    eprintln!();
+    eprintln!("Global Options:");
+    eprintln!("  -h, --help          Show this help message");
+    eprintln!("  -v, --version       Show version information");
     eprintln!();
     eprintln!("Commands:");
     eprintln!("  scan <path>         Scan local directory for cryptographic vulnerabilities");
     eprintln!("  scan <repo-url>     Clone and scan remote Git repository");
     eprintln!();
-    eprintln!("Options:");
+    eprintln!("Scan Options:");
     eprintln!("  --report-dir <dir>     Output directory for reports (default: reports)");
     eprintln!("  --report-name <name>   Base name for report files (default: directory/repo name)");
     eprintln!("  --keep-clone           Keep cloned repository after scanning (default: cleanup)");
     eprintln!();
     eprintln!("Examples:");
+    eprintln!("  {} --version", program);
+    eprintln!("  {} --help", program);
     eprintln!("  {} scan samples/vulnerable-app-1", program);
     eprintln!("  {} scan https://github.com/digininja/DVWA.git", program);
     eprintln!(
