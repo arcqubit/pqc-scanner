@@ -68,7 +68,10 @@ jobs:
       - name: Test Docker image
         if: github.event_name != 'pull_request'
         run: |
-          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest --help
+          # Use the first tag from the metadata output
+          FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Testing image: $FIRST_TAG"
+          docker run --rm $FIRST_TAG --help
 
       - name: Generate artifact attestation
         if: github.event_name != 'pull_request'
