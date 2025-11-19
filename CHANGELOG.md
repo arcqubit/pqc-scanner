@@ -1,5 +1,13 @@
 # Changelog
 
+## [2025.11.21-beta.11](https://github.com/arcqubit/pqc-scanner/compare/pqc-scanner-v2025.11.20-beta.11...pqc-scanner-v2025.11.21-beta.11) (2025-11-19)
+
+
+### Features
+
+* **cli:** add --help and --version flags ([bf2233b](https://github.com/arcqubit/pqc-scanner/commit/bf2233bb6e4c3ad6c38fba6af5e92f9c93664753))
+* **docker:** add optimized Docker containerization with multi-arch support ([#41](https://github.com/arcqubit/pqc-scanner/issues/41)) ([b3b6c74](https://github.com/arcqubit/pqc-scanner/commit/b3b6c7418d28db09faf11960d81d8baa8e9fa16f))
+
 ## [2025.11.20-beta.11](https://github.com/arcqubit/pqc-scanner/compare/pqc-scanner-v2025.11.19-beta.11...pqc-scanner-v2025.11.20-beta.11) (2025-11-18)
 
 
