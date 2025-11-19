@@ -1,7 +1,7 @@
 // Comprehensive error handling tests for critical fixes
 // Tests input validation, empty collection handling, and path validation
 
-use pqc_scanner::{analyze, generate_remediations, parse_file, AuditError, ParseError};
+use pqc_scanner::{AuditError, ParseError, analyze, generate_remediations, parse_file};
 
 #[test]
 fn test_empty_source_rejection() {

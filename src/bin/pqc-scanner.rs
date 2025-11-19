@@ -161,7 +161,10 @@ fn print_usage(program: &str) {
     eprintln!("PQC Scanner - Quantum-Safe Cryptography Auditor");
     eprintln!("Version: {}", env!("CARGO_PKG_VERSION"));
     eprintln!();
-    eprintln!("Usage: {} [OPTIONS] | {} scan <directory|repo-url> [OPTIONS]", program, program);
+    eprintln!(
+        "Usage: {} [OPTIONS] | {} scan <directory|repo-url> [OPTIONS]",
+        program, program
+    );
     eprintln!();
     eprintln!("Global Options:");
     eprintln!("  -h, --help          Show this help message");
@@ -351,8 +354,12 @@ fn clone_repository(url: &str) -> Result<PathBuf, String> {
     let clone_path = temp_dir.join(&repo_name);
 
     // Convert path to string, handling Unicode errors
-    let clone_path_str = clone_path.to_str()
-        .ok_or_else(|| format!("Clone path contains invalid Unicode characters: {:?}", clone_path))?;
+    let clone_path_str = clone_path.to_str().ok_or_else(|| {
+        format!(
+            "Clone path contains invalid Unicode characters: {:?}",
+            clone_path
+        )
+    })?;
 
     // Execute git clone command
     let output = process::Command::new("git")
@@ -483,14 +490,13 @@ fn scan_file(path: &Path) -> Result<Option<pqc_scanner::AuditResult>, String> {
         }
 
         // Read file content
-        let content = fs::read_to_string(path)
-            .map_err(|e| {
-                // Check if error is due to binary file
-                if e.kind() == std::io::ErrorKind::InvalidData {
-                    return format!("Skipping {} - appears to be binary", path.display());
-                }
-                format!("Failed to read {}: {}", path.display(), e)
-            })?;
+        let content = fs::read_to_string(path).map_err(|e| {
+            // Check if error is due to binary file
+            if e.kind() == std::io::ErrorKind::InvalidData {
+                return format!("Skipping {} - appears to be binary", path.display());
+            }
+            format!("Failed to read {}: {}", path.display(), e)
+        })?;
 
         // Analyze content
         let lang_str = match lang {

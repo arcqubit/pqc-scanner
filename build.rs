@@ -14,16 +14,12 @@ fn main() {
         panic!("CCCS algorithms database not found at data/cccs_algorithms.json");
     }
 
-    let cccs_data = fs::read_to_string(cccs_path)
-        .expect("Failed to read CCCS algorithms database");
+    let cccs_data = fs::read_to_string(cccs_path).expect("Failed to read CCCS algorithms database");
 
     // Validate JSON structure
     match serde_json::from_str::<serde_json::Value>(&cccs_data) {
         Ok(_) => println!("cargo:warning=CCCS algorithms database validated successfully"),
-        Err(e) => panic!(
-            "CCCS algorithms database contains invalid JSON: {}",
-            e
-        ),
+        Err(e) => panic!("CCCS algorithms database contains invalid JSON: {}", e),
     }
 
     // Validate CMVP certificates database
@@ -32,16 +28,13 @@ fn main() {
         panic!("CMVP certificates database not found at data/cmvp_certificates.json");
     }
 
-    let cmvp_data = fs::read_to_string(cmvp_path)
-        .expect("Failed to read CMVP certificates database");
+    let cmvp_data =
+        fs::read_to_string(cmvp_path).expect("Failed to read CMVP certificates database");
 
     // Validate JSON structure
     match serde_json::from_str::<serde_json::Value>(&cmvp_data) {
         Ok(_) => println!("cargo:warning=CMVP certificates database validated successfully"),
-        Err(e) => panic!(
-            "CMVP certificates database contains invalid JSON: {}",
-            e
-        ),
+        Err(e) => panic!("CMVP certificates database contains invalid JSON: {}", e),
     }
 
     println!("cargo:warning=All database files validated at build time");

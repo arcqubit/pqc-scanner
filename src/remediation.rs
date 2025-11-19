@@ -22,7 +22,10 @@ fn validate_file_path(path: &str) -> Result<(), String> {
 
     // Check path length
     if path.len() > 4096 {
-        return Err(format!("File path too long: {} bytes (max 4096)", path.len()));
+        return Err(format!(
+            "File path too long: {} bytes (max 4096)",
+            path.len()
+        ));
     }
 
     Ok(())

@@ -177,12 +177,16 @@ fn generate_findings(
         let first_vuln = match vulns.first() {
             Some(v) => v,
             None => {
-                eprintln!("Warning: Empty vulnerability group for {}, skipping", crypto_type);
+                eprintln!(
+                    "Warning: Empty vulnerability group for {}, skipping",
+                    crypto_type
+                );
                 continue;
             }
         };
 
-        let highest_severity = vulns.iter()
+        let highest_severity = vulns
+            .iter()
             .map(|v| v.severity)
             .max()
             .unwrap_or(Severity::Low); // Default to Low if empty (shouldn't happen)
