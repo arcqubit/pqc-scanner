@@ -115,28 +115,28 @@ fn parse_rust(source: &str) -> Result<ParsedSource, ParseError> {
             continue;
         }
 
-        if let Some(caps) = RUST_USE_RE.captures(trimmed) {
-            if let Some(import_match) = caps.get(1) {
-                let import = import_match.as_str().trim().to_string();
-                parsed.imports.push(import.clone());
-                parsed.ast_nodes.push(AstNode {
-                    node_type: NodeType::Import,
-                    line: line_num,
-                    column: 0,
-                    content: import,
-                });
-            }
+        if let Some(caps) = RUST_USE_RE.captures(trimmed)
+            && let Some(import_match) = caps.get(1)
+        {
+            let import = import_match.as_str().trim().to_string();
+            parsed.imports.push(import.clone());
+            parsed.ast_nodes.push(AstNode {
+                node_type: NodeType::Import,
+                line: line_num,
+                column: 0,
+                content: import,
+            });
         }
 
-        if let Some(caps) = RUST_STRUCT_RE.captures(trimmed) {
-            if let Some(struct_match) = caps.get(1) {
-                parsed.ast_nodes.push(AstNode {
-                    node_type: NodeType::ClassDeclaration,
-                    line: line_num,
-                    column: 0,
-                    content: struct_match.as_str().to_string(),
-                });
-            }
+        if let Some(caps) = RUST_STRUCT_RE.captures(trimmed)
+            && let Some(struct_match) = caps.get(1)
+        {
+            parsed.ast_nodes.push(AstNode {
+                node_type: NodeType::ClassDeclaration,
+                line: line_num,
+                column: 0,
+                content: struct_match.as_str().to_string(),
+            });
         }
 
         for caps in RUST_FN_CALL_RE.captures_iter(trimmed) {
