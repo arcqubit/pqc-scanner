@@ -350,9 +350,13 @@ fn clone_repository(url: &str) -> Result<PathBuf, String> {
     let repo_name = extract_repo_name(url).unwrap_or_else(|| "repository".to_string());
     let clone_path = temp_dir.join(&repo_name);
 
+    // Convert path to string, handling Unicode errors
+    let clone_path_str = clone_path.to_str()
+        .ok_or_else(|| format!("Clone path contains invalid Unicode characters: {:?}", clone_path))?;
+
     // Execute git clone command
     let output = process::Command::new("git")
-        .args(["clone", "--depth", "1", url, clone_path.to_str().unwrap()])
+        .args(["clone", "--depth", "1", url, clone_path_str])
         .output()
         .map_err(|e| format!("Failed to execute git clone: {}. Is git installed?", e))?;
 

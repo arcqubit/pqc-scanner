@@ -31,55 +31,55 @@ lazy_static! {
     // RSA patterns with key size detection
     static ref RSA_PATTERN: Regex = Regex::new(
         r"(?i)(RSA|Rsa|rsa)[^a-zA-Z]*([\d]{3,4})?|(generate.*rsa.*key|rsa.*keygen)"
-    ).unwrap();
+    ).expect("RSA_PATTERN: Invalid regex - this is a compile-time bug");
 
     static ref RSA_KEYGEN: Regex = Regex::new(
         r"(?i)(RSA\.generate|generateKeyPair.*RSA|KeyPairGenerator\.getInstance.*RSA|rsa\.GenerateKey)"
-    ).unwrap();
+    ).expect("RSA_KEYGEN: Invalid regex - this is a compile-time bug");
 
     static ref RSA_KEY_SIZE: Regex = Regex::new(
         r"(?i)(?:rsa|RSA)[^0-9]*(512|1024|2048|3072|4096|8192)"
-    ).unwrap();
+    ).expect("RSA_KEY_SIZE: Invalid regex - this is a compile-time bug");
 
     // ECDSA/ECDH patterns
     static ref ECDSA_PATTERN: Regex = Regex::new(
         r"(?i)(ECDSA|ECC|elliptic.*curve|secp256k1|secp384r1|prime256v1|P-256|P-384|P-521)"
-    ).unwrap();
+    ).expect("ECDSA_PATTERN: Invalid regex - this is a compile-time bug");
 
     static ref ECDH_PATTERN: Regex = Regex::new(
         r"(?i)(ECDH|ecdh|elliptic.*diffie|curve25519)"
-    ).unwrap();
+    ).expect("ECDH_PATTERN: Invalid regex - this is a compile-time bug");
 
     // DSA and Diffie-Hellman
     static ref DSA_PATTERN: Regex = Regex::new(
         r"(?i)(DSA|dsa)[^a-zA-Z]|(Digital.*Signature.*Algorithm)"
-    ).unwrap();
+    ).expect("DSA_PATTERN: Invalid regex - this is a compile-time bug");
 
     static ref DH_PATTERN: Regex = Regex::new(
         r"(?i)(diffie.*hellman|DH_|DHE|DHE_)"
-    ).unwrap();
+    ).expect("DH_PATTERN: Invalid regex - this is a compile-time bug");
 
     // Deprecated hash functions
     static ref SHA1_PATTERN: Regex = Regex::new(
         r"(?i)(SHA1|sha1|SHA-1|sha-1)[^0-9]"
-    ).unwrap();
+    ).expect("SHA1_PATTERN: Invalid regex - this is a compile-time bug");
 
     static ref MD5_PATTERN: Regex = Regex::new(
         r"(?i)(MD5|md5)"
-    ).unwrap();
+    ).expect("MD5_PATTERN: Invalid regex - this is a compile-time bug");
 
     // Deprecated ciphers - simpler pattern without lookahead
     static ref DES_PATTERN: Regex = Regex::new(
         r"(?i)(DES_|_DES|\.DES|DES\.|\bDES\b)"
-    ).unwrap();
+    ).expect("DES_PATTERN: Invalid regex - this is a compile-time bug");
 
     static ref TRIPLE_DES_PATTERN: Regex = Regex::new(
         r"(?i)(3DES|TripleDES|DESede)"
-    ).unwrap();
+    ).expect("TRIPLE_DES_PATTERN: Invalid regex - this is a compile-time bug");
 
     static ref RC4_PATTERN: Regex = Regex::new(
         r"(?i)(RC4|rc4|ARCFOUR)"
-    ).unwrap();
+    ).expect("RC4_PATTERN: Invalid regex - this is a compile-time bug");
 }
 
 /// Main audit function - analyzes source code for quantum-vulnerable cryptography
