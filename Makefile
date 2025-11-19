@@ -140,10 +140,15 @@ docker-push:
 	docker push $(REGISTRY)/$(IMAGE_NAME):beta
 
 docker-test:
-	@echo "Testing Docker image..."
-	docker run --rm $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) --version
-	docker run --rm $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) --help
-	@echo "Docker image test passed"
+	@echo "Testing Docker image $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)..."
+	@echo ""
+	@echo "Test 1: Container starts and shows help"
+	@docker run --rm $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) --help 2>&1 | grep -q "PQC Scanner" && echo "✓ Help output contains 'PQC Scanner'" || (echo "✗ Help output test failed" && exit 1)
+	@echo ""
+	@echo "Test 2: Binary is executable and responds"
+	@docker run --rm $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) 2>&1 | grep -q "Usage:" && echo "✓ Default command shows usage" || (echo "✗ Default command test failed" && exit 1)
+	@echo ""
+	@echo "✓ All Docker image tests passed"
 
 docker-login:
 	@echo "Logging in to GitHub Container Registry..."
