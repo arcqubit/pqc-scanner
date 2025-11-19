@@ -22,8 +22,8 @@ RUN apk add --no-cache \
 
 WORKDIR /build
 
-# Layer caching: Copy dependency manifests first
-COPY Cargo.toml Cargo.lock ./
+# Copy dependency manifest (Cargo.lock is gitignored and will be generated)
+COPY Cargo.toml ./
 
 # Copy source and data
 COPY src/ ./src/
