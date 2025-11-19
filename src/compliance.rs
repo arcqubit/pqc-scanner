@@ -171,7 +171,21 @@ fn generate_findings(
     // Create findings for each crypto type
     for (crypto_type, vulns) in vuln_groups {
         let finding_id = Uuid::new_v4().to_string();
-        let highest_severity = vulns.iter().map(|v| v.severity).max().unwrap();
+
+        // Safety: vulns should never be empty since it comes from HashMap.entry().or_default().push()
+        // but handle gracefully in case of logic errors
+        let first_vuln = match vulns.first() {
+            Some(v) => v,
+            None => {
+                eprintln!("Warning: Empty vulnerability group for {}, skipping", crypto_type);
+                continue;
+            }
+        };
+
+        let highest_severity = vulns.iter()
+            .map(|v| v.severity)
+            .max()
+            .unwrap_or(Severity::Low); // Default to Low if empty (shouldn't happen)
 
         // Determine implementation status for this finding
         let (impl_status, assess_status) = if highest_severity >= Severity::High {
@@ -232,7 +246,7 @@ fn generate_findings(
             This algorithm is {} and poses a {} risk to cryptographic protection.",
             vulns.len(),
             crypto_type,
-            if is_quantum_vulnerable(&vulns[0].crypto_type) {
+            if is_quantum_vulnerable(&first_vuln.crypto_type) {
                 "quantum-vulnerable"
             } else {
                 "cryptographically deprecated"
@@ -240,7 +254,7 @@ fn generate_findings(
             format!("{:?}", highest_severity).to_lowercase()
         );
 
-        let remediation = vulns[0].recommendation.clone();
+        let remediation = first_vuln.recommendation.clone();
 
         findings.push(ControlFinding {
             finding_id,

@@ -379,8 +379,22 @@ fn generate_canadian_findings(
     // Create findings for each crypto type
     for (crypto_type_str, vulns) in vuln_groups {
         let finding_id = Uuid::new_v4().to_string();
-        let highest_severity = vulns.iter().map(|v| v.severity).max().unwrap();
-        let crypto_type = &vulns[0].crypto_type;
+
+        // Safety: vulns should never be empty since it comes from HashMap.entry().or_default().push()
+        // but handle gracefully in case of logic errors
+        let first_vuln = match vulns.first() {
+            Some(v) => v,
+            None => {
+                eprintln!("Warning: Empty vulnerability group for {}, skipping", crypto_type_str);
+                continue;
+            }
+        };
+
+        let highest_severity = vulns.iter()
+            .map(|v| v.severity)
+            .max()
+            .unwrap_or(Severity::Low); // Default to Low if empty (shouldn't happen)
+        let crypto_type = &first_vuln.crypto_type;
 
         // Get CCCS approval status
         let cccs_approval_status = algorithm_database::get_cccs_status(crypto_type);
@@ -388,7 +402,7 @@ fn generate_canadian_findings(
         // Determine applicable classifications
         let applicable_classifications = determine_applicable_classifications(
             crypto_type,
-            vulns[0].key_size,
+            first_vuln.key_size,
             &cccs_approval_status,
         );
 

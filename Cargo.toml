@@ -30,6 +30,9 @@ console_error_panic_hook = "0.1"
 wasm-bindgen-test = "0.3"
 criterion = "0.7"
 
+[build-dependencies]
+serde_json = "1.0"
+
 [[bench]]
 name = "benchmarks"
 harness = false

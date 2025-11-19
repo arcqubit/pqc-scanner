@@ -16,12 +16,29 @@ pub enum ParseError {
 
     #[error("Invalid source code")]
     InvalidSource,
+
+    #[error("Source code too large for parsing: {0} bytes (max: {1})")]
+    SourceTooLarge(usize, usize),
 }
+
+// Input validation constants
+const MAX_PARSE_SIZE: usize = 5 * 1024 * 1024; // 5MB (smaller than audit since parsing is more expensive)
 
 /// Main parsing function - dispatches to language-specific parsers
 pub fn parse_file(source: &str, language: &str) -> Result<ParsedSource, ParseError> {
+    // Validate language
     let lang = Language::from_string(language)
         .ok_or_else(|| ParseError::UnsupportedLanguage(language.to_string()))?;
+
+    // Validate source size
+    if source.is_empty() {
+        return Err(ParseError::InvalidSource);
+    }
+
+    let source_size = source.len();
+    if source_size > MAX_PARSE_SIZE {
+        return Err(ParseError::SourceTooLarge(source_size, MAX_PARSE_SIZE));
+    }
 
     match lang {
         Language::Rust => parse_rust(source),

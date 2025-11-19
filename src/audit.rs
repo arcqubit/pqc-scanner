@@ -12,9 +12,19 @@ pub enum AuditError {
     #[error("Invalid source code")]
     InvalidSource,
 
+    #[error("Source code too large: {0} bytes (max: {1})")]
+    SourceTooLarge(usize, usize),
+
+    #[error("Too many lines: {0} (max: {1})")]
+    TooManyLines(usize, usize),
+
     #[error("Parse error: {0}")]
     ParseError(String),
 }
+
+// Input validation constants
+const MAX_SOURCE_SIZE: usize = 10 * 1024 * 1024; // 10MB
+const MAX_LINES: usize = 500_000;
 
 // Lazy-compiled regex patterns for crypto detection
 lazy_static! {
@@ -77,13 +87,25 @@ pub fn analyze(source: &str, language: &str) -> Result<AuditResult, AuditError> 
     // Parse language
     let lang = parse_language(language)?;
 
-    // Validate source
-    if source.trim().is_empty() {
+    // Validate source is not empty
+    let trimmed = source.trim();
+    if trimmed.is_empty() {
         return Err(AuditError::InvalidSource);
+    }
+
+    // Validate source size
+    let source_size = source.len();
+    if source_size > MAX_SOURCE_SIZE {
+        return Err(AuditError::SourceTooLarge(source_size, MAX_SOURCE_SIZE));
     }
 
     let lines: Vec<&str> = source.lines().collect();
     let line_count = lines.len();
+
+    // Validate line count
+    if line_count > MAX_LINES {
+        return Err(AuditError::TooManyLines(line_count, MAX_LINES));
+    }
 
     let mut result = AuditResult::new(lang, line_count);
 
