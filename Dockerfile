@@ -1,65 +1,110 @@
-# Multi-stage build for minimal distroless container
-# Stage 1: Build the WASM binaries
-FROM rust:1.91-slim as builder
+# Multi-stage Dockerfile for PQC Scanner
+# Builds CLI binary for quantum-vulnerable cryptography scanning
+# Optimized for size (<50MB), security (Alpine + non-root), and performance
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    pkg-config \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+# ============================================================================
+# Build Arguments
+# ============================================================================
+ARG ALPINE_VERSION=3.20
 
-# Install wasm-pack
-RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+# ============================================================================
+# Stage 1: Rust CLI Builder (Alpine-based for minimal size)
+# ============================================================================
+# Using nightly for edition2024 support
+FROM rustlang/rust:nightly-alpine AS rust-builder
 
-# Set working directory
+# Install build dependencies for static linking
+RUN apk add --no-cache \
+    musl-dev \
+    openssl-dev \
+    openssl-libs-static \
+    pkgconfig
+
 WORKDIR /build
 
-# Copy dependency manifests
+# Layer caching: Copy dependency manifests first
 COPY Cargo.toml Cargo.lock ./
 
-# Copy source code
-COPY src ./src
-COPY benches ./benches
-COPY tests ./tests
+# Copy source and data
+COPY src/ ./src/
+COPY data/ ./data/
+COPY benches/ ./benches/
+COPY examples/ ./examples/
+COPY tests/ ./tests/
 
-# Build WASM binaries (all targets)
-RUN wasm-pack build --target bundler --out-dir pkg --release
-RUN wasm-pack build --target nodejs --out-dir pkg-nodejs --release
-RUN wasm-pack build --target web --out-dir pkg-web --release
+# Build optimized CLI binary with static linking
+RUN cargo build --release --bin pqc-scanner && \
+    strip /build/target/release/pqc-scanner
 
-# WASM binaries are already optimized by wasm-pack --release
-# wasm-pack applies wasm-opt optimizations automatically
-# No additional optimization step needed
+# ============================================================================
+# Stage 2: Runtime Image (Minimal Alpine)
+# ============================================================================
+FROM alpine:${ALPINE_VERSION}
 
-# Stage 2: Runtime image with distroless Node.js
-FROM gcr.io/distroless/nodejs20-debian12:nonroot
+# Install minimal runtime dependencies
+RUN apk add --no-cache \
+    ca-certificates \
+    libgcc \
+    && addgroup -g 1000 pqc \
+    && adduser -D -u 1000 -G pqc pqc
 
-LABEL org.opencontainers.image.title="ArcQubit PQC Scanner"
-LABEL org.opencontainers.image.description="Quantum-safe cryptography auditor with WASM"
-LABEL org.opencontainers.image.vendor="ArcQubit Team"
-LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.source="https://github.com/arcqubit/pqc-scanner"
-
-# Copy built WASM artifacts from builder
-COPY --from=builder /build/pkg /app/pkg
-COPY --from=builder /build/pkg-nodejs /app/pkg-nodejs
-COPY --from=builder /build/pkg-web /app/pkg-web
-COPY --from=builder /build/README.md /app/
-
-# Set working directory
 WORKDIR /app
 
-# Run as non-root user
-USER nonroot:nonroot
+# Copy CLI binary from builder
+COPY --from=rust-builder /build/target/release/pqc-scanner /usr/local/bin/pqc-scanner
 
-# Health check (if running as service)
+# Copy algorithm databases (required for detection)
+COPY --from=rust-builder /build/data/ /app/data/
+
+# Copy documentation
+COPY README.md LICENSE /app/
+
+# Create workspace and reports directories
+RUN mkdir -p /app/workspace /app/reports && \
+    chown -R pqc:pqc /app
+
+# Switch to non-root user for security
+USER pqc
+
+# Set working directory for scanning operations
+WORKDIR /app/workspace
+
+# Health check: Verify CLI binary works
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('./pkg-nodejs/pqc_scanner.js')" || exit 1
+    CMD pqc-scanner --version || exit 1
 
-# Default command: show version and usage
+# Default entrypoint: CLI binary
+ENTRYPOINT ["pqc-scanner"]
 CMD ["--help"]
 
-# Usage:
-# docker run --rm ghcr.io/arcqubit/pqc-scanner:latest
-# docker run --rm -v $(pwd):/data ghcr.io/arcqubit/pqc-scanner:latest node -e "const scanner = require('/app/pkg-nodejs/pqc_scanner.js'); console.log(scanner)"
+# ============================================================================
+# Container Labels (OCI standard)
+# ============================================================================
+LABEL org.opencontainers.image.title="PQC Scanner"
+LABEL org.opencontainers.image.description="Quantum-safe cryptography auditor for detecting vulnerable algorithms in source code. Supports CLI and WASM for multi-platform deployment."
+LABEL org.opencontainers.image.vendor="ArcQubit Team"
+LABEL org.opencontainers.image.url="https://github.com/arcqubit/pqc-scanner"
+LABEL org.opencontainers.image.source="https://github.com/arcqubit/pqc-scanner"
+LABEL org.opencontainers.image.documentation="https://github.com/arcqubit/pqc-scanner/blob/main/README.md"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.version="2025.11.18"
+
+# ============================================================================
+# Usage Examples
+# ============================================================================
+# Build:
+#   docker build -t pqc-scanner .
+#
+# Run CLI (default):
+#   docker run --rm pqc-scanner --version
+#   docker run --rm -v $(pwd):/app/workspace pqc-scanner scan .
+#
+# Use WASM (Node.js):
+#   docker run --rm pqc-scanner:latest node -e "const pqc = require('/app/pkg-nodejs/pqc_scanner.js'); console.log(pqc)"
+#
+# Interactive shell:
+#   docker run --rm -it --entrypoint sh pqc-scanner
+#
+# Scan with output:
+#   docker run --rm -v $(pwd):/app/workspace -v $(pwd)/reports:/app/reports pqc-scanner scan . --output /app/reports/report.json
+# ============================================================================

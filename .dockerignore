@@ -1,0 +1,56 @@
+# Docker build context ignore file
+# Excludes unnecessary files to speed up builds and reduce context size
+
+# Target directory (build artifacts)
+target/
+
+# Node modules
+node_modules/
+pkg/
+pkg-nodejs/
+pkg-web/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation (except README)
+docs/
+*.md
+!README.md
+
+# Development files
+.env
+.env.*
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Releases
+release-please-config.json
+.release-please-manifest.json
+
+# Sample data
+pqc-scanner-samples/
+
+# MCP
+mcp/
