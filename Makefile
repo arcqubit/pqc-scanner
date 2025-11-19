@@ -106,11 +106,10 @@ PLATFORMS ?= linux/amd64,linux/arm64
 # Docker targets
 docker-build:
 	@echo "Building Docker image for local platform..."
-	docker buildx build \
+	docker build \
 		--tag $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) \
 		--tag $(REGISTRY)/$(IMAGE_NAME):latest \
 		--tag $(REGISTRY)/$(IMAGE_NAME):beta \
-		--load \
 		.
 
 docker-build-multiarch:
