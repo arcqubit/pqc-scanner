@@ -1,4 +1,4 @@
-.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps scan-samples docker-build docker-build-multiarch docker-build-push docker-push docker-test docker-login docker-clean docker-run
+.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps scan-samples docker-build docker-build-multiarch docker-build-push docker-push docker-test docker-login docker-clean docker-run docker-shell
 
 # Default target - show help
 .DEFAULT_GOAL := help
@@ -161,8 +161,14 @@ docker-clean:
 	docker rmi $(REGISTRY)/$(IMAGE_NAME):beta || true
 
 docker-run:
-	@echo "Running Docker container interactively..."
-	docker run --rm -it -v $(PWD):/app/workspace $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
+	@echo "Running scan on current directory..."
+	docker run --rm -v $(PWD):/app/workspace -v $(PWD)/reports:/app/reports \
+		$(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) scan .
+
+docker-shell:
+	@echo "Opening interactive shell in container..."
+	docker run --rm -it -v $(PWD):/app/workspace \
+		--entrypoint sh $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 # Help
 help:
@@ -186,7 +192,8 @@ help:
 	@echo "  make docker-push         - Push existing image to registry"
 	@echo "  make docker-test         - Test Docker image locally"
 	@echo "  make docker-login        - Login to GitHub Container Registry"
-	@echo "  make docker-run          - Run container interactively"
+	@echo "  make docker-run          - Scan current directory with container"
+	@echo "  make docker-shell        - Open interactive shell in container"
 	@echo "  make docker-clean        - Remove local Docker images"
 	@echo ""
 	@echo "Quality:"
