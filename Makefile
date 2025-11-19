@@ -1,4 +1,4 @@
-.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps scan-samples docker-build docker-build-multiarch docker-build-push docker-push docker-test docker-login docker-clean docker-run docker-shell
+.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps scan-samples docker-build docker-build-multiarch docker-build-push docker-push docker-test docker-login docker-clean docker-run docker-scan docker-shell
 
 # Default target - show help
 .DEFAULT_GOAL := help
@@ -160,7 +160,36 @@ docker-clean:
 	docker rmi $(REGISTRY)/$(IMAGE_NAME):beta || true
 
 docker-run:
-	@echo "Running scan on current directory..."
+	@echo "PQC Scanner - Docker Interactive Mode"
+	@echo ""
+	@echo "What would you like to scan?"
+	@echo "  1. Current directory (.)"
+	@echo "  2. Specific subdirectory"
+	@echo "  3. Git repository URL"
+	@echo ""
+	@read -p "Enter choice [1-3]: " choice; \
+	case $$choice in \
+		1) \
+			echo "Scanning current directory..."; \
+			docker run --rm -v $(PWD):/app/workspace -v $(PWD)/reports:/app/reports \
+				$(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) scan . ;; \
+		2) \
+			read -p "Enter subdirectory path: " subdir; \
+			echo "Scanning $$subdir..."; \
+			docker run --rm -v $(PWD):/app/workspace -v $(PWD)/reports:/app/reports \
+				$(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) scan "$$subdir" ;; \
+		3) \
+			read -p "Enter Git repository URL: " repo; \
+			echo "Scanning repository $$repo..."; \
+			docker run --rm -v $(PWD)/reports:/app/reports \
+				$(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) scan "$$repo" ;; \
+		*) \
+			echo "Invalid choice. Use 'make docker-shell' for manual control."; \
+			exit 1 ;; \
+	esac
+
+docker-scan:
+	@echo "Quick scan of current directory (non-interactive)..."
 	docker run --rm -v $(PWD):/app/workspace -v $(PWD)/reports:/app/reports \
 		$(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) scan .
 
@@ -191,7 +220,8 @@ help:
 	@echo "  make docker-push         - Push existing image to registry"
 	@echo "  make docker-test         - Test Docker image locally"
 	@echo "  make docker-login        - Login to GitHub Container Registry"
-	@echo "  make docker-run          - Scan current directory with container"
+	@echo "  make docker-run          - Interactive scan (choose what to scan)"
+	@echo "  make docker-scan         - Quick scan current directory (non-interactive)"
 	@echo "  make docker-shell        - Open interactive shell in container"
 	@echo "  make docker-clean        - Remove local Docker images"
 	@echo ""
