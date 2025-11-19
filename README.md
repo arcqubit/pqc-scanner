@@ -1,6 +1,7 @@
 # PQC Scanner - Quantum-Safe Crypto Auditor
 
 [![CI](https://github.com/arcqubit/pqc-scanner/actions/workflows/ci.yml/badge.svg)](https://github.com/arcqubit/pqc-scanner/actions/workflows/ci.yml)
+[![Docker Build](https://github.com/arcqubit/pqc-scanner/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/arcqubit/pqc-scanner/actions/workflows/docker-publish.yml)
 [![Security Audit](https://github.com/arcqubit/pqc-scanner/actions/workflows/cargo-audit.yml/badge.svg)](https://github.com/arcqubit/pqc-scanner/actions/workflows/cargo-audit.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/arcqubit/pqc-scanner/badge)](https://securityscorecards.dev/viewer/?uri=github.com/arcqubit/pqc-scanner)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11462/badge)](https://www.bestpractices.dev/projects/11462)
@@ -556,12 +557,147 @@ npm install @arcqubit/pqc-scanner
 
 ### Docker Container
 
+The PQC Scanner is available as an optimized Docker container (<50MB) with multi-architecture support (amd64/arm64).
+
+#### Quick Start
+
 ```bash
 # Pull latest image
 docker pull ghcr.io/arcqubit/pqc-scanner:latest
 
-# Run scan
-docker run --rm -v $(pwd):/data ghcr.io/arcqubit/pqc-scanner:latest
+# Run scan on current directory
+docker run --rm -v $(pwd):/app/workspace ghcr.io/arcqubit/pqc-scanner:latest scan .
+
+# Show version
+docker run --rm ghcr.io/arcqubit/pqc-scanner:latest --version
+
+# Show help
+docker run --rm ghcr.io/arcqubit/pqc-scanner:latest --help
+```
+
+#### Available Tags
+
+- `latest` - Latest stable release
+- `beta` - Development/beta features
+- `2025.11.18` - Specific CalVer version
+- `sha-<commit>` - Specific commit build
+
+#### Docker Usage Examples
+
+```bash
+# Scan a specific directory
+docker run --rm -v $(pwd):/app/workspace \
+  ghcr.io/arcqubit/pqc-scanner:latest scan ./src
+
+# Generate compliance report
+docker run --rm -v $(pwd):/app/workspace -v $(pwd)/reports:/app/reports \
+  ghcr.io/arcqubit/pqc-scanner:latest scan . --output /app/reports/report.json
+
+# Interactive shell for debugging
+docker run --rm -it --entrypoint sh ghcr.io/arcqubit/pqc-scanner:latest
+
+# Run with specific language
+docker run --rm -v $(pwd):/app/workspace \
+  ghcr.io/arcqubit/pqc-scanner:latest scan . --language javascript
+```
+
+#### Building Docker Image Locally
+
+Using Make targets:
+
+```bash
+# Build multi-arch image locally
+make docker-build
+
+# Build and push to registry
+make docker-build-push
+
+# Test the built image
+make docker-test
+
+# Run container interactively
+make docker-run
+
+# Clean local images
+make docker-clean
+```
+
+Using Docker directly:
+
+```bash
+# Build for local architecture
+docker build -t pqc-scanner:local .
+
+# Build multi-arch with buildx
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --tag ghcr.io/arcqubit/pqc-scanner:custom \
+  --load \
+  .
+
+# Push to registry
+docker push ghcr.io/arcqubit/pqc-scanner:custom
+```
+
+#### Environment Variables
+
+The Docker container supports the following configuration:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RUST_LOG` | `info` | Logging level (error/warn/info/debug/trace) |
+| `SCAN_TIMEOUT` | `300` | Maximum scan timeout in seconds |
+| `MAX_FILE_SIZE` | `10485760` | Maximum file size to scan (bytes) |
+
+Example with environment variables:
+
+```bash
+docker run --rm \
+  -e RUST_LOG=debug \
+  -e SCAN_TIMEOUT=600 \
+  -v $(pwd):/app/workspace \
+  ghcr.io/arcqubit/pqc-scanner:latest scan .
+```
+
+#### Security Features
+
+- **Non-root user**: Runs as `pqc:pqc` (UID 1000, GID 1000)
+- **Minimal base**: Alpine Linux 3.20 (<50MB total size)
+- **Static linking**: No external dependencies required
+- **Health checks**: Built-in container health monitoring
+- **SLSA Provenance**: Supply chain security attestation
+
+#### Health Check
+
+```bash
+# Container includes health check endpoint
+docker inspect --format='{{.State.Health.Status}}' <container-id>
+
+# Health check command: pqc-scanner --version
+```
+
+#### Docker Compose
+
+Example `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+services:
+  pqc-scanner:
+    image: ghcr.io/arcqubit/pqc-scanner:latest
+    volumes:
+      - ./src:/app/workspace
+      - ./reports:/app/reports
+    environment:
+      - RUST_LOG=info
+    command: scan . --output /app/reports/scan-results.json
+```
+
+Run with Docker Compose:
+
+```bash
+docker-compose up
+docker-compose down
 ```
 
 ### GitHub Action

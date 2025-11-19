@@ -1,4 +1,4 @@
-.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps scan-samples
+.PHONY: help all build build-release test clean install lint format bench wasm wasm-release example geiger udeps scan-samples docker-build docker-push docker-test docker-login docker-clean docker-run
 
 # Default target - show help
 .DEFAULT_GOAL := help
@@ -96,6 +96,64 @@ release: build-release wasm-release
 dev: format lint test
 	@echo "Development checks passed"
 
+# Docker configuration
+REGISTRY ?= ghcr.io
+IMAGE_NAME ?= arcqubit/pqc-scanner
+VERSION ?= $(shell grep '^version' Cargo.toml | head -n1 | cut -d'"' -f2)
+IMAGE_TAG ?= $(VERSION)
+PLATFORMS ?= linux/amd64,linux/arm64
+
+# Docker targets
+docker-build:
+	@echo "Building multi-arch Docker image with buildx..."
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--tag $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) \
+		--tag $(REGISTRY)/$(IMAGE_NAME):latest \
+		--tag $(REGISTRY)/$(IMAGE_NAME):beta \
+		--cache-from type=gha \
+		--cache-to type=gha,mode=max \
+		--load \
+		.
+
+docker-build-push:
+	@echo "Building and pushing multi-arch Docker image..."
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--tag $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) \
+		--tag $(REGISTRY)/$(IMAGE_NAME):latest \
+		--tag $(REGISTRY)/$(IMAGE_NAME):beta \
+		--cache-from type=gha \
+		--cache-to type=gha,mode=max \
+		--push \
+		.
+
+docker-push:
+	@echo "Pushing Docker image to $(REGISTRY)..."
+	docker push $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
+	docker push $(REGISTRY)/$(IMAGE_NAME):latest
+	docker push $(REGISTRY)/$(IMAGE_NAME):beta
+
+docker-test:
+	@echo "Testing Docker image..."
+	docker run --rm $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) --version
+	docker run --rm $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) --help
+	@echo "Docker image test passed"
+
+docker-login:
+	@echo "Logging in to GitHub Container Registry..."
+	@echo "$(GITHUB_TOKEN)" | docker login $(REGISTRY) -u $(GITHUB_USER) --password-stdin
+
+docker-clean:
+	@echo "Cleaning Docker images..."
+	docker rmi $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG) || true
+	docker rmi $(REGISTRY)/$(IMAGE_NAME):latest || true
+	docker rmi $(REGISTRY)/$(IMAGE_NAME):beta || true
+
+docker-run:
+	@echo "Running Docker container interactively..."
+	docker run --rm -it -v $(PWD):/app/workspace $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
+
 # Help
 help:
 	@echo "PQC Scanner - Build Targets"
@@ -110,6 +168,15 @@ help:
 	@echo "  make build-release  - Build optimized Rust binary"
 	@echo "  make wasm-release   - Build optimized WASM packages"
 	@echo "  make release        - Full release build"
+	@echo ""
+	@echo "Docker:"
+	@echo "  make docker-build   - Build multi-arch Docker image (amd64/arm64)"
+	@echo "  make docker-build-push - Build and push to registry"
+	@echo "  make docker-push    - Push existing image to registry"
+	@echo "  make docker-test    - Test Docker image locally"
+	@echo "  make docker-login   - Login to GitHub Container Registry"
+	@echo "  make docker-run     - Run container interactively"
+	@echo "  make docker-clean   - Remove local Docker images"
 	@echo ""
 	@echo "Quality:"
 	@echo "  make lint           - Run clippy linter"
