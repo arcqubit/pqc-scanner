@@ -179,7 +179,7 @@ const oscalReport = generate_oscal_report(source, 'javascript', 'app.js');
 console.log('OSCAL Version:', oscalReport.oscal_version);
 ```
 
-## Canadian CCCS/CSE Cryptographic Compliance (NEW in 2025.11.0-beta.1)
+## Canadian CCCS/CSE Cryptographic Compliance
 
 The scanner now provides comprehensive support for **Canadian Government cryptographic compliance standards**, enabling assessment against:
 
