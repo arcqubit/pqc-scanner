@@ -10,6 +10,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process;
 
+// File size limits
+const MAX_FILE_SIZE: u64 = 10 * 1024 * 1024; // 10MB
+
 struct ScanOptions {
     target_path: String,
     report_dir: String,
@@ -158,7 +161,10 @@ fn print_usage(program: &str) {
     eprintln!("PQC Scanner - Quantum-Safe Cryptography Auditor");
     eprintln!("Version: {}", env!("CARGO_PKG_VERSION"));
     eprintln!();
-    eprintln!("Usage: {} [OPTIONS] | {} scan <directory|repo-url> [OPTIONS]", program, program);
+    eprintln!(
+        "Usage: {} [OPTIONS] | {} scan <directory|repo-url> [OPTIONS]",
+        program, program
+    );
     eprintln!();
     eprintln!("Global Options:");
     eprintln!("  -h, --help          Show this help message");
@@ -347,9 +353,17 @@ fn clone_repository(url: &str) -> Result<PathBuf, String> {
     let repo_name = extract_repo_name(url).unwrap_or_else(|| "repository".to_string());
     let clone_path = temp_dir.join(&repo_name);
 
+    // Convert path to string, handling Unicode errors
+    let clone_path_str = clone_path.to_str().ok_or_else(|| {
+        format!(
+            "Clone path contains invalid Unicode characters: {:?}",
+            clone_path
+        )
+    })?;
+
     // Execute git clone command
     let output = process::Command::new("git")
-        .args(["clone", "--depth", "1", url, clone_path.to_str().unwrap()])
+        .args(["clone", "--depth", "1", url, clone_path_str])
         .output()
         .map_err(|e| format!("Failed to execute git clone: {}. Is git installed?", e))?;
 
@@ -455,9 +469,34 @@ fn scan_file(path: &Path) -> Result<Option<pqc_scanner::AuditResult>, String> {
     };
 
     if let Some(lang) = language {
+        // Check file size before reading
+        let metadata = fs::metadata(path)
+            .map_err(|e| format!("Failed to get metadata for {}: {}", path.display(), e))?;
+
+        let file_size = metadata.len();
+        if file_size > MAX_FILE_SIZE {
+            eprintln!(
+                "Warning: Skipping {} - file too large ({} bytes, max {})",
+                path.display(),
+                file_size,
+                MAX_FILE_SIZE
+            );
+            return Ok(None);
+        }
+
+        if file_size == 0 {
+            // Skip empty files
+            return Ok(None);
+        }
+
         // Read file content
-        let content = fs::read_to_string(path)
-            .map_err(|e| format!("Failed to read {}: {}", path.display(), e))?;
+        let content = fs::read_to_string(path).map_err(|e| {
+            // Check if error is due to binary file
+            if e.kind() == std::io::ErrorKind::InvalidData {
+                return format!("Skipping {} - appears to be binary", path.display());
+            }
+            format!("Failed to read {}: {}", path.display(), e)
+        })?;
 
         // Analyze content
         let lang_str = match lang {
