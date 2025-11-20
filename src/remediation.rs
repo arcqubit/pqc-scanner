@@ -4,6 +4,33 @@
 use crate::types::{AuditResult, CryptoType, Vulnerability};
 use serde::{Deserialize, Serialize};
 
+/// Validate file path for security
+fn validate_file_path(path: &str) -> Result<(), String> {
+    if path.is_empty() {
+        return Err("Empty file path".to_string());
+    }
+
+    // Check for null bytes
+    if path.contains('\0') {
+        return Err("File path contains null byte".to_string());
+    }
+
+    // Check for path traversal attempts
+    if path.contains("..") {
+        return Err(format!("Path traversal detected: {}", path));
+    }
+
+    // Check path length
+    if path.len() > 4096 {
+        return Err(format!(
+            "File path too long: {} bytes (max 4096)",
+            path.len()
+        ));
+    }
+
+    Ok(())
+}
+
 /// A suggested code fix for a cryptographic vulnerability
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CodeFix {
@@ -68,6 +95,21 @@ pub struct RemediationSummary {
 pub fn generate_remediations(audit_result: &AuditResult, file_path: &str) -> RemediationResult {
     let mut fixes = Vec::new();
     let mut warnings = Vec::new();
+
+    // Validate file path
+    if let Err(e) = validate_file_path(file_path) {
+        warnings.push(format!("Invalid file path: {}", e));
+        return RemediationResult {
+            fixes: Vec::new(),
+            summary: RemediationSummary {
+                total_vulnerabilities: audit_result.stats.total_vulnerabilities,
+                auto_fixable: 0,
+                manual_review_required: 0,
+                average_confidence: 0.0,
+            },
+            warnings,
+        };
+    }
 
     for vuln in &audit_result.vulnerabilities {
         match vuln.crypto_type {

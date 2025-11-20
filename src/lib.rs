@@ -18,6 +18,7 @@ pub use canadian_compliance::{
 pub use compliance::{
     export_oscal_json, export_sc13_json, generate_oscal_json, generate_sc13_report,
 };
+pub use parser::{ParseError, parse_file};
 pub use remediation::{CodeFix, RemediationResult, RemediationSummary, generate_remediations};
 pub use types::{
     AuditResult, AuditStats, CryptoType, ITSG33Report, Language, OscalAssessmentResults,
